@@ -5,8 +5,12 @@
   "base_branch": "main",
   "author": "INTEGRATOR",
   "created_at": "2025-12-17T19:25:51+00:00",
-  "updated_at": "2025-12-17T19:25:54+00:00",
-  "head_sha": "0bf5f9f7f98d352da58a915c5947fb49a6029aed",
+  "updated_at": "2025-12-17T19:26:25+00:00",
+  "head_sha": "a32625d4cf3c57a8a96e51d8c4ba6e564f036280",
   "merge_strategy": "squash",
-  "status": "OPEN"
+  "status": "MERGED",
+  "merged_at": "2025-12-17T19:26:25+00:00",
+  "merge_commit": "f2c94d2128da068c012f4d66b445320bb22a9c8e",
+  "closed_at": "2025-12-17T19:26:25+00:00",
+  "close_commit": "f2c94d2128da068c012f4d66b445320bb22a9c8e"
 }

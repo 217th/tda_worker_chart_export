@@ -231,7 +231,7 @@
       "id": "T-014",
       "title": "Refine WBS: invariants, deps, spec links",
       "description": "Refine the task backlog to reduce spec drift:\n- Add explicit per-task references to docs-worker-chart-export/docs-general/docs-gcp (and section pointers) in docs/workflow/T-###/README.md\n- Make the invariant explicit: each logical chart request ends up in manifest.items[] or manifest.failures[] (no silent drops)\n- Clarify ownership: CHART_IMG_ACCOUNTS_JSON parsed once at startup (fatal misconfig) vs usage/account selection logic\n- Adjust observability task dependencies to follow stabilized error model.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "human",
       "tags": [
@@ -239,13 +239,27 @@
         "worker-chart-export",
         "docs"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "commit": {
+        "hash": "0bf5f9f7f98d352da58a915c5947fb49a6029aed",
+        "message": "🧭 T-014 Refine WBS invariants and deps"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-014/pr."
+        },
+        {
+          "author": "INTEGRATOR",
+          "body": "Commit 0bf5f9f7f98d contains the actual WBS refinements; PR artifacts were integrated separately."
+        }
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "c15741c6392671da93405657776a06c739541936ed13d9acc394a003529f8243"
+    "checksum": "d3e2b6866b7b49db05bc63a6c395594d6aa377922fe8c3af23e36d8d415c1588"
   }
 }

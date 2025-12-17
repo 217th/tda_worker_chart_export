@@ -12,6 +12,7 @@
 
 - Python package layout, dependency management, and entrypoints (CloudEvent adapter + CLI).
 - Typed config: env + CLI overrides for `CHART_IMG_ACCOUNTS_JSON`, `CHARTS_BUCKET`, `CHARTS_API_MODE`, `CHARTS_DEFAULT_TIMEZONE`.
+  - `CHART_IMG_ACCOUNTS_JSON` is parsed and validated once per process start; invalid secret is a fatal misconfiguration (not per-step `VALIDATION_FAILED`).
 - Structured JSON logging fields per `docs-gcp/runbook/prod_runbook_gcp.md`.
 - References:
   - `docs-worker-chart-export/spec/implementation_contract.md` §11.1 (Chart-IMG accounts secret), §12.1 (CLI), §12.2 (modes)
@@ -24,6 +25,10 @@
 ## Verify Steps
 
 - `python -m compileall .`
+- `python -m unittest discover -s tests -p 'test_*.py' -q`
+- (optional) create venv + install deps:
+  - `python -m venv .venv && . .venv/bin/activate`
+  - `python -m pip install -U pip && python -m pip install -r requirements.txt`
 
 ## Rollback Plan
 
@@ -32,5 +37,24 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `docs/workflow/T-002/README.md`
+- `docs/workflow/T-002/pr/diffstat.txt`
+- `docs/workflow/T-002/pr/meta.json`
+- `docs/workflow/T-002/pr/review.md`
+- `docs/workflow/T-002/pr/scenarios.md`
+- `docs/workflow/T-002/pr/verify.log`
+- `docs/workflow/T-002/pr/verify_scenarios_report.md`
+- `pyproject.toml`
+- `requirements.txt`
+- `tests/test_scenarios_cli.py`
+- `tests/test_scenarios_cloud_event.py`
+- `tests/test_scenarios_config.py`
+- `tests/test_scenarios_logging.py`
+- `worker_chart_export/__init__.py`
+- `worker_chart_export/cli.py`
+- `worker_chart_export/config.py`
+- `worker_chart_export/core.py`
+- `worker_chart_export/entrypoints/__init__.py`
+- `worker_chart_export/entrypoints/cloud_event.py`
+- `worker_chart_export/errors.py`
 <!-- END AUTO SUMMARY -->

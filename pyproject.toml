@@ -1,0 +1,9 @@
+[project]
+name = "worker-chart-export"
+version = "0.0.0"
+description = "Trading Decisions Assistant: worker-chart-export"
+requires-python = ">=3.13"
+
+[project.scripts]
+worker-chart-export = "worker_chart_export.cli:main"
+

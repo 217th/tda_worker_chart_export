@@ -1,0 +1,16 @@
+# Runtime dependencies for worker-chart-export.
+#
+# Note: This repository is developed in a local-only environment; install into a venv:
+#   python -m venv .venv
+#   . .venv/bin/activate
+#   python -m pip install -U pip
+#   python -m pip install -r requirements.txt
+#
+# Cloud Run Functions (gen2) / Functions Framework
+functions-framework
+cloudevents
+
+# GCP clients (Firestore + GCS)
+google-cloud-firestore
+google-cloud-storage
+

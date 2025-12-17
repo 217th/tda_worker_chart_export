@@ -1,0 +1,23 @@
+ docs/workflow/T-002/README.md                     |  26 ++-
+ docs/workflow/T-002/pr/diffstat.txt               |  23 +++
+ docs/workflow/T-002/pr/meta.json                  |  12 ++
+ docs/workflow/T-002/pr/review.md                  |  21 +++
+ docs/workflow/T-002/pr/scenarios.md               | 173 +++++++++++++++++++
+ docs/workflow/T-002/pr/verify.log                 |   2 +
+ docs/workflow/T-002/pr/verify_scenarios_report.md | 194 ++++++++++++++++++++++
+ pyproject.toml                                    |   9 +
+ requirements.txt                                  |  16 ++
+ tests/test_scenarios_cli.py                       |  51 ++++++
+ tests/test_scenarios_cloud_event.py               |  43 +++++
+ tests/test_scenarios_config.py                    |  41 +++++
+ tests/test_scenarios_logging.py                   |  32 ++++
+ worker_chart_export/__init__.py                   |   4 +
+ worker_chart_export/cli.py                        |  96 +++++++++++
+ worker_chart_export/config.py                     | 116 +++++++++++++
+ worker_chart_export/core.py                       |  24 +++
+ worker_chart_export/entrypoints/__init__.py       |   1 +
+ worker_chart_export/entrypoints/cloud_event.py    |  46 +++++
+ worker_chart_export/errors.py                     |  11 ++
+ worker_chart_export/logging.py                    |  42 +++++
+ worker_chart_export/runtime.py                    |  11 ++
+ 22 files changed, 993 insertions(+), 1 deletion(-)

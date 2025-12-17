@@ -199,7 +199,7 @@
               "type": "object",
               "additionalProperties": true,
               "properties": {
-                "gcs_uri": { "type": "string", "pattern": "^gcs://.+" },
+                "gcs_uri": { "type": "string", "pattern": "^gs://.+" },
                 "signed_url": { "type": "string" },
                 "expires_at": { "$ref": "#/$defs/rfc3339Timestamp" }
               }
@@ -250,7 +250,7 @@
                 "ohlcv_gcs_uri": {
                   "type": "string",
                   "description": "Опционально: ссылка на OHLCV JSON, если нужно для контекста/логирования/валидации.",
-                  "pattern": "^gcs://.+"
+                  "pattern": "^gs://.+"
                 }
               }
             },
@@ -258,7 +258,7 @@
               "type": "object",
               "additionalProperties": true,
               "properties": {
-                "outputsManifestGcsUri": { "type": "string", "pattern": "^gcs://.+" },
+                "outputsManifestGcsUri": { "type": "string", "pattern": "^gs://.+" },
                 "signed_url": { "type": "string" },
                 "expires_at": { "$ref": "#/$defs/rfc3339Timestamp" }
               }
@@ -293,11 +293,11 @@
                     "modelId": { "type": "string", "minLength": 1 }
                   }
                 },
-                "ohlcv_gcs_uri": { "type": "string", "pattern": "^gcs://.+" },
+                "ohlcv_gcs_uri": { "type": "string", "pattern": "^gs://.+" },
                 "charts_outputsManifestGcsUri": {
                   "type": "string",
                   "description": "Manifest с набором графиков/индикаторов, если используется.",
-                  "pattern": "^gcs://.+"
+                  "pattern": "^gs://.+"
                 },
                 "reportIds": {
                   "type": "array",
@@ -310,7 +310,7 @@
               "type": "object",
               "additionalProperties": true,
               "properties": {
-                "gcs_uri": { "type": "string", "pattern": "^gcs://.+" },
+                "gcs_uri": { "type": "string", "pattern": "^gs://.+" },
                 "reportId": { "type": "string", "minLength": 1 },
                 "signed_url": { "type": "string" },
                 "expires_at": { "$ref": "#/$defs/rfc3339Timestamp" }
@@ -348,5 +348,4 @@
     }
   }
 }
-
 

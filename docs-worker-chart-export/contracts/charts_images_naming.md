@@ -5,8 +5,11 @@
 - когда сгенерировали
 - по какому символу
 - какой таймфрейм
-- какой шаблон
-- какой “вид” изображения (kind)
+- какой шаблон (`chartTemplateId`)
+
+`kind` **не включаем в имя файла PNG**: в MVP `1 request -> 1 PNG` на каждый
+`chartTemplateId`, а “вид” изображения хранится в manifest’е
+(`ChartsOutputsManifest.items[*].kind`) и берётся из `chartTemplate.description`.
 
 ## Директория
 
@@ -20,24 +23,22 @@ PNG для каждого шаблона записываются в дирек�
 ## Формат имени файла PNG
 
 ```
-<generatedAt>__<symbolSlug>__<timeframe>__<chartTemplateId>__<kind>.png
+<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png
 ```
 
 Где:
 - `generatedAt`: UTC, формат `YYYYMMDD-HHmmss`
 - `symbolSlug`: например `BTC-USDT` (без `/`)
 - `timeframe`: например `1M`, `1w`, `4h`
-- `chartTemplateId`: например `ctpl_default_v1`
-- `kind`: например `price`, `volume`, `rsi`, `macd`
+- `chartTemplateId`: например `ctpl_price_ma1226_vol_v1`
 
 ### Пример
 
-`runs/20251215-102530_BTC-USDT_k3f7a/charts/1M/ctpl_default_v1/20251215-102612__BTC-USDT__1M__ctpl_default_v1__price.png`
+`runs/20251215-102530_BTC-USDT_k3f7a/charts/1M/ctpl_price_ma1226_vol_v1/20251215-102612_BTC-USDT_1M_ctpl_price_ma1226_vol_v1.png`
 
 ## Связь с manifest
 
 - В `ChartsOutputsManifest.items[*].generatedAt` хранится RFC3339 timestamp (UTC).
 - Для имени файла `generatedAt` берём тот же момент, но сериализуем в
   `YYYYMMDD-HHmmss` (без `:` и без timezone суффикса).
-
 

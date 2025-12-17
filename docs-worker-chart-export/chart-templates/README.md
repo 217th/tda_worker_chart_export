@@ -11,9 +11,9 @@
 - Рекомендуемый формат:
   - **один файл на один `chartTemplateId`**;
   - имя файла совпадает с `chartTemplateId` + `.json`, например:
-    - `ctpl_default_v1.json`
-    - `ctpl_breakout_v1.json`
-    - `ctpl_trend_follow_v1.json`
+    - `ctpl_price_ma1226_vol_v1.json`
+    - `ctpl_price_psar_adi_v1.json`
+    - `ctpl_price_rsi14_stochrsi_v1.json`
   - внутри файла — JSON-объект с конфигурацией TradingView / Chart-IMG Advanced Chart (API v2).
 
 ### Содержимое файла-шаблона (черновик)
@@ -21,7 +21,7 @@
 Минимально шаблон может содержать:
 
 - метаданные:
-  - `id`: строка, совпадает с именем файла без `.json` (например, `ctpl_default_v1`);
+  - `id`: строка, совпадает с именем файла без `.json` (например, `ctpl_price_ma1226_vol_v1`);
   - `description`: человекочитаемое описание шаблона;
 - конфигурацию для Chart-IMG API v2 Advanced Chart:
   - `request`: JSON-объект с полями тела запроса к `POST /v2/tradingview/advanced-chart`  
@@ -57,5 +57,4 @@
 - Шаблон здесь описывает **форму и оформление графика** (style, theme, studies, overrides, drawings и т.д.), а не конкретный тикер.
 
 Конкретная семантика `chartTemplateId` (что строго входит в шаблон, как работает версионирование и совместимость) описывается в отдельной спецификации и может эволюционировать. Эта директория служит “местом”, куда можно положить 5 (и более) темплейтов в виде JSON-файлов.
-
 

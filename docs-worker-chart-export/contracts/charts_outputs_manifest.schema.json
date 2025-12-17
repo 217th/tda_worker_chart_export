@@ -70,7 +70,7 @@
           "description": "Время генерации конкретного изображения (UTC, RFC3339)."
         },
         "label": { "type": "string" },
-        "png_gcs_uri": { "type": "string", "pattern": "^gcs://.+" },
+        "png_gcs_uri": { "type": "string", "pattern": "^gs://.+" },
         "signed_url": { "type": "string" },
         "expires_at": { "type": "string", "format": "date-time" },
         "meta": {
@@ -103,5 +103,4 @@
     }
   }
 }
-
 

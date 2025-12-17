@@ -74,7 +74,7 @@
 - `runs/<runId>/charts/<timeframe>/<chartTemplateId>/`
 
 Имя файла PNG (см. `charts_images_naming.md`):
-- `<generatedAt>__<symbolSlug>__<timeframe>__<chartTemplateId>__<kind>.png`
+- `<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`
 
 ### 5.2 Manifest path
 Воркер пишет один `ChartsOutputsManifest` JSON в:
@@ -94,7 +94,7 @@
 - `minImages` (копия inputs.minImages)
 - `requested[]` (копия inputs.requests[])
 - `items[]`: для каждого успешного PNG:
-  - `chartTemplateId`, `kind`, `generatedAt` (RFC3339 UTC), `png_gcs_uri`
+  - `chartTemplateId`, `kind`, `generatedAt` (RFC3339 UTC), `png_gcs_uri` (формат URI: `gs://...`)
   - optional: `label`, `signed_url`, `expires_at`, `meta`
 - `failures[]`: для каждого неуспеха:
   - `request` (как в requested)
@@ -448,4 +448,3 @@ Event trigger может быть at-least-once.
 - Взаимодействие с Cloud Monitoring:
   - воркер **не использует** Cloud Monitoring API для принятия решений о выборе аккаунта;
   - Cloud Monitoring применяется только для построения дашбордов и алертов на основе логов (log-based metrics).
-

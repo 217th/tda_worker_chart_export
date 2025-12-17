@@ -10,6 +10,10 @@
 - Чеклист реализации:
   - `checklists/worker_chart_export.md`
 
+### Примечание про URI
+- В рамках `docs-worker-chart-export` канонический формат ссылок на объекты в Cloud Storage: `gs://<bucket>/<path>`.
+- В `docs-general` может встречаться `gcs://` как историческая несогласованность; для реализации `worker-chart-export` ориентируемся на этот bundle.
+
 ### Что должен делать сервис
 - Реагировать на изменения `flow_runs/{runId}` и брать в работу только `CHART_EXPORT` шаги со статусом `READY`.
 - Писать PNG в GCS по соглашению именования.
@@ -21,5 +25,4 @@
 
 ### Вопросы перед передачей в разработку
 См. `questions/open_questions.md`.
-
 

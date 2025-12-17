@@ -36,7 +36,6 @@ class TestScenarioCli(unittest.TestCase):
         self.assertEqual(proc.returncode, 3)
         self.assertIn("NOT_IMPLEMENTED:", proc.stderr)
 
-        # Also check that at least one structured log line is emitted.
         combined = (proc.stdout + proc.stderr).splitlines()
         json_lines = []
         for line in combined:

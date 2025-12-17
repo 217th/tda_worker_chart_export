@@ -6,7 +6,6 @@ import unittest
 
 class TestScenarioLogging(unittest.TestCase):
     def test_json_log_event_format(self) -> None:
-        # Note: logging.basicConfig defaults to stderr; we capture it.
         code = (
             "import logging\n"
             "from worker_chart_export.logging import configure_logging, log_event\n"

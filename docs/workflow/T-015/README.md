@@ -52,10 +52,9 @@
 
 ## Verify Steps
 
-- `python -m unittest discover -s tests -p 'test_*.py' -q`
-- `bash scripts/qa/run_all.sh` (once added)
+- `bash scripts/qa/run_all.sh`
+- (optional) list discovered task suites: `python scripts/qa/run_all.py --list`
 
 ## Rollback Plan
 
 - Revert the QA harness commit(s); no runtime behavior should depend on these helpers.
-

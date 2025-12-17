@@ -1,5 +1,4 @@
 import json
-import os
 import subprocess
 import sys
 import unittest
@@ -26,10 +25,13 @@ class TestScenarioCloudEvent(unittest.TestCase):
 
         combined = (proc.stdout + proc.stderr).splitlines()
 
-        # The handler intentionally raises NotImplementedError in T-002 stage.
-        self.assertTrue(any("NotImplementedError:CloudEvent processing not implemented yet." in ln for ln in combined))
+        self.assertTrue(
+            any(
+                "NotImplementedError:CloudEvent processing not implemented yet." in ln
+                for ln in combined
+            )
+        )
 
-        # Ensure a structured "cloud_event_received" log is emitted.
         json_lines = []
         for line in combined:
             line = line.strip()

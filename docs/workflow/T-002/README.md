@@ -13,6 +13,9 @@
 - Python package layout, dependency management, and entrypoints (CloudEvent adapter + CLI).
 - Typed config: env + CLI overrides for `CHART_IMG_ACCOUNTS_JSON`, `CHARTS_BUCKET`, `CHARTS_API_MODE`, `CHARTS_DEFAULT_TIMEZONE`.
 - Structured JSON logging fields per `docs-gcp/runbook/prod_runbook_gcp.md`.
+- References:
+  - `docs-worker-chart-export/spec/implementation_contract.md` §11.1 (Chart-IMG accounts secret), §12.1 (CLI), §12.2 (modes)
+  - `docs-gcp/runbook/prod_runbook_gcp.md` §1.3 (Secret Manager), §8 (Logging & Observability)
 
 ## Risks
 

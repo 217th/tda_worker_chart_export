@@ -14,6 +14,10 @@
 - Manifest path: `runs/<runId>/steps/<stepId>/charts/manifest.json` (deterministic, overwrite allowed).
 - Emit `gs://<bucket>/<path>` URIs in outputs/manifest.
 - Validate manifest against `docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json`.
+- Invariant: for every logical request (`inputs.requests[*]`) the manifest must contain either an `items[]` element or a corresponding `failures[]` element (no “missing” requests).
+- References:
+  - `docs-worker-chart-export/spec/implementation_contract.md` §5 (GCS paths), §6 (manifest), §9 (retry/idempotency)
+  - `docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json`
 
 ## Risks
 

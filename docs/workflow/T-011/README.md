@@ -12,6 +12,8 @@
 
 - Use `CHARTS_API_MODE=mock` + repo fixtures.
 - Scenario-level assertions for object paths and outputs.
+- References:
+  - `docs-worker-chart-export/spec/implementation_contract.md` §12.2 (mock/record), §9 (idempotency expectations)
 
 ## Risks
 

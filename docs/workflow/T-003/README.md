@@ -14,6 +14,10 @@
 - Fast no-op if no `CHART_EXPORT` step is `READY`.
 - Deterministic pick: sort `stepId` ascending, pick first `READY`.
 - No network calls inside Firestore transactions; transaction is reserved for claim only.
+- References:
+  - `docs-worker-chart-export/spec/implementation_contract.md` §2 (Trigger/filter), §3.1 (Claim)
+  - `docs-general/contracts/orchestration_rules.md` (“READY -> RUNNING -> SUCCEEDED|FAILED”, idempotency key `runId+stepId`)
+  - `docs-gcp/runbook/prod_runbook_gcp.md` §4 (Eventarc/Firestore triggers), §8 (log fields)
 
 ## Risks
 

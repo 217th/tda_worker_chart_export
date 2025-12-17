@@ -13,6 +13,9 @@
 - Structured logs with `service/env/runId/flowKey/stepId/eventId/severity/error.*` and `chartsApi.*` (accountId, httpStatus, durationMs, chartTemplateId).
 - Log-based metrics + alert policies for `CHART_API_LIMIT_EXCEEDED`, error rate, latency, step success rate.
 - Dashboard spec/instructions and runbook actions.
+- References:
+  - `docs-worker-chart-export/spec/implementation_contract.md` §10 (logging minimum), §13.4–13.5 (Chart-IMG limits/errors), §14.4 (global exhaustion event fields)
+  - `docs-gcp/runbook/prod_runbook_gcp.md` §8 (Logging & Observability)
 
 ## Risks
 

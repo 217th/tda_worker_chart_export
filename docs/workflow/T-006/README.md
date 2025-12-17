@@ -13,6 +13,9 @@
 - Transactional usage algorithm (UTC day window reset + `usageToday` increment before HTTP call).
 - Handle 429/Limit Exceeded by exhausting the account for the current window and switching accounts.
 - Global exhaustion emits a structured `CHART_API_LIMIT_EXCEEDED` event listing exhausted `accountId`s.
+- References:
+  - `docs-worker-chart-export/spec/implementation_contract.md` §11.1 (accounts config), §13.4–13.5 (limits + error classification), §14.4 (persistent usage accounting)
+  - `docs-gcp/runbook/prod_runbook_gcp.md` §1.1 (collections), §8 (logging fields)
 
 ## Risks
 

@@ -13,6 +13,9 @@
 - Phase 1 (transaction): guard + claim `READY -> RUNNING` only.
 - Phase 2 (non-transactional update): set `finishedAt`, `outputs.outputsManifestGcsUri` (required on success), and `error` on failure.
 - Minimal patching: do not clobber unrelated step fields or other steps.
+- References:
+  - `docs-worker-chart-export/spec/implementation_contract.md` §3 (Claim + завершение), §7 (success rule), §8 (error codes)
+  - `docs-general/contracts/orchestration_rules.md` (step status model + who sets READY)
 
 ## Risks
 

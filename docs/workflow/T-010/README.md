@@ -14,6 +14,10 @@
 - Status rule: `SUCCEEDED` iff `items >= minImages`.
 - Error code coverage: `VALIDATION_FAILED`, `CHART_API_FAILED`, `CHART_API_LIMIT_EXCEEDED`, `CHART_API_MOCK_MISSING`, `GCS_WRITE_FAILED`, `MANIFEST_WRITE_FAILED`.
 - PNG naming + `gs://` formatting.
+- Invariant: no “silent drops” — every logical request must end up in `items[]` or `failures[]`.
+- References:
+  - `docs-worker-chart-export/spec/implementation_contract.md` §6–§9 (manifest + success rule + retries), §8 (error codes)
+  - `docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json`
 
 ## Risks
 

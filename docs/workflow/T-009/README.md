@@ -13,6 +13,8 @@
 - Implement flags per `docs-worker-chart-export/spec/implementation_contract.md`.
 - Support `--accounts-config-path` to load `chart-img.accounts.local.json` and inject `CHART_IMG_ACCOUNTS_JSON`.
 - Provide `--output-summary=none|text|json`.
+- References:
+  - `docs-worker-chart-export/spec/implementation_contract.md` §12.1 (CLI requirements), §12.2 (modes)
 
 ## Risks
 

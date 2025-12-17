@@ -27,7 +27,7 @@
     {
       "id": "T-002",
       "title": "Bootstrap worker-chart-export (Python 3.13)",
-      "description": "Create initial Python 3.13 service skeleton for Cloud Run Functions (gen2) + local CLI:\n- Typed config model (env + CLI overrides): CHART_IMG_ACCOUNTS_JSON, CHARTS_BUCKET, CHARTS_API_MODE, CHARTS_DEFAULT_TIMEZONE\n- Structured JSON logging per @docs-gcp/runbook/prod_runbook_gcp.md\n- Core engine module reusable by CloudEvent adapter and CLI (no duplicated logic)\nRisk: confirm runtime/deploy strategy for Python 3.13 (may require container-based deploy).",
+      "description": "Create initial Python 3.13 service skeleton for Cloud Run Functions (gen2) + local CLI:\n- Typed config model (env + CLI overrides): CHART_IMG_ACCOUNTS_JSON, CHARTS_BUCKET, CHARTS_API_MODE, CHARTS_DEFAULT_TIMEZONE\n- Parse + validate CHART_IMG_ACCOUNTS_JSON once at process startup; invalid secret is a fatal misconfiguration (not a per-step VALIDATION_FAILED)\n- Structured JSON logging per docs-gcp/runbook/prod_runbook_gcp.md\n- Core engine module reusable by CloudEvent adapter and CLI (no duplicated logic)\nRisk: confirm runtime/deploy strategy for Python 3.13 (may require container-based deploy).",
       "status": "TODO",
       "priority": "high",
       "owner": "human",
@@ -91,7 +91,7 @@
     {
       "id": "T-006",
       "title": "Account selection + usage accounting (chart_img_accounts_usage)",
-      "description": "Implement per-account daily limit tracking and selection:\n- Parse accounts from CHART_IMG_ACCOUNTS_JSON (Secret Manager mounted env)\n- For each logical Chart-IMG call, choose an account using Firestore chart_img_accounts_usage/{accountId}\n- In transaction: reset window if needed (UTC day), check dailyLimit, increment usageToday before HTTP call\n- On 429/Limit Exceeded: mark account exhausted for window and retry with another account (bounded)\n- If all accounts exhausted: record failures with CHART_API_LIMIT_EXCEEDED and emit structured ERROR event listing exhausted accountIds.",
+      "description": "Implement per-account daily limit tracking and selection using Firestore chart_img_accounts_usage/{accountId}:\n- Use the already-parsed accounts list from CHART_IMG_ACCOUNTS_JSON (parsing/validation is owned by T-002)\n- In transaction: reset window if needed (UTC day), check dailyLimit, increment usageToday before HTTP call\n- On 429/Limit Exceeded: mark account exhausted for window and retry with another account (bounded)\n- If all accounts exhausted: record failures with CHART_API_LIMIT_EXCEEDED and emit structured ERROR event listing exhausted accountIds.",
       "status": "TODO",
       "priority": "high",
       "owner": "human",
@@ -221,14 +221,31 @@
         "gcp"
       ],
       "depends_on": [
-        "T-003"
+        "T-003",
+        "T-006",
+        "T-007",
+        "T-008"
       ]
+    },
+    {
+      "id": "T-014",
+      "title": "Refine WBS: invariants, deps, spec links",
+      "description": "Refine the task backlog to reduce spec drift:\n- Add explicit per-task references to docs-worker-chart-export/docs-general/docs-gcp (and section pointers) in docs/workflow/T-###/README.md\n- Make the invariant explicit: each logical chart request ends up in manifest.items[] or manifest.failures[] (no silent drops)\n- Clarify ownership: CHART_IMG_ACCOUNTS_JSON parsed once at startup (fatal misconfig) vs usage/account selection logic\n- Adjust observability task dependencies to follow stabilized error model.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "human",
+      "tags": [
+        "planning",
+        "worker-chart-export",
+        "docs"
+      ],
+      "depends_on": []
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "20deaedff99eac54f46407a7809bbe2be425aa3f7a170596984b534c9b3efe85"
+    "checksum": "c15741c6392671da93405657776a06c739541936ed13d9acc394a003529f8243"
   }
 }

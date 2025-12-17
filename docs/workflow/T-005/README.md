@@ -13,6 +13,9 @@
 - Firestore reads from `chart_templates/{chartTemplateId}`.
 - Merge logic: `template.request` as base + inject `symbol` and `interval` from `flow_run`.
 - Template missing/invalid becomes a per-request failure and contributes to `minImages` evaluation.
+- References:
+  - `docs-worker-chart-export/spec/implementation_contract.md` §4 (inputs), §6 (manifest shape), §14 (template semantics)
+  - `docs-worker-chart-export/chart-templates/README.md` (template structure)
 
 ## Risks
 

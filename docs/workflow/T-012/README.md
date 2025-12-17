@@ -13,6 +13,9 @@
 - gcloud deploy instructions for Cloud Run Functions (gen2): `concurrency=1`, timeouts, runtime SA, Secret Manager env wiring.
 - Seed scripts/instructions for `chart_templates` and `chart_img_accounts_usage`.
 - Manual verification steps that do not run in CI by default.
+- References:
+  - `docs-gcp/runbook/prod_runbook_gcp.md` §1–§4 (resources/IAM/triggers), §6–§7 (pre/post deploy checks)
+  - `docs-worker-chart-export/spec/implementation_contract.md` §10 (logging events), §11 (secrets), §14.4 (usage docs)
 
 ## Risks
 

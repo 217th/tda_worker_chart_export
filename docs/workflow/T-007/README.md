@@ -14,6 +14,13 @@
 - Error classification (4xx non-retriable, 5xx/timeouts retriable, 429 triggers account switch).
 - Modes: `real|mock|record` (`CHARTS_API_MODE` / CLI flag).
 - Fixtures path: `docs-worker-chart-export/fixtures/chart-api/chart-img/advanced-chart-v2`.
+- Invariant: for every logical request (`inputs.requests[*]`) produce exactly one of:
+  - `ChartsOutputsManifest.items[]` entry (success), or
+  - `ChartsOutputsManifest.failures[]` entry with an `error.code` (failure).
+  No “silent drops”.
+- References:
+  - `docs-worker-chart-export/spec/implementation_contract.md` §8 (error model), §12.2 (mock/record + CHART_API_MOCK_MISSING), §13 (Chart-IMG v2)
+  - `docs-worker-chart-export/chart-img-docs/API Documentation.htm` (`POST /v2/tradingview/advanced-chart`)
 
 ## Risks
 

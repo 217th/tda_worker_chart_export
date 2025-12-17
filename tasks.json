@@ -28,7 +28,7 @@
       "id": "T-002",
       "title": "Bootstrap worker-chart-export (Python 3.13)",
       "description": "Create initial Python 3.13 service skeleton for Cloud Run Functions (gen2) + local CLI:\n- Typed config model (env + CLI overrides): CHART_IMG_ACCOUNTS_JSON, CHARTS_BUCKET, CHARTS_API_MODE, CHARTS_DEFAULT_TIMEZONE\n- Parse + validate CHART_IMG_ACCOUNTS_JSON once at process startup; invalid secret is a fatal misconfiguration (not a per-step VALIDATION_FAILED)\n- Structured JSON logging per docs-gcp/runbook/prod_runbook_gcp.md\n- Core engine module reusable by CloudEvent adapter and CLI (no duplicated logic)\nRisk: confirm runtime/deploy strategy for Python 3.13 (may require container-based deploy).",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [
@@ -38,6 +38,16 @@
       ],
       "depends_on": [
         "T-001"
+      ],
+      "commit": {
+        "hash": "2ebf1413a0547bc1a0d59e4e3ebe5a09f6dd719c",
+        "message": "📝 T-002 Refresh PR metadata"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-002/pr."
+        }
       ]
     },
     {
@@ -276,6 +286,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "2d3457552355ce3045433ebf8695e1c11c1b592dd03f1ae97209012b03aada3f"
+    "checksum": "84a312042b3f3f1f796fb76bc5073b0bf1a42d3e0d1deb146bcb7c6302d3724d"
   }
 }

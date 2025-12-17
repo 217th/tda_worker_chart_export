@@ -30,5 +30,17 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `docs-worker-chart-export/README.md`
+- `docs-worker-chart-export/chart-templates/README.md`
+- `docs-worker-chart-export/contracts/charts_images_naming.md`
+- `docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json`
+- `docs-worker-chart-export/contracts/flow_run.schema.json`
+- `docs-worker-chart-export/spec/implementation_contract.md`
+- `docs-worker-chart-export/test_vectors/expected_flow_run_step_patch.json`
+- `docs-worker-chart-export/test_vectors/expected_manifest.json`
+- `docs-worker-chart-export/test_vectors/flow_run_ready_chart_step.json`
+- `docs/workflow/T-001/pr/diffstat.txt`
+- `docs/workflow/T-001/pr/meta.json`
+- `docs/workflow/T-001/pr/review.md`
+- `docs/workflow/T-001/pr/verify.log`
 <!-- END AUTO SUMMARY -->

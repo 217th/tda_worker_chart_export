@@ -4,7 +4,7 @@
       "id": "T-001",
       "title": "Align docs-worker URIs & PNG naming",
       "description": "Update @docs-worker-chart-export to match agreed conventions:\n- Canonical GCS URI format is gs:// (not gcs://) in schemas/examples/outputs\n- PNG filename format is <generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png (no kind)\n- Test vectors stop using ctpl_default_v1 and reflect 1 request -> 1 PNG\nNote: @docs-general remains unchanged (known mismatch).",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [
@@ -12,7 +12,17 @@
         "docs",
         "mvp"
       ],
-      "depends_on": []
+      "depends_on": [],
+      "commit": {
+        "hash": "41c0fd87f9227bed2aa0a975fb4a97cb524064ba",
+        "message": "📝 T-001 Align docs-worker to gs:// + PNG naming"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-001/pr."
+        }
+      ]
     },
     {
       "id": "T-002",
@@ -219,6 +229,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "9c1f33675fff12cef29c0bf8dec7b585deed8e38e11fcf9f493a6aa99b42022d"
+    "checksum": "20deaedff99eac54f46407a7809bbe2be425aa3f7a170596984b534c9b3efe85"
   }
 }

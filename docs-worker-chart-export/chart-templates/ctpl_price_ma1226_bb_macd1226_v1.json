@@ -1,0 +1,39 @@
+{
+    "id": "ctpl_price_ma1226_bb_macd1226_v1",
+    "description": "price + MA12/26 + bollinger bands + MACD12/26",
+    "request": {
+      "height": 600,
+      "style": "candle",
+      "theme": "light",
+      "scale": "regular",
+      "timezone": "UTC",
+      "format": "png",
+      "studies": [
+        {
+            "name": "Bollinger Bands",
+            "input": {
+              "in_0": 20,
+              "in_1": 2
+            }
+          },
+          {
+            "name": "Moving Average Double",
+            "input": {
+              "firstPeriods": 12,
+              "secondPeriods": 26,
+              "method": "Simple"
+            }
+          },
+          {
+            "name": "MACD",
+            "forceOverlay": false,
+            "input": {
+              "in_0": 12,
+              "in_1": 26,
+              "in_2": 9,
+              "in_3": "close"
+            }
+        }
+      ]
+    }
+  }

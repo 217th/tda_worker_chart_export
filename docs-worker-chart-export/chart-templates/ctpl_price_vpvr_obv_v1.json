@@ -1,0 +1,35 @@
+{
+    "id": "ctpl_price_vpvr_obv_v1",
+    "description": "price + Volume Profile Visible Range + On Balance Volume",
+    "request": {
+      "height": 600,
+      "style": "candle",
+      "theme": "light",
+      "scale": "regular",
+      "timezone": "UTC",
+      "format": "png",
+      "studies": [
+        {
+        "name": "Volume Profile Visible Range",
+        "input": {
+          "rows": 24,
+          "volume": "Up/Down",
+          "vaVolume": 70
+        }
+      },
+        {
+          "name": "On Balance Volume",
+          "forceOverlay": false,
+          "input": {
+            "smoothingLine": "SMA",
+            "smoothingLength": 14
+          },
+          "override": {
+            "Plot.linewidth": 2,
+            "Plot.plottype": "line",
+            "Plot.color": "rgb(33,150,243)"
+          }
+        }
+      ]
+    }
+  }

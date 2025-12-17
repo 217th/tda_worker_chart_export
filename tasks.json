@@ -1,9 +1,224 @@
 {
-  "tasks": [],
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "Align docs-worker URIs & PNG naming",
+      "description": "Update @docs-worker-chart-export to match agreed conventions:\n- Canonical GCS URI format is gs:// (not gcs://) in schemas/examples/outputs\n- PNG filename format is <generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png (no kind)\n- Test vectors stop using ctpl_default_v1 and reflect 1 request -> 1 PNG\nNote: @docs-general remains unchanged (known mismatch).",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "docs",
+        "mvp"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "T-002",
+      "title": "Bootstrap worker-chart-export (Python 3.13)",
+      "description": "Create initial Python 3.13 service skeleton for Cloud Run Functions (gen2) + local CLI:\n- Typed config model (env + CLI overrides): CHART_IMG_ACCOUNTS_JSON, CHARTS_BUCKET, CHARTS_API_MODE, CHARTS_DEFAULT_TIMEZONE\n- Structured JSON logging per @docs-gcp/runbook/prod_runbook_gcp.md\n- Core engine module reusable by CloudEvent adapter and CLI (no duplicated logic)\nRisk: confirm runtime/deploy strategy for Python 3.13 (may require container-based deploy).",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "python",
+        "mvp"
+      ],
+      "depends_on": [
+        "T-001"
+      ]
+    },
+    {
+      "id": "T-003",
+      "title": "CloudEvent ingest: fast filter + deterministic READY pick",
+      "description": "Implement Functions Framework CloudEvent adapter:\n- Fast no-op when no CHART_EXPORT step is READY\n- Deterministic selection when multiple READY (sort by stepId asc, pick first)\n- Explicit at-least-once safety: repeated events must no-op if target step is not READY\n- No network calls inside Firestore transaction (transaction reserved for claim only).",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "gcp",
+        "idempotency"
+      ],
+      "depends_on": [
+        "T-002"
+      ]
+    },
+    {
+      "id": "T-004",
+      "title": "Firestore two-phase claim + finalize step patch",
+      "description": "Implement orchestration state transitions for CHART_EXPORT:\n- Phase 1: Firestore transaction claim READY->RUNNING (guard: if not READY, no-op)\n- Phase 2: after work completes, update RUNNING->SUCCEEDED|FAILED with finishedAt, outputs.outputsManifestGcsUri (SUCCEEDED required), and error{code,message,details} on failure\n- Patch must be minimal: do not clobber unrelated step fields or other steps.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "firestore",
+        "orchestration"
+      ],
+      "depends_on": [
+        "T-003"
+      ]
+    },
+    {
+      "id": "T-005",
+      "title": "Load chart_templates + build Chart-IMG request",
+      "description": "Implement chart template resolution and request building:\n- Read runtime templates from Firestore chart_templates/{chartTemplateId}\n- Use template.request as base, inject symbol/interval from flow_run (scope.symbol + step.timeframe)\n- Set manifest.items[*].kind = template.description (human-readable)\n- If template missing/invalid: record failure in manifest and evaluate step via minImages.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "chart-img",
+        "firestore"
+      ],
+      "depends_on": [
+        "T-004"
+      ]
+    },
+    {
+      "id": "T-006",
+      "title": "Account selection + usage accounting (chart_img_accounts_usage)",
+      "description": "Implement per-account daily limit tracking and selection:\n- Parse accounts from CHART_IMG_ACCOUNTS_JSON (Secret Manager mounted env)\n- For each logical Chart-IMG call, choose an account using Firestore chart_img_accounts_usage/{accountId}\n- In transaction: reset window if needed (UTC day), check dailyLimit, increment usageToday before HTTP call\n- On 429/Limit Exceeded: mark account exhausted for window and retry with another account (bounded)\n- If all accounts exhausted: record failures with CHART_API_LIMIT_EXCEEDED and emit structured ERROR event listing exhausted accountIds.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "chart-img",
+        "firestore",
+        "limits"
+      ],
+      "depends_on": [
+        "T-004"
+      ]
+    },
+    {
+      "id": "T-007",
+      "title": "Chart-IMG client + mock/record fixtures",
+      "description": "Implement Chart-IMG v2 Advanced Chart integration:\n- POST https://api.chart-img.com/v2/tradingview/advanced-chart with x-api-key and JSON body\n- Error classification: 4xx non-retriable (CHART_API_FAILED), 5xx/timeouts retriable, 429 triggers account switch\n- Modes: real|mock|record (CHARTS_API_MODE / CLI flag)\n- Fixtures stored under docs-worker-chart-export/fixtures/chart-api/chart-img/advanced-chart-v2; missing fixture in mock => CHART_API_MOCK_MISSING without real HTTP\n- CI must not call real Chart-IMG (use mock).",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "chart-img",
+        "testing"
+      ],
+      "depends_on": [
+        "T-005",
+        "T-006"
+      ]
+    },
+    {
+      "id": "T-008",
+      "title": "Write PNG + manifest to GCS (gs://) + validate manifest",
+      "description": "Implement artifact writing with deterministic paths:\n- PNG path: runs/<runId>/charts/<timeframe>/<chartTemplateId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png\n- Manifest path: runs/<runId>/steps/<stepId>/charts/manifest.json (overwrite allowed on retry)\n- Store URIs as gs://<bucket>/<path>\n- Validate manifest against docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json; surface MANIFEST_WRITE_FAILED / GCS_WRITE_FAILED accordingly.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "gcs",
+        "manifest"
+      ],
+      "depends_on": [
+        "T-007"
+      ]
+    },
+    {
+      "id": "T-009",
+      "title": "CLI run-local wrapper (thin adapter over core engine)",
+      "description": "Implement CLI per implementation_contract.md:\n- Flags: --flow-run-path, --step-id, --charts-api-mode, --charts-bucket, --accounts-config-path, --output-summary\n- accounts-config-path reads chart-img.accounts.local.json and injects CHART_IMG_ACCOUNTS_JSON\n- CLI uses the same core engine as CloudEvent handler; divergence is a bug\n- Output summary supports none|text|json.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "cli",
+        "dx"
+      ],
+      "depends_on": [
+        "T-008"
+      ]
+    },
+    {
+      "id": "T-010",
+      "title": "Unit tests (schema, idempotency, error codes, naming)",
+      "description": "Add unit tests to cover core logic without real external services:\n- Schema validation (flow_run + charts_outputs_manifest)\n- Idempotent behavior: repeated events/claims no side effects\n- Status rule: SUCCEEDED iff items>=minImages\n- All required error.code paths: VALIDATION_FAILED, CHART_API_FAILED, CHART_API_LIMIT_EXCEEDED, CHART_API_MOCK_MISSING, GCS_WRITE_FAILED, MANIFEST_WRITE_FAILED\n- PNG naming + gs:// URI formatting\nNote: tests must run with CHARTS_API_MODE=mock by default.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "tests",
+        "unit"
+      ],
+      "depends_on": [
+        "T-009"
+      ],
+      "verify": [
+        "python -m pytest -q"
+      ]
+    },
+    {
+      "id": "T-011",
+      "title": "Integration tests (local, mock-only)",
+      "description": "Add integration tests that exercise Firestore+GCS wiring without real Chart-IMG:\n- Use CHARTS_API_MODE=mock with repo fixtures\n- Scenario: flow_run with READY CHART_EXPORT -> claim -> PNG+manifest written -> step patched\n- Assert GCS object paths + manifest content + step outputs\n- No network calls; safe for CI.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "tests",
+        "integration"
+      ],
+      "depends_on": [
+        "T-010"
+      ],
+      "verify": [
+        "python -m pytest -q"
+      ]
+    },
+    {
+      "id": "T-012",
+      "title": "Prod-like GCP scenario + deploy scripts/runbook",
+      "description": "Provide scripts and instructions for deploying and verifying in a dev/staging GCP project:\n- Deploy worker-chart-export as Cloud Run Function (gen2) with concurrency=1, suitable timeout, runtime SA\n- Configure Secret Manager -> CHART_IMG_ACCOUNTS_JSON, env CHARTS_BUCKET/CHARTS_API_MODE\n- Seed Firestore: chart_templates and chart_img_accounts_usage\n- Manual/prod-like verification steps and rollback plan\n- Keep CI isolated; prod-like runs are explicit/manual.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "gcp",
+        "deploy"
+      ],
+      "depends_on": [
+        "T-011"
+      ]
+    },
+    {
+      "id": "T-013",
+      "title": "Observability (Cloud Logging + Monitoring)",
+      "description": "Add observability setup based on structured logs:\n- Ensure logs contain service/env/runId/flowKey/stepId/eventId/severity/error.* and chartsApi.* (accountId, httpStatus, durationMs, chartTemplateId)\n- Provide log-based metrics + alert policies: CHART_API_LIMIT_EXCEEDED, Chart-IMG error rate, latency, step success rate\n- Provide dashboard spec/instructions for Cloud Monitoring\n- Document runbook actions for common failures (limit exhaustion, widespread 5xx).",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "human",
+      "tags": [
+        "worker-chart-export",
+        "observability",
+        "gcp"
+      ],
+      "depends_on": [
+        "T-003"
+      ]
+    }
+  ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "b8cce95f94bb3842447a35cad31d68789df636e11353ab4a75179d86761d804c"
+    "checksum": "9c1f33675fff12cef29c0bf8dec7b585deed8e38e11fcf9f493a6aa99b42022d"
   }
 }

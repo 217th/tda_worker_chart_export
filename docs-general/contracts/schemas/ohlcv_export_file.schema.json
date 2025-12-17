@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/ohlcv_export_file.schema.json",
+  "title": "OHLCVExportFile",
+  "description": "Канонический артефакт OHLCV экспорта: метаданные запроса + массив свечей.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["metadata", "data"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request_id", "request_timestamp", "symbol", "timeframe", "query_type", "query_parameters"],
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "description": "Идентификатор запроса на стороне экспортера (для диагностики)."
+        },
+        "request_timestamp": { "type": "string", "format": "date-time" },
+        "symbol": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Например LINKUSDT (как в текущей реализации экспортера) или BTC/USDT."
+        },
+        "timeframe": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Таймфрейм (формат зависит от экспортера; для прототипа фиксируем как строку)."
+        },
+        "query_type": {
+          "type": "string",
+          "enum": ["all", "range"],
+          "description": "Что экспортировали: весь ряд или диапазон."
+        },
+        "query_parameters": {
+          "type": "object",
+          "description": "Параметры запроса (например границы range).",
+          "additionalProperties": true
+        }
+      }
+    },
+    "data": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ohlcvRow" }
+    }
+  },
+  "$defs": {
+    "ohlcvRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "open", "high", "low", "close", "volume"],
+      "properties": {
+        "date": { "type": "string", "format": "date-time" },
+        "open": { "type": "number" },
+        "high": { "type": "number" },
+        "low": { "type": "number" },
+        "close": { "type": "number" },
+        "volume": { "type": "number" }
+      }
+    }
+  }
+}
+
+

@@ -1,0 +1,12 @@
+{
+  "stepId": "charts:1M:ctpl_default_v1",
+  "expectedStepAfterSuccess": {
+    "status": "SUCCEEDED",
+    "finishedAt": "2025-12-15T10:26:15Z",
+    "outputs": {
+      "outputsManifestGcsUri": "gcs://ARTIFACTS_BUCKET/runs/20251215-102530_BTC-USDT_k3f7a/steps/charts:1M:ctpl_default_v1/charts/manifest.json"
+    }
+  }
+}
+
+

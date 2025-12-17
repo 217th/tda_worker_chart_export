@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "runId": "20251215-102530_BTC-USDT_k3f7a",
+  "flowKey": "scheduled_month_week_report_v1",
+  "status": "RUNNING",
+  "createdAt": "2025-12-15T10:25:30Z",
+  "trigger": { "type": "SCHEDULER", "source": "flow1-every-4h" },
+  "scope": { "symbol": "BTC/USDT" },
+  "steps": {
+    "charts:1M:ctpl_default_v1": {
+      "stepType": "CHART_EXPORT",
+      "status": "READY",
+      "timeframe": "1M",
+      "createdAt": "2025-12-15T10:25:46Z",
+      "dependsOn": ["ohlcv_export:1M"],
+      "inputs": {
+        "minImages": 2,
+        "requests": [{ "chartTemplateId": "ctpl_default_v1" }]
+      },
+      "outputs": {}
+    }
+  }
+}
+
+

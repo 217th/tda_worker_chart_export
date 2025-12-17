@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/llm_recommendation_file.schema.json",
+  "title": "LLMRecommendationFile",
+  "description": "Канонический артефакт LLM рекомендации: metadata + summary + details (всё в одном JSON).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["metadata", "summary", "details"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runId", "stepId", "createdAt", "symbol", "llm", "inputs"],
+      "properties": {
+        "runId": {
+          "type": "string",
+          "description": "Flow run docId.",
+          "pattern": "^[0-9]{8}-[0-9]{6}_[A-Z0-9]+(?:-[A-Z0-9]+)*_[a-z0-9]{3,6}$"
+        },
+        "stepId": { "type": "string", "minLength": 1 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "symbol": { "type": "string", "minLength": 1 },
+        "llm": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["promptId", "modelId"],
+          "properties": {
+            "promptId": { "type": "string", "minLength": 1 },
+            "modelId": { "type": "string", "minLength": 1 }
+          }
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reportIds"],
+          "properties": {
+            "reportIds": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "account_gcs_uri": { "type": "string", "pattern": "^gcs://.+" },
+            "news_gcs_uri": { "type": "string", "pattern": "^gcs://.+" }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["markdown"],
+      "properties": {
+        "markdown": { "type": "string" },
+        "html": { "type": "string" }
+      }
+    },
+    "details": {
+      "type": "object",
+      "description": "Большой JSON с подробностями рекомендации (структура может эволюционировать).",
+      "additionalProperties": true
+    }
+  }
+}
+
+

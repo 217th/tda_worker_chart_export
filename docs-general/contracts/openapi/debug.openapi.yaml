@@ -1,0 +1,285 @@
+openapi: 3.1.0
+# -----------------------------------------------------------------------------
+# TDA (Trading Decisions Assistant) Debug API (prototype)
+#
+# Зачем это нужно:
+# - Архитектура прототипа event-driven (оркестрация через Firestore update), но
+#   всё равно полезен минимальный HTTP-вход для ручного запуска и просмотра run.
+# - Этот файл описывает 2 базовые операции:
+#   - создать `flow_runs/{runId}` (поставить run в очередь/запустить)
+#   - прочитать `flow_runs/{runId}` (посмотреть статус/прогресс/артефакты)
+#
+# Как это применяется:
+# - Реализация обычно будет одной HTTP Cloud Run function/service (или локальный
+#   сервер), которая читает/пишет Firestore документы `flow_runs/{runId}`.
+# - После создания/изменения `flow_run` Firestore trigger (`advance_flow`) и
+#   воркеры (когда появятся) продолжат обработку асинхронно.
+#
+# Про $ref:
+# - Ответы ссылаются на JSON Schema из репозитория:
+#   `../schemas/flow_run.schema.json`
+# - Некоторые UI (например Swagger UI) могут потребовать "bundle" или абсолютные
+#   ссылки, но для прототипа это ок.
+# -----------------------------------------------------------------------------
+info:
+  title: TDA Debug API (prototype)
+  version: 0.1.0
+  license:
+    name: Proprietary
+    url: https://debug-api.example.internal/license
+  description: |
+    Минимальный HTTP API для ручного запуска и просмотра `flow_runs/{runId}`.
+servers:
+  - url: https://debug-api.example.internal
+    description: |
+      Production/internal endpoint (Cloud Run Functions, IAM-protected).
+      For local development you can run a localhost stub implementation.
+
+security:
+  - bearerAuth: []
+paths:
+  /runs:
+    get:
+      summary: List runs (debug only)
+      description: |
+        Возвращает список запусков. Это debug-операция для быстрого просмотра
+        последних run'ов без UI.
+
+        Реализация может:
+        - сортировать по createdAt desc
+        - поддерживать простую пагинацию через limit (и, при желании, cursor)
+      operationId: listRuns
+      parameters:
+        - in: query
+          name: flowKey
+          required: false
+          schema:
+            type: string
+          description: "Фильтр по flowKey (например scheduled_month_week_report_v1)."
+        - in: query
+          name: symbol
+          required: false
+          schema:
+            type: string
+          description: "Фильтр по symbol (например BTC/USDT)."
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+          description: "Максимальное число элементов."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "../schemas/flow_run.schema.json"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+
+  /runs:trigger:
+    post:
+      summary: Trigger new run (create flow_run)
+      description: |
+        Создаёт новый `flow_runs/{runId}` и возвращает его.
+
+        Ожидаемое поведение реализации:
+        - сформировать `runId` (docId Firestore) по принятому формату
+        - записать документ `flow_run` со стартовыми `steps`
+        - дальнейшая обработка пойдёт через Firestore-триггеры/воркеры
+      operationId: triggerRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [flowKey, symbol]
+              properties:
+                flowKey:
+                  type: string
+                  description: "Например scheduled_month_week_report_v1"
+                symbol:
+                  type: string
+                  description: "Например BTC/USDT"
+                triggerSource:
+                  type: string
+                  description: "Например debug-ui"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/flow_run.schema.json"
+        "400":
+          description: Bad request
+  /runs/{runId}:
+    get:
+      summary: Get run by runId
+      description: |
+        Возвращает текущее состояние `flow_runs/{runId}` (вся карта `steps`,
+        статусы, ошибки и ссылки на артефакты в GCS).
+      operationId: getRun
+      parameters:
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/flow_run.schema.json"
+        "404":
+          description: Not found
+
+  # ---------------------------------------------------------------------------
+  # Debug-only: симуляция работы воркеров/оркестратора
+  #
+  # Зачем:
+  # - пока воркеры не готовы, можно "двигать" статусы шагов руками и проверять,
+  #   что `advance_flow` корректно переводит следующие шаги в READY
+  # - можно отлаживать UI/интеграции, не дожидаясь реальной обработки данных
+  # ---------------------------------------------------------------------------
+
+  /runs/{runId}/steps/{stepId}:simulate:
+    post:
+      summary: Simulate step status update (debug only)
+      description: |
+        Имитирует результат выполнения конкретного шага: обновляет
+        `steps[stepId].status`, а также (опционально) `outputs`, `error`,
+        `finishedAt`.
+
+        Рекомендуемая семантика реализации:
+        - если шаг уже в терминальном статусе (SUCCEEDED/FAILED/CANCELLED),
+          можно вернуть 409 или просто no-op (на усмотрение прототипа)
+        - после обновления шага можно вызвать (или дождаться) `advance_flow`,
+          чтобы следующий шаг стал READY
+      operationId: simulateStepUpdate
+      parameters:
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: stepId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  description: "Новый статус шага."
+                  enum: [PENDING, READY, RUNNING, SUCCEEDED, FAILED, SKIPPED, CANCELLED]
+                outputs:
+                  type: object
+                  description: "Произвольные outputs шага (как в flow_run.schema.json)."
+                  additionalProperties: true
+                error:
+                  type: object
+                  additionalProperties: false
+                  required: [code, message]
+                  properties:
+                    code: { type: string }
+                    message: { type: string }
+                    details:
+                      type: object
+                      additionalProperties: true
+                finishedAt:
+                  type: string
+                  format: date-time
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/flow_run.schema.json"
+        "404":
+          description: Not found
+        "409":
+          description: Conflict (step already terminal / invalid transition)
+
+  /runs/{runId}:advance:
+    post:
+      summary: Force-run advance_flow logic once (debug only)
+      description: |
+        Ручной запуск логики "advance_flow" (один тик).
+        Полезно, если вы хотите отлаживать оркестрацию без Firestore trigger'а
+        или когда триггеры временно выключены.
+      operationId: advanceRunOnce
+      parameters:
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/flow_run.schema.json"
+        "404":
+          description: Not found
+
+  /runs/{runId}:cancel:
+    post:
+      summary: Cancel run (debug only)
+      description: |
+        Пытается отменить run: выставляет `flow_run.status=CANCELLED`.
+
+        Рекомендуемая семантика реализации для прототипа:
+        - если run уже SUCCEEDED/FAILED/CANCELLED: вернуть 409 или no-op
+        - можно дополнительно проставить CANCELLED всем шагам, которые ещё не в
+          терминальном состоянии (PENDING/READY/RUNNING)
+      operationId: cancelRun
+      parameters:
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/flow_run.schema.json"
+        "404":
+          description: Not found
+        "409":
+          description: Conflict (run already terminal / invalid transition)
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+

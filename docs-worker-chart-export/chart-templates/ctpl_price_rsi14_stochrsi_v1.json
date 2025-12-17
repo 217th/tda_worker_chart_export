@@ -1,0 +1,27 @@
+{
+    "id": "ctpl_price_rsi14_stochrsi_v1",
+    "description": "price + Relative Strength Index 14 + Stochastic RSI 14/3",
+    "request": {
+      "height": 600,
+      "style": "candle",
+      "theme": "light",
+      "scale": "regular",
+      "timezone": "UTC",
+      "format": "png",
+      "studies": [
+        {
+          "name": "Relative Strength Index",
+          "forceOverlay": false,
+          "input": {
+            "length": 14,
+            "smoothingLine": "SMA",
+            "smoothingLength": 14
+          }
+        },
+        {
+          "name": "Stochastic RSI",
+          "forceOverlay": false
+        }
+      ]
+    }
+  }

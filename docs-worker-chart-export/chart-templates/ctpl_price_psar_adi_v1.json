@@ -1,0 +1,30 @@
+{
+    "id": "ctpl_price_psar_adi_v1",
+    "description": "price + Parabolic SAR + Average Directional Index",
+    "request": {
+      "height": 600,
+      "style": "candle",
+      "theme": "light",
+      "scale": "regular",
+      "timezone": "UTC",
+      "format": "png",
+      "studies": [
+        {
+        "name": "Parabolic SAR",
+        "override": {
+          "Plot.linewidth": 2,
+          "Plot.plottype": "cross",
+          "Plot.color": "rgb(33,150,243)"
+        }
+      },
+        {
+          "name": "Average Directional Index",
+          "forceOverlay": false,
+          "input": {
+            "in_0": 14,
+            "in_1": 14
+          }
+        }
+      ]
+    }
+  }

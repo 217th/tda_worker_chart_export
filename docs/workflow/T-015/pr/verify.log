@@ -1,2 +1,12 @@
-# Verify log
 
+=== T-002 ===
+test_cli_run_local_not_implemented (test_scenarios_cli.TestScenarioCli.test_cli_run_local_not_implemented) ... ok
+test_cloud_event_direct_call_logs_and_raises (test_scenarios_cloud_event.TestScenarioCloudEvent.test_cloud_event_direct_call_logs_and_raises) ... ok
+test_config_invalid_accounts_json_is_fatal (test_scenarios_config.TestScenarioConfig.test_config_invalid_accounts_json_is_fatal) ... ok
+test_config_loads_ok (test_scenarios_config.TestScenarioConfig.test_config_loads_ok) ... ok
+test_json_log_event_format (test_scenarios_logging.TestScenarioLogging.test_json_log_event_format) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.351s
+
+OK

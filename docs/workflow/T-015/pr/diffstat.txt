@@ -1,6 +1,6 @@
  docs/workflow/QA_CYCLE.md                          | 46 +++++++++++
  docs/workflow/T-015/README.md                      |  5 +-
- docs/workflow/T-015/pr/diffstat.txt                |  1 +
+ docs/workflow/T-015/pr/diffstat.txt                | 18 +++++
  docs/workflow/T-015/pr/meta.json                   | 12 +++
  docs/workflow/T-015/pr/review.md                   | 21 +++++
  docs/workflow/T-015/pr/scenarios.md                | 93 ++++++++++++++++++++++
@@ -15,4 +15,4 @@
  .../T-002}/test_scenarios_cloud_event.py           | 10 ++-
  tests/{ => tasks/T-002}/test_scenarios_config.py   |  0
  tests/{ => tasks/T-002}/test_scenarios_logging.py  |  1 -
- 17 files changed, 437 insertions(+), 9 deletions(-)
+ 17 files changed, 454 insertions(+), 9 deletions(-)

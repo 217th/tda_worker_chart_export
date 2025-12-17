@@ -269,7 +269,7 @@
       "id": "T-015",
       "title": "QA harness + regression runner",
       "description": "Standardize per-task QA artifacts and enable full regression runs after each task.\\n\\nDeliverables:\\n- Standard directory for accumulated tests: tests/tasks/T-###/… (or equivalent), with guidance on updating older tests when behavior changes.\\n- Common runner script(s) for full bundle: scripts/qa/run_all.sh (and/or python runner), plus documented command(s).\\n- Templates for docs/workflow/T-###/pr/scenarios.md and docs/workflow/T-###/pr/verify_scenarios_report.md, including explicit marking of human-in-the-middle steps.\\n- Update developer workflow docs (within this repo) so the QA cycle is mandatory after each task: scenarios → manual steps → automated tests/scripts → verification report.\\n\\nAcceptance criteria:\\n- After any task, there is a single command that runs all accumulated tests (regression).\\n- Each task PR artifact contains scenarios + manual steps + verification report; missing pieces are treated as BLOCKED with explicit reason.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [
@@ -279,6 +279,16 @@
       ],
       "depends_on": [
         "T-001"
+      ],
+      "commit": {
+        "hash": "952b35e0c85f4aad3e2d50aa725221032a0290e1",
+        "message": "📝 T-015 Refresh PR metadata"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-015/pr."
+        }
       ]
     }
   ],
@@ -286,6 +296,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "84a312042b3f3f1f796fb76bc5073b0bf1a42d3e0d1deb146bcb7c6302d3724d"
+    "checksum": "cb30fddba9a06cbab90e30d2fb06349bae3609d05653edc812fbae0a05cabe98"
   }
 }

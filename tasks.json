@@ -254,12 +254,28 @@
           "body": "Commit 0bf5f9f7f98d contains the actual WBS refinements; PR artifacts were integrated separately."
         }
       ]
+    },
+    {
+      "id": "T-015",
+      "title": "QA harness + regression runner",
+      "description": "Standardize per-task QA artifacts and enable full regression runs after each task.\\n\\nDeliverables:\\n- Standard directory for accumulated tests: tests/tasks/T-###/… (or equivalent), with guidance on updating older tests when behavior changes.\\n- Common runner script(s) for full bundle: scripts/qa/run_all.sh (and/or python runner), plus documented command(s).\\n- Templates for docs/workflow/T-###/pr/scenarios.md and docs/workflow/T-###/pr/verify_scenarios_report.md, including explicit marking of human-in-the-middle steps.\\n- Update developer workflow docs (within this repo) so the QA cycle is mandatory after each task: scenarios → manual steps → automated tests/scripts → verification report.\\n\\nAcceptance criteria:\\n- After any task, there is a single command that runs all accumulated tests (regression).\\n- Each task PR artifact contains scenarios + manual steps + verification report; missing pieces are treated as BLOCKED with explicit reason.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "qa",
+        "workflow",
+        "worker-chart-export"
+      ],
+      "depends_on": [
+        "T-001"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "d3e2b6866b7b49db05bc63a6c395594d6aa377922fe8c3af23e36d8d415c1588"
+    "checksum": "2d3457552355ce3045433ebf8695e1c11c1b592dd03f1ae97209012b03aada3f"
   }
 }

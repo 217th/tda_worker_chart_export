@@ -12,10 +12,14 @@ from .errors import ConfigError
 ChartsApiMode = Literal["real", "mock", "record"]
 
 
+DEFAULT_CHART_IMG_DAILY_LIMIT = 44
+
+
 @dataclass(frozen=True, slots=True)
 class ChartImgAccount:
     id: str
     api_key: str
+    daily_limit: int = DEFAULT_CHART_IMG_DAILY_LIMIT
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,10 +111,16 @@ class WorkerConfig:
             if account_id in seen_ids:
                 raise ConfigError(f"Duplicate Chart-IMG account id: {account_id}")
             seen_ids.add(account_id)
-            accounts.append(ChartImgAccount(id=account_id, api_key=api_key))
+            daily_limit = item.get("dailyLimit", DEFAULT_CHART_IMG_DAILY_LIMIT)
+            if not isinstance(daily_limit, int) or daily_limit <= 0:
+                raise ConfigError(
+                    f"CHART_IMG_ACCOUNTS_JSON[{i}].dailyLimit must be a positive integer"
+                )
+            accounts.append(
+                ChartImgAccount(id=account_id, api_key=api_key, daily_limit=daily_limit)
+            )
 
         if not accounts:
             raise ConfigError("CHART_IMG_ACCOUNTS_JSON must contain at least 1 account")
 
         return accounts
-

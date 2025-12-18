@@ -120,5 +120,13 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `docs/workflow/T-006/README.md`
+- `docs/workflow/T-006/pr/diffstat.txt`
+- `docs/workflow/T-006/pr/meta.json`
+- `docs/workflow/T-006/pr/scenarios.md`
+- `docs/workflow/T-006/pr/verify.log`
+- `docs/workflow/T-006/pr/verify_scenarios_report.md`
+- `tests/tasks/T-006/test_usage.py`
+- `worker_chart_export/config.py`
+- `worker_chart_export/usage.py`
 <!-- END AUTO SUMMARY -->

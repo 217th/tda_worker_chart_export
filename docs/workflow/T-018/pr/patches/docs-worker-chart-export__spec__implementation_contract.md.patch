@@ -1,0 +1,105 @@
+diff --git a/docs-worker-chart-export/spec/implementation_contract.md b/docs-worker-chart-export/spec/implementation_contract.md
+index d3d643e..5331990 100644
+--- a/docs-worker-chart-export/spec/implementation_contract.md
++++ b/docs-worker-chart-export/spec/implementation_contract.md
+@@ -56,7 +56,7 @@
+ ## 4) Входные данные шага (flow_run)
+ Воркер читает:
+ - `runId` (из документа)
+-- `scope.symbol` (строка)
++- `scope.symbol` (базовый символ, например `BTCUSDT`)
+ - `steps[stepId].timeframe` (строка)
+ - `steps[stepId].inputs.minImages` (integer)
+ - `steps[stepId].inputs.requests[]` где каждый элемент имеет `chartTemplateId`
+@@ -65,6 +65,9 @@
+ Если входы некорректны/неполны:
+ - завершить шаг `FAILED`
+ - заполнить `steps[stepId].error.code = "VALIDATION_FAILED"`
++Минимальные проверки:
++- `scope.symbol` должен быть в базовом формате без слэша (например `BTCUSDT`);
++- у каждого `chartTemplateId` должна быть доступна валидная запись шаблона с `chartImgSymbolTemplate`.
+ 
+ ---
+ 
+@@ -90,7 +93,7 @@
+ ## 6) Формирование ChartsOutputsManifest
+ Воркер обязан сформировать manifest, соответствующий `charts_outputs_manifest.schema.json`:
+ - `schemaVersion`: integer >= 1
+-- `runId`, `stepId`, `createdAt`, `symbol`, `timeframe`
++- `runId`, `stepId`, `createdAt`, `symbol` (копия `scope.symbol`), `timeframe`
+ - `minImages` (копия inputs.minImages)
+ - `requested[]` (копия inputs.requests[])
+ - `items[]`: для каждого успешного PNG:
+@@ -255,7 +258,7 @@ Event trigger может быть at-least-once.
+   - реализация выбирает фикстуру по детерминированному ключу, зависящему как минимум от:
+     - провайдера (`chart-img`);
+     - endpoint’а (`advanced-chart-v2`);
+-    - `symbol` (`flow_run.scope.symbol`);
++    - `chartImgSymbol` (TradingView‑символ, вычисляемый из `chartImgSymbolTemplate` и `flow_run.scope.symbol`);
+     - `timeframe` (`steps[stepId].timeframe`);
+     - `chartTemplateId`;
+   - рекомендуемая структура директорий и нейминг фикстур:
+@@ -263,7 +266,7 @@ Event trigger может быть at-least-once.
+     - для CHART‑IMG Snapshot v2 Advanced Chart: `fixtures/chart-api/chart-img/advanced-chart-v2/`;
+     - для успешных ответов (`HTTP 200`, PNG): файлы вида  
+       `BINANCE_BTCUSDT__1h__price_psar_adi_v1.png`, где:
+-        - `BINANCE_BTCUSDT` — `symbol` c заменой `:` на `_`;
++        - `BINANCE_BTCUSDT` — `chartImgSymbol` с заменой `:` на `_`;
+         - `1h` — `timeframe`;
+         - `price_psar_adi_v1` — `chartTemplateId`;
+     - для ошибочных ответов (JSON‑ошибка): файлы вида  
+@@ -289,7 +292,7 @@ Event trigger может быть at-least-once.
+   - для всех `chartTemplateId`, фигурирующих:
+     - в эталонных шаблонах `docs-worker-chart-export/chart-templates/*.json`, используемых в MVP‑сценариях;
+     - в sample‑`flow_run`, автотестах и e2e‑сценариях, которые должны работать в режиме `mock`;
+-  - должен существовать хотя бы один успешный PNG‑fixture (для фиксированной пары `symbol`+`timeframe`, например `BINANCE:BTCUSDT` + `1h`);
++  - должен существовать хотя бы один успешный PNG‑fixture (для фиксированной пары `chartImgSymbol`+`timeframe`, например `BINANCE:BTCUSDT` + `1h`);
+   - по возможности должны существовать 1‑2 типовых error‑фикстуры (например, `429_LIMIT_EXCEEDED`, `500_SOMETHING_WENT_WRONG`) для проверки путей с `failures[]` и кодом `CHART_API_FAILED`;
+   - CI‑сценарии, использующие `CHARTS_API_MODE=mock`, не должны зависеть от реального Chart API и опираться только на зафиксированный в репозитории набор фикстур.
+ 
+@@ -326,7 +329,10 @@ Event trigger может быть at-least-once.
+   - остальные параметры (layout, индикаторы, стили, размеры и т.п.) получает из разрешённого `chartTemplateId`.
+ - Семантика `chartTemplateId` для API-запроса:
+   - каждый `chartTemplateId` указывает на JSON-шаблон с полем `request`, который описывает **форму и оформление** графика (theme, style, studies, overrides, drawings и т.п.);
+-  - `symbol` и `interval` берутся из `flow_run.scope.symbol` и `flow_run.steps[stepId].timeframe` и подставляются воркером в тело запроса, а не зашиваются в шаблон.
++  - шаблон **обязательно** содержит `chartImgSymbolTemplate` (строка, например `BINANCE:{symbol}` или `BYBIT:{symbol}.P`);
++  - `chartImgSymbol` вычисляется как `chartImgSymbolTemplate` с подстановкой `{symbol} = flow_run.scope.symbol` (например `BTCUSDT`);
++  - `symbol` в запросе = `chartImgSymbol`, а `interval` берётся из `flow_run.steps[stepId].timeframe` и подставляется воркером (не зашивается в шаблон);
++  - если `chartImgSymbolTemplate` отсутствует или `flow_run.scope.symbol` невалиден — запрос отмечается `VALIDATION_FAILED`.
+ - Ответ Chart-IMG v2 для Advanced Chart:
+   - при успехе (HTTP 200) — бинарное PNG-изображение;
+   - при ошибках (HTTP 4xx/5xx) — JSON с сообщением и/или списком ошибок согласно разделу **Errors / API v2 / v3** в [документации](https://doc.chart-img.com/#base-api-endpoint).
+@@ -337,7 +343,7 @@ Event trigger может быть at-least-once.
+ - Требования к реализации:
+   - воркер должен уметь варьировать аккаунты (API-ключи), а не использовать всегда один и тот же;
+   - по каждому аккаунту ведём **независимый** учёт запросов через **логи**:
+-    - каждое обращение к Chart-IMG логируется как отдельное событие (например, `chartsApi.request`) с полями: `accountId`, `runId`, `stepId`, `symbol`, `timeframe`/`interval`, `chartTemplateId`, `status`, `httpStatus`, `errorCode` (если есть);
++    - каждое обращение к Chart-IMG логируется как отдельное событие (например, `chartsApi.request`) с полями: `accountId`, `runId`, `stepId`, `symbol` (TradingView `chartImgSymbol`), `timeframe`/`interval`, `chartTemplateId`, `status`, `httpStatus`, `errorCode` (если есть);
+     - дальнейшая агрегация до метрик (суточный счётчик запросов на аккаунт, доля ошибок и т.п.) выполняется внешней системой логирования/мониторинга.
+   - при получении от Chart-IMG статуса 429 (`Too Many Requests`) или сообщений вида `"Limit Exceeded"` для конкретного ключа:
+     - воркер помечает аккаунт как **временно исчерпанный** (в рамках процесса) и больше не использует его до конца текущего окна (best-effort);
+@@ -389,7 +395,7 @@ Event trigger может быть at-least-once.
+ 
+ - Runtime source of truth для `chartTemplateId` — коллекция в Firestore (например, `chart_templates/{chartTemplateId}`), где:
+   - `chartTemplateId` = `id` документа;
+-  - документ содержит JSON-объект с полями `id`, `description`, `request` (по форме, описанной в `docs-worker-chart-export/chart-templates/README.md`).
++  - документ содержит JSON-объект с полями `id`, `description`, `chartImgSymbolTemplate`, `request` (по форме, описанной в `docs-worker-chart-export/chart-templates/README.md`).
+ - Репозиторий `docs-worker-chart-export/chart-templates/*.json` служит:
+   - эталонным набором шаблонов для MVP;
+   - исходником/seed’ом для загрузки в Firestore (ручной или автоматизированный импорт).
+@@ -399,13 +405,14 @@ Event trigger может быть at-least-once.
+ - Минимальные поля шаблона:
+   - `id`: строка, совпадает с `chartTemplateId` и именем файла/документа;
+   - `description`: человекочитаемое описание “вида” изображения; в MVP используется как `kind` в manifest;
++  - `chartImgSymbolTemplate`: TradingView‑шаблон символа (например `BINANCE:{symbol}` или `BYBIT:{symbol}.P`);
+   - `request`: фрагмент тела запроса к `POST /v2/tradingview/advanced-chart`, описывающий:
+     - `height`, `style`, `theme`, `scale`, `timezone` (по необходимости);
+     - `studies[]` (индикаторы) и их `input`/`override`;
+     - `drawings[]` и связанные `input`/`override`.
+ - Ограничения MVP:
+   - один `chartTemplateId` → **одна картинка** на один запуск шага (нет multiple PNG per template);
+-  - параметры рынка (`symbol`, `interval`) не зашиваются в шаблон, а приходят из `flow_run` (см. 12.3).
++  - параметры рынка (`symbol`, `interval`) не зашиваются в `request` шаблона; `symbol` вычисляется через `chartImgSymbolTemplate` + `flow_run.scope.symbol`, `interval` приходит из `flow_run` (см. 12.3).
+ 
+ ### 14.3 Отражение шаблонов в manifest и `minImages`
+ 

@@ -1,0 +1,19 @@
+diff --git a/docs-worker-chart-export/questions/open_questions.md b/docs-worker-chart-export/questions/open_questions.md
+index e531abb..4c29dc7 100644
+--- a/docs-worker-chart-export/questions/open_questions.md
++++ b/docs-worker-chart-export/questions/open_questions.md
+@@ -71,10 +71,10 @@
+   - `real` — реальные HTTP-запросы к Chart-IMG (прод-режим);
+   - `mock` — полностью отключённые HTTP-запросы и использование фикстур по детерминированному ключу;
+   - `record` — режим record/replay: при отсутствии фикстуры выполняется реальный вызов и ответ сохраняется как новая фикстура.
+-- Фикстуры для mock/record хранятся **в репозитории**:
+-  - корень: `docs-worker-chart-export/fixtures/chart-api/`, для CHART-IMG Snapshot v2 Advanced Chart — `fixtures/chart-api/chart-img/advanced-chart-v2/`;
+-  - ключ построен по провайдеру, endpoint’у, `symbol`, `timeframe`, `chartTemplateId`;
+-  - успешные ответы — PNG-файлы вида `BINANCE_BTCUSDT__1h__price_psar_adi_v1.png`, ошибочные — JSON-файлы вида `...__429_LIMIT_EXCEEDED.json` и т.п.
++- Фикстуры для mock/record хранятся **в репозитории**:
++  - корень: `docs-worker-chart-export/fixtures/chart-api/`, для CHART-IMG Snapshot v2 Advanced Chart — `fixtures/chart-api/chart-img/advanced-chart-v2/`;
++  - ключ построен по провайдеру, endpoint’у, `chartImgSymbol` (из `chartImgSymbolTemplate` + `scope.symbol`), `timeframe`, `chartTemplateId`;
++  - успешные ответы — PNG-файлы вида `BINANCE_BTCUSDT__1h__price_psar_adi_v1.png`, ошибочные — JSON-файлы вида `...__429_LIMIT_EXCEEDED.json` и т.п.
+ - Минимальный набор покрытия mock:
+   - для всех `chartTemplateId`, используемых в MVP/эталонных сценариях (sample `flow_run`, автотесты, e2e), есть хотя бы один успешный PNG-fixture и по возможности типовые error-fixture;
+   - при `CHARTS_API_MODE=mock` отсутствие нужной фикстуры даёт код ошибки шага `CHART_API_MOCK_MISSING` без реального HTTP-вызова.

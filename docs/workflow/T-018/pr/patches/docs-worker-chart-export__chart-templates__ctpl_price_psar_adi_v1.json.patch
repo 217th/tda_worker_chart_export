@@ -1,0 +1,20 @@
+diff --git a/docs-worker-chart-export/chart-templates/ctpl_price_psar_adi_v1.json b/docs-worker-chart-export/chart-templates/ctpl_price_psar_adi_v1.json
+index 24fd11a..b85f975 100644
+--- a/docs-worker-chart-export/chart-templates/ctpl_price_psar_adi_v1.json
++++ b/docs-worker-chart-export/chart-templates/ctpl_price_psar_adi_v1.json
+@@ -1,6 +1,7 @@
+ {
+     "id": "ctpl_price_psar_adi_v1",
+-    "description": "price + Parabolic SAR + Average Directional Index",
++    "description": "price + Parabolic SAR + Average Directional Index",
++    "chartImgSymbolTemplate": "BINANCE:{symbol}",
+     "request": {
+       "height": 600,
+       "style": "candle",
+@@ -27,4 +28,4 @@
+         }
+       ]
+     }
+-  }
+\ No newline at end of file
++  }

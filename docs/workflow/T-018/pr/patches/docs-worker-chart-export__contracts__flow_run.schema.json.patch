@@ -1,0 +1,18 @@
+diff --git a/docs-worker-chart-export/contracts/flow_run.schema.json b/docs-worker-chart-export/contracts/flow_run.schema.json
+index 159a4bc..16d9696 100644
+--- a/docs-worker-chart-export/contracts/flow_run.schema.json
++++ b/docs-worker-chart-export/contracts/flow_run.schema.json
+@@ -58,7 +58,7 @@
+         "symbol": {
+           "type": "string",
+           "minLength": 1,
+-          "description": "Например BTC/USDT."
++          "description": "Базовый торговый символ без слэша (например BTCUSDT)."
+         }
+       },
+       "additionalProperties": true
+@@ -348,4 +348,3 @@
+     }
+   }
+ }
+-

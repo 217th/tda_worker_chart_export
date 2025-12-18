@@ -1,0 +1,20 @@
+diff --git a/docs-worker-chart-export/chart-templates/ctpl_price_vpvr_obv_v1.json b/docs-worker-chart-export/chart-templates/ctpl_price_vpvr_obv_v1.json
+index b8ffbd9..5132afb 100644
+--- a/docs-worker-chart-export/chart-templates/ctpl_price_vpvr_obv_v1.json
++++ b/docs-worker-chart-export/chart-templates/ctpl_price_vpvr_obv_v1.json
+@@ -1,6 +1,7 @@
+ {
+     "id": "ctpl_price_vpvr_obv_v1",
+-    "description": "price + Volume Profile Visible Range + On Balance Volume",
++    "description": "price + Volume Profile Visible Range + On Balance Volume",
++    "chartImgSymbolTemplate": "BINANCE:{symbol}",
+     "request": {
+       "height": 600,
+       "style": "candle",
+@@ -32,4 +33,4 @@
+         }
+       ]
+     }
+-  }
+\ No newline at end of file
++  }

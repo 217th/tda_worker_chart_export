@@ -58,7 +58,7 @@
         "symbol": {
           "type": "string",
           "minLength": 1,
-          "description": "Например BTC/USDT."
+          "description": "Базовый торговый символ без слэша (например BTCUSDT)."
         }
       },
       "additionalProperties": true
@@ -348,4 +348,3 @@
     }
   }
 }
-

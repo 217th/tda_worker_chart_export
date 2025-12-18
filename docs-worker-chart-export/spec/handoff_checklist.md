@@ -29,7 +29,7 @@
 ### 5) Внешний Chart API (Chart-IMG)
 - [ ] Используется Chart-IMG API v2, TradingView Snapshot v2 Advanced Chart (`POST https://api.chart-img.com/v2/tradingview/advanced-chart` с JSON-body).
 - [ ] Аутентификация реализована через заголовок `x-api-key`, без утечек ключей в логи/артефакты.
-- [ ] Воркер не передаёт OHLCV в Chart API, а только `symbol`/`interval` и параметры из `chartTemplateId`; источник данных — Chart-IMG/TradingView.
+- [ ] Воркер не передаёт OHLCV в Chart API, а только `chartImgSymbol`/`interval` (где `chartImgSymbol` вычислен из `chartImgSymbolTemplate` + `scope.symbol`) и параметры из `chartTemplateId`; источник данных — Chart-IMG/TradingView.
 - [ ] Поддерживаются несколько API-ключей (аккаунтов), есть стратегия выбора аккаунта и логирование `accountId` для каждого вызова.
 - [ ] Ошибки Chart API классифицированы (retriable/non-retriable) и обрабатываются согласно `implementation_contract.md` (включая 429/Limit Exceeded и 5xx/timeout).
 

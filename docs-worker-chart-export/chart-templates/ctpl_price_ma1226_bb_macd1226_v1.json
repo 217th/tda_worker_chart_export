@@ -1,6 +1,7 @@
 {
     "id": "ctpl_price_ma1226_bb_macd1226_v1",
     "description": "price + MA12/26 + bollinger bands + MACD12/26",
+    "chartImgSymbolTemplate": "BINANCE:{symbol}",
     "request": {
       "height": 600,
       "style": "candle",

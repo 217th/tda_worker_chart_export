@@ -73,7 +73,7 @@
   - `record` — режим record/replay: при отсутствии фикстуры выполняется реальный вызов и ответ сохраняется как новая фикстура.
 - Фикстуры для mock/record хранятся **в репозитории**:
   - корень: `docs-worker-chart-export/fixtures/chart-api/`, для CHART-IMG Snapshot v2 Advanced Chart — `fixtures/chart-api/chart-img/advanced-chart-v2/`;
-  - ключ построен по провайдеру, endpoint’у, `symbol`, `timeframe`, `chartTemplateId`;
+  - ключ построен по провайдеру, endpoint’у, `chartImgSymbol` (из `chartImgSymbolTemplate` + `scope.symbol`), `timeframe`, `chartTemplateId`;
   - успешные ответы — PNG-файлы вида `BINANCE_BTCUSDT__1h__price_psar_adi_v1.png`, ошибочные — JSON-файлы вида `...__429_LIMIT_EXCEEDED.json` и т.п.
 - Минимальный набор покрытия mock:
   - для всех `chartTemplateId`, используемых в MVP/эталонных сценариях (sample `flow_run`, автотесты, e2e), есть хотя бы один успешный PNG-fixture и по возможности типовые error-fixture;

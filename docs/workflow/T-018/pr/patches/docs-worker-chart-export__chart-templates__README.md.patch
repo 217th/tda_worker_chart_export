@@ -1,0 +1,34 @@
+diff --git a/docs-worker-chart-export/chart-templates/README.md b/docs-worker-chart-export/chart-templates/README.md
+index 4f4ffa6..6615af6 100644
+--- a/docs-worker-chart-export/chart-templates/README.md
++++ b/docs-worker-chart-export/chart-templates/README.md
+@@ -23,6 +23,7 @@
+ - метаданные:
+   - `id`: строка, совпадает с именем файла без `.json` (например, `ctpl_price_ma1226_vol_v1`);
+   - `description`: человекочитаемое описание шаблона;
++  - `chartImgSymbolTemplate`: строка-шаблон TradingView‑символа (обязательное поле), например `BINANCE:{symbol}` или `BYBIT:{symbol}.P`;
+ - конфигурацию для Chart-IMG API v2 Advanced Chart:
+   - `request`: JSON-объект с полями тела запроса к `POST /v2/tradingview/advanced-chart`  
+     (см. локальную документацию `chart-img-docs/API Documentation.htm`, раздел **TradingView Snapshot v2 / Advanced Chart**).
+@@ -33,6 +34,7 @@
+ {
+   "id": "ctpl_example_v1",
+   "description": "Example chart template (dark, 1h baseline with volume + MACD).",
++  "chartImgSymbolTemplate": "BINANCE:{symbol}",
+   "request": {
+     "theme": "dark",
+     "interval": "1h",
+@@ -51,10 +53,10 @@
+ ### Динамические поля (symbol, timeframe)
+ 
+ - Поля `symbol`, `interval`, `timezone` и т.п. в реальном запросе к Chart-IMG будут формироваться воркером на основе:
+-  - `flow_run.scope.symbol`
++  - `flow_run.scope.symbol` (базовый символ, например `BTCUSDT`)
++  - `chartImgSymbolTemplate` из шаблона (обязателен): `{symbol}` подставляется в TradingView‑формат, например `BINANCE:{symbol}` → `BINANCE:BTCUSDT`
+   - `flow_run.steps[stepId].timeframe`
+   - глобальной конфигурации (например, дефолтный `timezone`)
+-- Шаблон здесь описывает **форму и оформление графика** (style, theme, studies, overrides, drawings и т.д.), а не конкретный тикер.
++- Шаблон описывает **форму и оформление графика** (style, theme, studies, overrides, drawings и т.д.) и **биржу/рынок** через `chartImgSymbolTemplate`.
+ 
+ Конкретная семантика `chartTemplateId` (что строго входит в шаблон, как работает версионирование и совместимость) описывается в отдельной спецификации и может эволюционировать. Эта директория служит “местом”, куда можно положить 5 (и более) темплейтов в виде JSON-файлов.
+-

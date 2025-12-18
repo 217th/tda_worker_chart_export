@@ -1,6 +1,7 @@
 {
     "id": "ctpl_price_ma1226_vol_v1",
     "description": "price + MA12/26 + Volume",
+    "chartImgSymbolTemplate": "BINANCE:{symbol}",
     "request": {
       "height": 600,
       "style": "candle",

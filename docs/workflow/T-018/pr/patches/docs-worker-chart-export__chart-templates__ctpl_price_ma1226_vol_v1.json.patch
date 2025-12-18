@@ -1,0 +1,20 @@
+diff --git a/docs-worker-chart-export/chart-templates/ctpl_price_ma1226_vol_v1.json b/docs-worker-chart-export/chart-templates/ctpl_price_ma1226_vol_v1.json
+index cda19a1..afbfe05 100644
+--- a/docs-worker-chart-export/chart-templates/ctpl_price_ma1226_vol_v1.json
++++ b/docs-worker-chart-export/chart-templates/ctpl_price_ma1226_vol_v1.json
+@@ -1,6 +1,7 @@
+ {
+     "id": "ctpl_price_ma1226_vol_v1",
+-    "description": "price + MA12/26 + Volume",
++    "description": "price + MA12/26 + Volume",
++    "chartImgSymbolTemplate": "BINANCE:{symbol}",
+     "request": {
+       "height": 600,
+       "style": "candle",
+@@ -23,4 +24,4 @@
+         }
+       ]
+     }
+-  }
+\ No newline at end of file
++  }

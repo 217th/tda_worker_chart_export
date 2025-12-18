@@ -1,6 +1,7 @@
 {
     "id": "ctpl_price_vpvr_obv_v1",
     "description": "price + Volume Profile Visible Range + On Balance Volume",
+    "chartImgSymbolTemplate": "BINANCE:{symbol}",
     "request": {
       "height": 600,
       "style": "candle",

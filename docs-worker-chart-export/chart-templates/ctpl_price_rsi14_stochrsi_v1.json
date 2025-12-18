@@ -1,6 +1,7 @@
 {
     "id": "ctpl_price_rsi14_stochrsi_v1",
     "description": "price + Relative Strength Index 14 + Stochastic RSI 14/3",
+    "chartImgSymbolTemplate": "BINANCE:{symbol}",
     "request": {
       "height": 600,
       "style": "candle",

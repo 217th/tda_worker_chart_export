@@ -27,18 +27,17 @@ PNG для каждого шаблона записываются в дирек�
 ```
 
 Где:
-- `generatedAt`: UTC, формат `YYYYMMDD-HHmmss`
-- `symbolSlug`: например `BTC-USDT` (без `/`)
+  - `generatedAt`: UTC, формат `YYYYMMDD-HHmmss`
+  - `symbolSlug`: например `BTCUSDT` (из `scope.symbol`)
 - `timeframe`: например `1M`, `1w`, `4h`
 - `chartTemplateId`: например `ctpl_price_ma1226_vol_v1`
 
 ### Пример
 
-`runs/20251215-102530_BTC-USDT_k3f7a/charts/1M/ctpl_price_ma1226_vol_v1/20251215-102612_BTC-USDT_1M_ctpl_price_ma1226_vol_v1.png`
+`runs/20251215-102530_BTCUSDT_k3f7a/charts/1M/ctpl_price_ma1226_vol_v1/20251215-102612_BTCUSDT_1M_ctpl_price_ma1226_vol_v1.png`
 
 ## Связь с manifest
 
 - В `ChartsOutputsManifest.items[*].generatedAt` хранится RFC3339 timestamp (UTC).
 - Для имени файла `generatedAt` берём тот же момент, но сериализуем в
   `YYYYMMDD-HHmmss` (без `:` и без timezone суффикса).
-

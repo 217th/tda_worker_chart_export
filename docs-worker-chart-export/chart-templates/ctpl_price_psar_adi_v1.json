@@ -1,6 +1,7 @@
 {
     "id": "ctpl_price_psar_adi_v1",
     "description": "price + Parabolic SAR + Average Directional Index",
+    "chartImgSymbolTemplate": "BINANCE:{symbol}",
     "request": {
       "height": 600,
       "style": "candle",

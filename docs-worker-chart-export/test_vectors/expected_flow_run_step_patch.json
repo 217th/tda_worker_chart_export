@@ -4,8 +4,7 @@
     "status": "SUCCEEDED",
     "finishedAt": "2025-12-15T10:26:15Z",
     "outputs": {
-      "outputsManifestGcsUri": "gs://ARTIFACTS_BUCKET/runs/20251215-102530_BTC-USDT_k3f7a/steps/charts:1M:ctpl_price_ma1226_vol_v1/charts/manifest.json"
+      "outputsManifestGcsUri": "gs://ARTIFACTS_BUCKET/runs/20251215-102530_BTCUSDT_k3f7a/steps/charts:1M:ctpl_price_ma1226_vol_v1/charts/manifest.json"
     }
   }
 }
-

@@ -1,0 +1,20 @@
+diff --git a/docs-worker-chart-export/chart-templates/ctpl_price_ma1226_bb_macd1226_v1.json b/docs-worker-chart-export/chart-templates/ctpl_price_ma1226_bb_macd1226_v1.json
+index 315bfc7..d0cd195 100644
+--- a/docs-worker-chart-export/chart-templates/ctpl_price_ma1226_bb_macd1226_v1.json
++++ b/docs-worker-chart-export/chart-templates/ctpl_price_ma1226_bb_macd1226_v1.json
+@@ -1,6 +1,7 @@
+ {
+     "id": "ctpl_price_ma1226_bb_macd1226_v1",
+-    "description": "price + MA12/26 + bollinger bands + MACD12/26",
++    "description": "price + MA12/26 + bollinger bands + MACD12/26",
++    "chartImgSymbolTemplate": "BINANCE:{symbol}",
+     "request": {
+       "height": 600,
+       "style": "candle",
+@@ -36,4 +37,4 @@
+         }
+       ]
+     }
+-  }
+\ No newline at end of file
++  }

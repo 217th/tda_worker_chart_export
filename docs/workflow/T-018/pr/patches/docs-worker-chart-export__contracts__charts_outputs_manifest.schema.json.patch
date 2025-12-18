@@ -1,0 +1,22 @@
+diff --git a/docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json b/docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json
+index f0dfda1..5ba09d0 100644
+--- a/docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json
++++ b/docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json
+@@ -16,7 +16,11 @@
+     "stepId": { "type": "string", "minLength": 1 },
+     "createdAt": { "type": "string", "format": "date-time" },
+     "timeframe": { "type": "string", "minLength": 1 },
+-    "symbol": { "type": "string", "minLength": 1 },
++    "symbol": {
++      "type": "string",
++      "minLength": 1,
++      "description": "Базовый торговый символ из `flow_run.scope.symbol` (например BTCUSDT)."
++    },
+     "minImages": {
+       "type": "integer",
+       "minimum": 0,
+@@ -103,4 +107,3 @@
+     }
+   }
+ }
+-

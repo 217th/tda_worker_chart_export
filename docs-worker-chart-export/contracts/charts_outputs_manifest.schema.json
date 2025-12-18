@@ -16,7 +16,11 @@
     "stepId": { "type": "string", "minLength": 1 },
     "createdAt": { "type": "string", "format": "date-time" },
     "timeframe": { "type": "string", "minLength": 1 },
-    "symbol": { "type": "string", "minLength": 1 },
+    "symbol": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Базовый торговый символ из `flow_run.scope.symbol` (например BTCUSDT)."
+    },
     "minImages": {
       "type": "integer",
       "minimum": 0,
@@ -103,4 +107,3 @@
     }
   }
 }
-

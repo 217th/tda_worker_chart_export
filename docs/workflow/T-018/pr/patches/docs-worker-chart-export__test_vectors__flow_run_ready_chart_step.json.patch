@@ -1,0 +1,23 @@
+diff --git a/docs-worker-chart-export/test_vectors/flow_run_ready_chart_step.json b/docs-worker-chart-export/test_vectors/flow_run_ready_chart_step.json
+index 507dad1..4b0d79e 100644
+--- a/docs-worker-chart-export/test_vectors/flow_run_ready_chart_step.json
++++ b/docs-worker-chart-export/test_vectors/flow_run_ready_chart_step.json
+@@ -1,11 +1,11 @@
+ {
+   "schemaVersion": 1,
+-  "runId": "20251215-102530_BTC-USDT_k3f7a",
++  "runId": "20251215-102530_BTCUSDT_k3f7a",
+   "flowKey": "scheduled_month_week_report_v1",
+   "status": "RUNNING",
+   "createdAt": "2025-12-15T10:25:30Z",
+   "trigger": { "type": "SCHEDULER", "source": "flow1-every-4h" },
+-  "scope": { "symbol": "BTC/USDT" },
++  "scope": { "symbol": "BTCUSDT" },
+   "steps": {
+     "charts:1M:ctpl_price_ma1226_vol_v1": {
+       "stepType": "CHART_EXPORT",
+@@ -21,4 +21,3 @@
+     }
+   }
+ }
+-

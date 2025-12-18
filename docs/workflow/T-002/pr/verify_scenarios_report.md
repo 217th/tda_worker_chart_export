@@ -127,11 +127,12 @@ PY
 ```
 
 **Result**
-- Exit code: `0` (exception is caught and printed)
+- Exit code: `0`
 - STDOUT:
-  - `NotImplementedError CloudEvent processing not implemented yet.`
+  - no exception output (non-Firestore events are ignored)
 - STDERR:
   - structured log line with `event="cloud_event_received"` and `eventId="evt1"`
+  - structured log line with `event="cloud_event_ignored"` and `reason="event_type_filtered"`
 
 ---
 
@@ -184,10 +185,10 @@ curl -X POST "http://127.0.0.1:$PORT" \
 
 **Observed result**
 - Socket creation succeeded (example): `bound ('127.0.0.1', 39585)`
-- `curl` result: `http=500` (expected at T-002 stage because handler raises `NotImplementedError`)
+- `curl` result: `http=2xx` (handler ignores non-Firestore events; no error)
 - Server log contained:
   - `{"event":"cloud_event_received","eventId":"evt1","eventType":"test.event",...}`
-  - stack trace ending with `NotImplementedError: CloudEvent processing not implemented yet.`
+  - no stack trace (non-Firestore events are ignored)
 
 **How to run it on a normal machine**
 - Ensure deps installed (venv + `pip install -r requirements.txt`).

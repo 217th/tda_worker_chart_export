@@ -1,4 +1,4 @@
-# Review: T-003
+# Review: T-005
 
 ## Checklist
 
@@ -9,12 +9,8 @@
 
 ## Handoff Notes
 
-Add short handoff notes here as list items so INTEGRATOR can append them to tasks.json on close.
-
-- CODER: ...
-- TESTER: ...
-- DOCS: ...
-- REVIEWER: Reviewed T-003 ingest/fast-filter. No blocking issues found.
+- REVIEWER: Reviewed T-005 template loading/build logic. No blocking issues found.
+- REVIEWER: Cross-cutting fixes included in this branch: CLI returns non-zero on FAILED; finalize uses transaction to avoid concurrent overwrite.
 
 ## Notes
 

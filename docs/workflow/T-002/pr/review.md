@@ -2,10 +2,10 @@
 
 ## Checklist
 
-- [ ] PR artifact complete (README/diffstat/verify.log)
-- [ ] No `tasks.json` changes in the task branch
-- [ ] Verify commands ran (or justified)
-- [ ] Scope matches task goal; risks understood
+- [x] PR artifact complete (README/diffstat/verify.log)
+- [x] No `tasks.json` changes in the task branch
+- [x] Verify commands ran (or justified)
+- [x] Scope matches task goal; risks understood
 
 ## Handoff Notes
 
@@ -14,8 +14,9 @@ Add short handoff notes here as list items so INTEGRATOR can append them to task
 - CODER: ...
 - TESTER: ...
 - DOCS: ...
-- REVIEWER: ...
+- REVIEWER: Reviewed T-002 bootstrap. No blocking issues. Note: CLI exit code on FAILED was inconsistent; fix implemented in T-005 branch.
+- REVIEWER: Structured logging/config bootstrap looks fine; no secrets in logs observed.
 
 ## Notes
 
-- ...
+- Reviewed on 2025-12-18

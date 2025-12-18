@@ -148,8 +148,9 @@ References:
    - `python - << 'PY'\nimport os\nos.environ[\"CHARTS_BUCKET\"] = \"gs://dummy-bucket\"\nos.environ[\"CHART_IMG_ACCOUNTS_JSON\"] = '[{\"id\":\"acc1\",\"apiKey\":\"SECRET1\"}]'\nfrom worker_chart_export.entrypoints.cloud_event import worker_chart_export\ntry:\n    worker_chart_export({\"id\":\"evt1\",\"type\":\"test.event\"})\nexcept Exception as e:\n    print(type(e).__name__, str(e))\nPY`
 
 **Expected result**
-- One structured log line is emitted with `event="cloud_event_received"` (JSON).
-- The printed exception is `NotImplementedError CloudEvent processing not implemented yet.` (or equivalent).
+- Structured log line is emitted with `event="cloud_event_received"` (JSON).
+- Structured log line is emitted with `event="cloud_event_ignored"` and `reason="event_type_filtered"`.
+- No exception is raised for non-Firestore update events.
 
 ### Manual test (optional: Functions Framework local server)
 
@@ -169,5 +170,5 @@ References:
    - `curl -X POST localhost:8080 -H 'Content-Type: application/cloudevents+json' -d '{\"specversion\":\"1.0\",\"type\":\"test.event\",\"source\":\"local\",\"id\":\"evt1\",\"data\":{}}'`
 
 **Expected result**
-- Server logs show `cloud_event_received`.
-- Request fails with 5xx (because handler raises `NotImplementedError`), which is expected at T-002 stage.
+- Server logs show `cloud_event_received` and `cloud_event_ignored` with `reason="event_type_filtered"`.
+- Request returns 2xx/204 (no crash); no work is executed for non-Firestore events.

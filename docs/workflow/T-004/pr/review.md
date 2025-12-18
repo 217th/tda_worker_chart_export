@@ -1,4 +1,4 @@
-# Review: T-003
+# Review: T-004
 
 ## Checklist
 
@@ -9,12 +9,8 @@
 
 ## Handoff Notes
 
-Add short handoff notes here as list items so INTEGRATOR can append them to tasks.json on close.
-
-- CODER: ...
-- TESTER: ...
-- DOCS: ...
-- REVIEWER: Reviewed T-003 ingest/fast-filter. No blocking issues found.
+- REVIEWER: Reviewed T-004 claim/finalize helpers.
+- REVIEWER: Added transactional finalize to avoid concurrent overwrite; claim logs transaction errors.
 
 ## Notes
 

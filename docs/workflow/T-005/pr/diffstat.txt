@@ -1,0 +1,23 @@
+ docs/workflow/T-002/pr/review.md                  |  13 +-
+ docs/workflow/T-002/pr/scenarios.md               |   9 +-
+ docs/workflow/T-002/pr/verify.log                 |   4 +-
+ docs/workflow/T-002/pr/verify_scenarios_report.md |   9 +-
+ docs/workflow/T-003/pr/review.md                  |  12 +-
+ docs/workflow/T-003/pr/verify_scenarios_report.md | 146 ++++++++-
+ docs/workflow/T-004/pr/review.md                  |  17 ++
+ docs/workflow/T-004/pr/verify.log                 |   2 -
+ docs/workflow/T-004/pr/verify_scenarios_report.md | 239 ++++++++++++++-
+ docs/workflow/T-005/README.md                     |   4 +-
+ docs/workflow/T-005/pr/diffstat.txt               |   5 +
+ docs/workflow/T-005/pr/meta.json                  |   6 +
+ docs/workflow/T-005/pr/review.md                  |  17 ++
+ docs/workflow/T-005/pr/scenarios.md               | 355 ++++++++++++++++++++++
+ docs/workflow/T-005/pr/verify.log                 |   2 +
+ docs/workflow/T-005/pr/verify_scenarios_report.md | 215 +++++++++++++
+ tests/tasks/T-002/test_scenarios_cli.py           |  37 +++
+ tests/tasks/T-002/test_scenarios_cloud_event.py   |   9 +-
+ tests/tasks/T-005/test_templates.py               | 206 +++++++++++++
+ worker_chart_export/cli.py                        |   3 +-
+ worker_chart_export/orchestration.py              |  79 +++--
+ worker_chart_export/templates.py                  | 237 +++++++++++++++
+ 22 files changed, 1551 insertions(+), 75 deletions(-)

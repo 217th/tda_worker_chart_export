@@ -25,13 +25,6 @@ class TestScenarioCloudEvent(unittest.TestCase):
 
         combined = (proc.stdout + proc.stderr).splitlines()
 
-        self.assertTrue(
-            any(
-                "NotImplementedError:CloudEvent processing not implemented yet." in ln
-                for ln in combined
-            )
-        )
-
         json_lines = []
         for line in combined:
             line = line.strip()
@@ -42,4 +35,4 @@ class TestScenarioCloudEvent(unittest.TestCase):
             except Exception:
                 continue
         self.assertTrue(any(item.get("event") == "cloud_event_received" for item in json_lines))
-
+        self.assertTrue(any(item.get("reason") == "event_type_filtered" for item in json_lines))

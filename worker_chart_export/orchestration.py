@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 from typing import Any, Mapping, Literal
 
 
@@ -96,7 +97,21 @@ def claim_step_transaction(*, client: Any, run_id: str, step_id: str) -> ClaimRe
         transaction.update(doc_ref, update)
         return ClaimResult(claimed=True, status=status)
 
-    return _run_transaction(client, _claim)
+    try:
+        return _run_transaction(client, _claim)
+    except Exception as exc:
+        logger = logging.getLogger("worker-chart-export")
+        logger.error(
+            {
+                "event": "firestore_claim_error",
+                "message": "firestore_claim_error",
+                "runId": run_id,
+                "stepId": step_id,
+                "error": type(exc).__name__,
+            },
+            exc_info=True,
+        )
+        raise
 
 
 def finalize_step(
@@ -110,32 +125,38 @@ def finalize_step(
     error: StepError | None = None,
 ) -> FinalizeResult:
     doc_ref = client.collection("flow_runs").document(run_id)
-    snapshot = doc_ref.get()
-    flow_run = snapshot.to_dict() if snapshot is not None else None
-    flow_run = flow_run if isinstance(flow_run, dict) else {}
-    current_status = _get_step_status(flow_run, step_id)
 
-    if current_status in ("SUCCEEDED", "FAILED"):
-        return FinalizeResult(updated=False, status=current_status, reason="already_final")
-    if current_status != "RUNNING":
-        return FinalizeResult(updated=False, status=current_status, reason="not_running")
+    def _finalize(transaction: Any) -> FinalizeResult:
+        snapshot = doc_ref.get(transaction=transaction)
+        flow_run = snapshot.to_dict() if snapshot is not None else None
+        flow_run = flow_run if isinstance(flow_run, dict) else {}
+        current_status = _get_step_status(flow_run, step_id)
 
-    if status == "SUCCEEDED":
-        if outputs_manifest_gcs_uri is None:
-            raise ValueError("outputs_manifest_gcs_uri is required for SUCCEEDED")
-        update = build_finalize_success_update(
-            step_id=step_id,
-            finished_at=finished_at,
-            outputs_manifest_gcs_uri=outputs_manifest_gcs_uri,
-        )
-    else:
-        if error is None:
-            raise ValueError("error is required for FAILED")
-        update = build_finalize_failure_update(
-            step_id=step_id,
-            finished_at=finished_at,
-            error=error,
-        )
+        if current_status in ("SUCCEEDED", "FAILED"):
+            return FinalizeResult(
+                updated=False, status=current_status, reason="already_final"
+            )
+        if current_status != "RUNNING":
+            return FinalizeResult(updated=False, status=current_status, reason="not_running")
 
-    doc_ref.update(update)
-    return FinalizeResult(updated=True, status=current_status)
+        if status == "SUCCEEDED":
+            if outputs_manifest_gcs_uri is None:
+                raise ValueError("outputs_manifest_gcs_uri is required for SUCCEEDED")
+            update = build_finalize_success_update(
+                step_id=step_id,
+                finished_at=finished_at,
+                outputs_manifest_gcs_uri=outputs_manifest_gcs_uri,
+            )
+        else:
+            if error is None:
+                raise ValueError("error is required for FAILED")
+            update = build_finalize_failure_update(
+                step_id=step_id,
+                finished_at=finished_at,
+                error=error,
+            )
+
+        transaction.update(doc_ref, update)
+        return FinalizeResult(updated=True, status=current_status)
+
+    return _run_transaction(client, _finalize)

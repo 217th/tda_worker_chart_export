@@ -63,7 +63,7 @@ def _run_local(args: argparse.Namespace) -> int:
         )
     elif args.output_summary == "text":
         print(f"CHART_EXPORT {result.status}: manifest={result.outputs_manifest_gcs_uri or '-'}")
-    return 0
+    return 0 if result.status == "SUCCEEDED" else 1
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -93,4 +93,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

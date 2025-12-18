@@ -135,5 +135,24 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `docs/workflow/T-002/pr/review.md`
+- `docs/workflow/T-002/pr/scenarios.md`
+- `docs/workflow/T-002/pr/verify.log`
+- `docs/workflow/T-002/pr/verify_scenarios_report.md`
+- `docs/workflow/T-003/pr/review.md`
+- `docs/workflow/T-003/pr/verify_scenarios_report.md`
+- `docs/workflow/T-004/pr/review.md`
+- `docs/workflow/T-004/pr/verify.log`
+- `docs/workflow/T-004/pr/verify_scenarios_report.md`
+- `docs/workflow/T-005/README.md`
+- `docs/workflow/T-005/pr/diffstat.txt`
+- `docs/workflow/T-005/pr/meta.json`
+- `docs/workflow/T-005/pr/review.md`
+- `docs/workflow/T-005/pr/scenarios.md`
+- `docs/workflow/T-005/pr/verify.log`
+- `docs/workflow/T-005/pr/verify_scenarios_report.md`
+- `tests/tasks/T-002/test_scenarios_cli.py`
+- `tests/tasks/T-002/test_scenarios_cloud_event.py`
+- `tests/tasks/T-005/test_templates.py`
+- `worker_chart_export/cli.py`
 <!-- END AUTO SUMMARY -->

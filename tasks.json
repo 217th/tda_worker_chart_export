@@ -196,8 +196,8 @@
         "integration"
       ],
       "depends_on": [
-        "T-010",
-        "T-017"
+        "T-017",
+        "T-020"
       ],
       "verify": [
         "python -m pytest -q"
@@ -373,12 +373,28 @@
       "depends_on": [
         "T-018"
       ]
+    },
+    {
+      "id": "T-020",
+      "title": "Integration test harness infra",
+      "description": "Define and document concrete Firestore/GCS emulators or fakes for integration tests, including CI launch steps, local setup, and limitations to mirror prod-like behavior without external network.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "tests",
+        "integration",
+        "infra"
+      ],
+      "depends_on": [
+        "T-017"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "14b027f03a5a499e3b0b0022d0abf3c72905e5df4b095e8317a2428428df73fc"
+    "checksum": "5b8782d47b9b29e1c20de34a196822b16c8e1e35696170083b4f8f67ab643d48"
   }
 }

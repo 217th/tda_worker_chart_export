@@ -20,8 +20,8 @@
 
 ### Firestore
 
-- **Firebase Local Emulator Suite (Firestore emulator)**: official emulator for Firestore, started via Firebase CLI; requires Node.js and Java; does not enforce production limits.
-- **In‑memory fake**: lightweight fake for tests (no external process); faster but lower fidelity (no real indexes/transactions).
+- **In‑memory fake (DECISION)**: lightweight fake for local debugging/testing (no external process). This is the chosen harness for T‑020.
+- Firebase Local Emulator Suite (Firestore emulator): not used for this task; would require Node.js + Java and still differs from prod.
 
 ### GCS
 
@@ -30,7 +30,7 @@
 
 ## Plan
 
-1) Choose Firestore harness (emulator vs fake) and document rationale and setup.
+1) Document Firestore harness decision (in‑memory fake) and rationale/limitations.
 2) Choose GCS harness (fake‑gcs‑server vs filesystem fake) and document rationale and setup.
 3) Document CI startup: commands, env vars, ports, health checks, teardown.
 4) Document limitations vs prod (auth, consistency, missing APIs).
@@ -38,19 +38,19 @@
 
 ## Planned Scenarios (TDD)
 
-### Scenario 1: Firestore harness selection + setup
+### Scenario 1: Firestore harness selection + setup (in‑memory fake)
 
 **Prerequisites**
 - None
 - Requires human-in-the-middle: NO
 
 **Steps**
-1) Decide Firestore harness (Firebase emulator vs in‑memory fake).
+1) Confirm in‑memory fake is the chosen harness.
 2) Document setup and teardown steps for local and CI.
-3) Record required tooling (e.g., Node/Java if emulator).
+3) Document limitations vs prod (no real indexes/transactions).
 
 **Expected result**
-- A concrete, reproducible Firestore setup is documented.
+- In‑memory Firestore fake is documented as the harness for debugging/testing with clear limitations.
 
 ### Scenario 2: GCS harness selection + setup
 

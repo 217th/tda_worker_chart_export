@@ -1,6 +1,16 @@
 {
-  "updated_at": "2025-12-18T14:43:39+00:00",
-  "head_sha": "fe6e8e903f24904da1928051e33e5b689ac28e3d",
+  "updated_at": "2025-12-18T14:47:40+00:00",
+  "head_sha": "e96fd1c64a667269dfa2cbfeda3c0c30aef8f254",
   "branch": "task/T-005/templates-requests",
-  "base_branch": "main"
+  "base_branch": "main",
+  "handoff_applied_digest": "6e51fa496285e97682cc21c7a0888015d87cd064ca2f35d9e9a94d82351c3e0e",
+  "handoff_applied_at": "2025-12-18T14:47:40+00:00",
+  "merged_at": "2025-12-18T14:47:40+00:00",
+  "merge_commit": "bfa56b86a5e88924f6d97c27d129cd2bbf07ac9a",
+  "closed_at": "2025-12-18T14:47:40+00:00",
+  "close_commit": "bfa56b86a5e88924f6d97c27d129cd2bbf07ac9a",
+  "status": "MERGED",
+  "merge_strategy": "squash",
+  "last_verified_sha": "e96fd1c64a667269dfa2cbfeda3c0c30aef8f254",
+  "last_verified_at": "2025-12-18T14:47:40+00:00"
 }

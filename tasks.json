@@ -106,7 +106,7 @@
       "id": "T-005",
       "title": "Load chart_templates + build Chart-IMG request",
       "description": "Implement chart template resolution and request building:\n- Read runtime templates from Firestore chart_templates/{chartTemplateId}\n- Use template.request as base, inject symbol/interval from flow_run (scope.symbol + step.timeframe)\n- Set manifest.items[*].kind = template.description (human-readable)\n- If template missing/invalid: record failure in manifest and evaluate step via minImages.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [
@@ -116,6 +116,24 @@
       ],
       "depends_on": [
         "T-004"
+      ],
+      "commit": {
+        "hash": "bfa56b86a5e88924f6d97c27d129cd2bbf07ac9a",
+        "message": "🧾 T-005 refresh PR metadata"
+      },
+      "comments": [
+        {
+          "author": "REVIEWER",
+          "body": "Reviewed T-005 template loading/build logic. No blocking issues found."
+        },
+        {
+          "author": "REVIEWER",
+          "body": "Cross-cutting fixes included in this branch: CLI returns non-zero on FAILED; finalize uses transaction to avoid concurrent overwrite."
+        },
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-005/pr."
+        }
       ]
     },
     {
@@ -415,6 +433,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "ee02c89faa7d4f9920c19ea37facdbfe27de1eaf32391a62c2d172b9e47d83aa"
+    "checksum": "c99e7d9862d7827727355e905c90053c9fbe7f01da64e564360e3c8acc7e1384"
   }
 }

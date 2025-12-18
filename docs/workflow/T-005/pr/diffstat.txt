@@ -7,8 +7,8 @@
  docs/workflow/T-004/pr/review.md                  |  17 ++
  docs/workflow/T-004/pr/verify.log                 |   2 -
  docs/workflow/T-004/pr/verify_scenarios_report.md | 239 ++++++++++++++-
- docs/workflow/T-005/README.md                     |   4 +-
- docs/workflow/T-005/pr/diffstat.txt               |   5 +
+ docs/workflow/T-005/README.md                     |  21 +-
+ docs/workflow/T-005/pr/diffstat.txt               |  23 ++
  docs/workflow/T-005/pr/meta.json                  |   6 +
  docs/workflow/T-005/pr/review.md                  |  17 ++
  docs/workflow/T-005/pr/scenarios.md               | 355 ++++++++++++++++++++++
@@ -20,4 +20,4 @@
  worker_chart_export/cli.py                        |   3 +-
  worker_chart_export/orchestration.py              |  79 +++--
  worker_chart_export/templates.py                  | 237 +++++++++++++++
- 22 files changed, 1551 insertions(+), 75 deletions(-)
+ 22 files changed, 1586 insertions(+), 75 deletions(-)

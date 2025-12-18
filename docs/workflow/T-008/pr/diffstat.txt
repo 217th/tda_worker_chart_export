@@ -1,1 +1,11 @@
-
+ docs/workflow/T-008/README.md                     |   2 +-
+ docs/workflow/T-008/pr/diffstat.txt               |   1 +
+ docs/workflow/T-008/pr/meta.json                  |  12 ++
+ docs/workflow/T-008/pr/review.md                  |  21 +++
+ docs/workflow/T-008/pr/scenarios.md               | 192 +++++++++++++++++++
+ docs/workflow/T-008/pr/verify.log                 |  13 ++
+ docs/workflow/T-008/pr/verify_scenarios_report.md | 134 +++++++++++++
+ requirements.txt                                  |   3 +
+ tests/tasks/T-008/test_gcs_artifacts.py           | 168 +++++++++++++++++
+ worker_chart_export/gcs_artifacts.py              | 219 ++++++++++++++++++++++
+ 10 files changed, 764 insertions(+), 1 deletion(-)

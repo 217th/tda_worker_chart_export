@@ -11,3 +11,5 @@ test_upload_pngs_partial_failure (test_gcs_artifacts.TestGcsArtifacts.test_uploa
 Ran 6 tests in 0.002s
 
 OK
+[2025-12-18T17:24:00+00:00] ℹ️ no verify commands configured
+

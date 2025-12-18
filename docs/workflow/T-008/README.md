@@ -126,5 +126,14 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `docs/workflow/T-008/README.md`
+- `docs/workflow/T-008/pr/diffstat.txt`
+- `docs/workflow/T-008/pr/meta.json`
+- `docs/workflow/T-008/pr/review.md`
+- `docs/workflow/T-008/pr/scenarios.md`
+- `docs/workflow/T-008/pr/verify.log`
+- `docs/workflow/T-008/pr/verify_scenarios_report.md`
+- `requirements.txt`
+- `tests/tasks/T-008/test_gcs_artifacts.py`
+- `worker_chart_export/gcs_artifacts.py`
 <!-- END AUTO SUMMARY -->

@@ -140,7 +140,7 @@
       "id": "T-006",
       "title": "Account selection + usage accounting (chart_img_accounts_usage)",
       "description": "Implement per-account daily limit tracking and selection using Firestore chart_img_accounts_usage/{accountId}:\n- Use the already-parsed accounts list from CHART_IMG_ACCOUNTS_JSON (parsing/validation is owned by T-002)\n- In transaction: reset window if needed (UTC day), check dailyLimit, increment usageToday before HTTP call\n- On 429/Limit Exceeded: mark account exhausted for window and retry with another account (bounded)\n- If all accounts exhausted: record failures with CHART_API_LIMIT_EXCEEDED and emit structured ERROR event listing exhausted accountIds.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [
@@ -151,6 +151,16 @@
       ],
       "depends_on": [
         "T-004"
+      ],
+      "commit": {
+        "hash": "f25c8d64ce0c635495088b505f43cf82a950e7b5",
+        "message": "🛠️ T-006 Usage accounting and selection"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-006/pr."
+        }
       ]
     },
     {
@@ -433,6 +443,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "c99e7d9862d7827727355e905c90053c9fbe7f01da64e564360e3c8acc7e1384"
+    "checksum": "0565096cfa4e9cf9deb1139892a3f4a2a2d9c56170a8d43ee0d1addbc1fdcf5d"
   }
 }

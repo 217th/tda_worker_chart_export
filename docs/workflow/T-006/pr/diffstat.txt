@@ -1,5 +1,5 @@
  docs/workflow/T-006/README.md                     |  10 +-
- docs/workflow/T-006/pr/diffstat.txt               |   8 +
+ docs/workflow/T-006/pr/diffstat.txt               |  10 +
  docs/workflow/T-006/pr/meta.json                  |   6 +
  docs/workflow/T-006/pr/scenarios.md               | 398 ++++++++++++++++++++++
  docs/workflow/T-006/pr/verify.log                 |   2 +
@@ -7,4 +7,4 @@
  tests/tasks/T-006/test_usage.py                   | 236 +++++++++++++
  worker_chart_export/config.py                     |  14 +-
  worker_chart_export/usage.py                      | 174 ++++++++++
- 9 files changed, 1193 insertions(+), 3 deletions(-)
+ 9 files changed, 1195 insertions(+), 3 deletions(-)

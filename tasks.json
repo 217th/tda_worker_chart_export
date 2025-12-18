@@ -322,12 +322,43 @@
       "depends_on": [
         "T-010"
       ]
+    },
+    {
+      "id": "T-018",
+      "title": "Update symbol mapping: chartImgSymbolTemplate",
+      "description": "Update specs, templates, and test vectors so flow_run.scope.symbol is base symbol (e.g. BTCUSDT) and Chart-IMG symbol is derived via chartImgSymbolTemplate in chart-templates. Produce per-file patch artifacts for external sync.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "docs",
+        "spec",
+        "worker-chart-export"
+      ],
+      "depends_on": [
+        "T-001"
+      ]
+    },
+    {
+      "id": "T-019",
+      "title": "Future: architecture alignment for exchanges/symbols",
+      "description": "Backlog: revisit exchange selection, symbol naming, and mapping architecture for chart generation beyond the simple template-based mapping.",
+      "status": "TODO",
+      "priority": "low",
+      "owner": "human",
+      "tags": [
+        "backlog",
+        "architecture"
+      ],
+      "depends_on": [
+        "T-018"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "d9e49c3bacf8648ec28207e389d912d808353db648e60519114aeacb052b187b"
+    "checksum": "d305a57365bcf8561fb39dc221e72c79578cc4df42e6b53145736a6ee88df222"
   }
 }

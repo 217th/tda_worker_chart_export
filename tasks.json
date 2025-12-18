@@ -327,7 +327,7 @@
       "id": "T-018",
       "title": "Update symbol mapping: chartImgSymbolTemplate",
       "description": "Update specs, templates, and test vectors so flow_run.scope.symbol is base symbol (e.g. BTCUSDT) and Chart-IMG symbol is derived via chartImgSymbolTemplate in chart-templates. Produce per-file patch artifacts for external sync.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [
@@ -337,6 +337,16 @@
       ],
       "depends_on": [
         "T-001"
+      ],
+      "commit": {
+        "hash": "a2de7aa20ddf477f9a14337b69f448297b8319d4",
+        "message": "📝 T-018 Define chartImgSymbolTemplate mapping"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-018/pr."
+        }
       ]
     },
     {
@@ -359,6 +369,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "d305a57365bcf8561fb39dc221e72c79578cc4df42e6b53145736a6ee88df222"
+    "checksum": "7a2181460ffe53615c76689bdf320c308e9a594e18cd87b84b5aada38541f9b4"
   }
 }

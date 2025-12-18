@@ -92,5 +92,24 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `docs-worker-chart-export/chart-templates/README.md`
+- `docs-worker-chart-export/chart-templates/ctpl_price_ma1226_bb_macd1226_v1.json`
+- `docs-worker-chart-export/chart-templates/ctpl_price_ma1226_vol_v1.json`
+- `docs-worker-chart-export/chart-templates/ctpl_price_psar_adi_v1.json`
+- `docs-worker-chart-export/chart-templates/ctpl_price_rsi14_stochrsi_v1.json`
+- `docs-worker-chart-export/chart-templates/ctpl_price_vpvr_obv_v1.json`
+- `docs-worker-chart-export/checklists/worker_chart_export.md`
+- `docs-worker-chart-export/contracts/charts_images_naming.md`
+- `docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json`
+- `docs-worker-chart-export/contracts/flow_run.schema.json`
+- `docs-worker-chart-export/questions/open_questions.md`
+- `docs-worker-chart-export/spec/handoff_checklist.md`
+- `docs-worker-chart-export/spec/implementation_contract.md`
+- `docs-worker-chart-export/test_vectors/expected_flow_run_step_patch.json`
+- `docs-worker-chart-export/test_vectors/expected_manifest.json`
+- `docs-worker-chart-export/test_vectors/flow_run_ready_chart_step.json`
+- `docs/workflow/T-018/pr/diffstat.txt`
+- `docs/workflow/T-018/pr/meta.json`
+- `docs/workflow/T-018/pr/patches/docs-worker-chart-export__chart-templates__README.md.patch`
+- `docs/workflow/T-018/pr/patches/docs-worker-chart-export__chart-templates__ctpl_price_ma1226_bb_macd1226_v1.json.patch`
 <!-- END AUTO SUMMARY -->

@@ -494,7 +494,7 @@
       "id": "T-021",
       "title": "Project README (root)",
       "description": "Add comprehensive root README summarizing worker_chart_export service: purpose, architecture, configs, storage, testing, deploy, observability, known gaps; initial version based on current specs and tasks.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "human",
       "tags": [],
@@ -505,14 +505,22 @@
         {
           "author": "ORCHESTRATOR",
           "body": "Handing to REVIEWER: please review README.md (gs:// canonical, Etc/UTC default, chartImgSymbolTemplate required, Deploy/Observability outlined), branch task/T-021/project-readme, commit 2facbb33ea4a."
+        },
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: docs-only integration of root README; no runtime changes."
         }
-      ]
+      ],
+      "commit": {
+        "hash": "1779f72422e848732d05dfa469520b173d016bd2",
+        "message": "📝 T-021 integrate root README"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "7ad5e2cd91414cccb68cd89ce63b806c4e09362e4745b09c919e532d96071188"
+    "checksum": "5662fab81bba7631699377707a6cbb6c1a20f483f7a2c25119aeeed2930bd4be"
   }
 }

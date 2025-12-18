@@ -489,12 +489,24 @@
       "depends_on": [
         "T-017"
       ]
+    },
+    {
+      "id": "T-021",
+      "title": "Project README (root)",
+      "description": "Add comprehensive root README summarizing worker_chart_export service: purpose, architecture, configs, storage, testing, deploy, observability, known gaps; initial version based on current specs and tasks.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "human",
+      "tags": [],
+      "depends_on": [
+        "T-016"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "50f241ac23571af855b854eabc609c05cfd2a7be36805952b95a1d439cd6f70c"
+    "checksum": "036e067d960835cd317d4d265dadea5f3864312d6e5a5f6bb36aadd1a5b3d987"
   }
 }

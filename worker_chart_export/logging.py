@@ -38,5 +38,6 @@ def configure_logging(*, level: str | None = None) -> None:
 
 
 def log_event(logger: logging.Logger, event: str, **fields: Any) -> None:
-    logger.info({"event": event, **fields})
-
+    payload = {"event": event, **fields}
+    payload.setdefault("message", event)
+    logger.info(payload)

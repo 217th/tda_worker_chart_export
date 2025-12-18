@@ -1,0 +1,23 @@
+
+=== T-003 ===
+test_handler_ignores_invalid_steps_shape (test_ingest.TestIngest) ... {"event":"cloud_event_received","service":"worker-chart-export","env":null,"eventId":"evt-invalid","eventType":"google.cloud.firestore.document.v1.updated","subject":"projects/p/databases/(default)/documents/flow_runs/run-1","message":"cloud_event_received","severity":"INFO","logger":"worker-chart-export","time":"2025-12-18T10:38:28.814095+00:00"}
+{"event":"cloud_event_ignored","service":"worker-chart-export","env":null,"eventId":"evt-invalid","eventType":"google.cloud.firestore.document.v1.updated","subject":"projects/p/databases/(default)/documents/flow_runs/run-1","runId":"run-1","reason":"invalid_steps","message":"cloud_event_ignored","severity":"INFO","logger":"worker-chart-export","time":"2025-12-18T10:38:28.814263+00:00"}
+ok
+test_handler_ignores_non_update_event (test_ingest.TestIngest) ... {"event":"cloud_event_received","service":"worker-chart-export","env":null,"eventId":"evt","eventType":"google.cloud.firestore.document.v1.created","subject":"projects/p/databases/(default)/documents/flow_runs/run-1","message":"cloud_event_received","severity":"INFO","logger":"worker-chart-export","time":"2025-12-18T10:38:28.814407+00:00"}
+{"event":"cloud_event_ignored","service":"worker-chart-export","env":null,"eventId":"evt","eventType":"google.cloud.firestore.document.v1.created","subject":"projects/p/databases/(default)/documents/flow_runs/run-1","reason":"event_type_filtered","message":"cloud_event_ignored","severity":"INFO","logger":"worker-chart-export","time":"2025-12-18T10:38:28.814534+00:00"}
+ok
+test_handler_ignores_other_collection (test_ingest.TestIngest) ... {"event":"cloud_event_received","service":"worker-chart-export","env":null,"eventId":"evt","eventType":"google.cloud.firestore.document.v1.updated","subject":"projects/p/databases/(default)/documents/other/123","message":"cloud_event_received","severity":"INFO","logger":"worker-chart-export","time":"2025-12-18T10:38:28.814734+00:00"}
+{"event":"cloud_event_ignored","service":"worker-chart-export","env":null,"eventId":"evt","eventType":"google.cloud.firestore.document.v1.updated","subject":"projects/p/databases/(default)/documents/other/123","reason":"event_filtered","message":"cloud_event_ignored","severity":"INFO","logger":"worker-chart-export","time":"2025-12-18T10:38:28.814801+00:00"}
+ok
+test_handler_noop_when_no_ready_step (test_ingest.TestIngest) ... {"event":"cloud_event_received","service":"worker-chart-export","env":null,"eventId":"evt","eventType":"google.cloud.firestore.document.v1.updated","subject":"projects/p/databases/(default)/documents/flow_runs/run-1","message":"cloud_event_received","severity":"INFO","logger":"worker-chart-export","time":"2025-12-18T10:38:28.814999+00:00"}
+{"event":"cloud_event_noop","service":"worker-chart-export","env":null,"eventId":"evt","eventType":"google.cloud.firestore.document.v1.updated","subject":"projects/p/databases/(default)/documents/flow_runs/run-1","runId":"run-1","reason":"no_ready_step","message":"cloud_event_noop","severity":"INFO","logger":"worker-chart-export","time":"2025-12-18T10:38:28.815088+00:00"}
+ok
+test_parse_flow_run_event_extracts_run_id_and_steps (test_ingest.TestIngest) ... ok
+test_parse_flow_run_event_filters_non_flow_runs (test_ingest.TestIngest) ... ok
+test_pick_ready_step_ignores_invalid_steps (test_ingest.TestIngest) ... ok
+test_pick_ready_step_is_deterministic (test_ingest.TestIngest) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.002s
+
+OK

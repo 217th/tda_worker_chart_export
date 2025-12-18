@@ -25,13 +25,16 @@
 
 **Prerequisites**
 - A representative Eventarc Firestore **update** CloudEvent payload for `flow_runs/{runId}` (document name/path + fields).
+- Payload includes `subject` and/or `data.value.name` with full doc path:
+  `projects/<project>/databases/(default)/documents/flow_runs/{runId}`.
 - Requires human-in-the-middle: NO
 
 **Steps**
 1) Feed the CloudEvent payload into the handler.
 
 **Expected result**
-- The handler recognizes the event as `flow_runs/{runId}` update, extracts `runId`, and reads `steps` from the document fields.
+- The handler recognizes the event as `flow_runs/{runId}` **update**, extracts `runId` from the doc path, and reads `steps` from the document fields.
+- INFO log includes `service`, `env`, `runId`, `eventId`, `severity`, `message`.
 
 ### Scenario 2: No READY CHART_EXPORT step → no-op (explicit handler result + log fields)
 
@@ -43,8 +46,8 @@
 1) Send a CloudEvent for the flow_run update to the handler.
 
 **Expected result**
-- Handler returns a successful response (no exception; no retry trigger).
-- INFO log entry includes required fields (at minimum: `service`, `env`, `runId`, `eventId`, `severity`, `reason=no_ready_step`).
+- Handler returns a successful response (200/OK, no exception; no retry trigger).
+- INFO log entry includes required fields (at minimum: `service`, `env`, `runId`, `eventId`, `severity`, `message`, `reason=no_ready_step`).
 
 ### Scenario 3: Multiple READY steps → deterministic pick
 
@@ -68,7 +71,7 @@
 1) Send the same CloudEvent again.
 
 **Expected result**
-- The handler does not attempt work again; it exits via claim no-op with an INFO log.
+- The handler does not attempt work again; it exits via no-op with an INFO log including `reason=no_ready_step` (or equivalent).
 
 ### Scenario 5: Step already RUNNING/SUCCEEDED/FAILED → no-op
 
@@ -85,14 +88,14 @@
 ### Scenario 6: Non-target event or malformed document → ignore (noise filter)
 
 **Prerequisites**
-- Firestore **create/delete** events, events for other collections, or `flow_run` documents with invalid `steps` (not a map/object, missing `status` or `stepType`).
+- Firestore **create/delete** events (non-update), events for other collections, or `flow_run` documents with invalid `steps` (not a map/object, missing `status` or `stepType`).
 - Requires human-in-the-middle: NO
 
 **Steps**
 1) Send the event to the handler.
 
 **Expected result**
-- Handler ignores the event (no claim, no errors).
+- Handler ignores the event (no claim, no errors), returns 200/OK, and logs a structured INFO with `reason=event_filtered` or `reason=invalid_steps`.
 
 ## Risks
 
@@ -109,5 +112,15 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `docs/workflow/T-003/README.md`
+- `docs/workflow/T-003/pr/diffstat.txt`
+- `docs/workflow/T-003/pr/meta.json`
+- `docs/workflow/T-003/pr/review.md`
+- `docs/workflow/T-003/pr/scenarios.md`
+- `docs/workflow/T-003/pr/verify.log`
+- `docs/workflow/T-003/pr/verify_scenarios_report.md`
+- `tests/tasks/T-003/test_ingest.py`
+- `worker_chart_export/entrypoints/cloud_event.py`
+- `worker_chart_export/ingest.py`
+- `worker_chart_export/logging.py`
 <!-- END AUTO SUMMARY -->

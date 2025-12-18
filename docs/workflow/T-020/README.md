@@ -25,13 +25,13 @@
 
 ### GCS
 
-- **fake‑gcs‑server**: community HTTP server emulating GCS API; usable in CI/local.
-- **Filesystem‑backed fake**: simple local file storage adapter (no HTTP), fastest but least faithful.
+- **Filesystem‑backed fake (DECISION)**: simple local file storage adapter (no HTTP), fastest; chosen for T‑020.
+- fake‑gcs‑server: not used for this task; closer to prod but heavier to run in CI.
 
 ## Plan
 
 1) Document Firestore harness decision (in‑memory fake) and rationale/limitations.
-2) Choose GCS harness (fake‑gcs‑server vs filesystem fake) and document rationale and setup.
+2) Document GCS harness decision (filesystem fake) and rationale/limitations.
 3) Document CI startup: commands, env vars, ports, health checks, teardown.
 4) Document limitations vs prod (auth, consistency, missing APIs).
 5) Update `docs/workflow/T-011/README.md` to reference the chosen harness.
@@ -52,18 +52,18 @@
 **Expected result**
 - In‑memory Firestore fake is documented as the harness for debugging/testing with clear limitations.
 
-### Scenario 2: GCS harness selection + setup
+### Scenario 2: GCS harness selection + setup (filesystem fake)
 
 **Prerequisites**
 - None
 - Requires human-in-the-middle: NO
 
 **Steps**
-1) Decide GCS harness (fake‑gcs‑server vs filesystem-backed fake).
+1) Confirm filesystem-backed fake is the chosen harness.
 2) Document setup and teardown steps for local and CI.
 
 **Expected result**
-- A concrete, reproducible GCS setup is documented.
+- Filesystem-backed GCS fake is documented as the harness for debugging/testing with clear limitations.
 
 ### Scenario 3: CI startup instructions
 

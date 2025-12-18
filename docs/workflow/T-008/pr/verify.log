@@ -1,0 +1,13 @@
+
+=== T-008 ===
+test_manifest_does_not_include_signed_fields (test_gcs_artifacts.TestGcsArtifacts.test_manifest_does_not_include_signed_fields) ... ok
+test_manifest_overwrite_path_stable (test_gcs_artifacts.TestGcsArtifacts.test_manifest_overwrite_path_stable) ... ok
+test_manifest_validation_failure (test_gcs_artifacts.TestGcsArtifacts.test_manifest_validation_failure) ... ok
+test_manifest_write_failure (test_gcs_artifacts.TestGcsArtifacts.test_manifest_write_failure) ... ok
+test_png_path_and_gs_uri (test_gcs_artifacts.TestGcsArtifacts.test_png_path_and_gs_uri) ... ok
+test_upload_pngs_partial_failure (test_gcs_artifacts.TestGcsArtifacts.test_upload_pngs_partial_failure) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.002s
+
+OK

@@ -32,7 +32,7 @@
 2) Write manifest to the deterministic path.
 
 **Expected result**
-- PNG stored at `gs://<bucket>/runs/<runId>/steps/<stepId>/charts/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`.
+- PNG stored at `gs://<bucket>/runs/<runId>/charts/<timeframe>/<chartTemplateId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`.
 - Manifest stored at `gs://<bucket>/runs/<runId>/steps/<stepId>/charts/manifest.json`.
 - Manifest validates against the JSON schema.
 

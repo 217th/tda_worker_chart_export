@@ -16,3 +16,6 @@ google-cloud-storage
 
 # HTTP client for Chart-IMG integration
 httpx
+
+# JSON Schema validation
+jsonschema

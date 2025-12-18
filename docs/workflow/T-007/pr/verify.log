@@ -16,3 +16,5 @@ test_max_attempts_across_accounts (test_chart_img_client.TestChartImgRetries.tes
 Ran 11 tests in 0.005s
 
 OK
+[2025-12-18T16:29:13+00:00] ℹ️ no verify commands configured
+

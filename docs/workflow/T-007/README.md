@@ -186,6 +186,7 @@
 - `docs-worker-chart-export/chart-templates/ctpl_price_psar_adi_v1.json`
 - `docs-worker-chart-export/chart-templates/ctpl_price_rsi14_stochrsi_v1.json`
 - `docs-worker-chart-export/chart-templates/ctpl_price_vpvr_obv_v1.json`
+- `docs/workflow/T-007/README.md`
 - `docs/workflow/T-007/pr/diffstat.txt`
 - `docs/workflow/T-007/pr/meta.json`
 - `docs/workflow/T-007/pr/review.md`

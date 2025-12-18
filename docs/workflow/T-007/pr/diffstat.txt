@@ -3,7 +3,8 @@
  .../chart-templates/ctpl_price_psar_adi_v1.json    |  56 +--
  .../ctpl_price_rsi14_stochrsi_v1.json              |  50 +-
  .../chart-templates/ctpl_price_vpvr_obv_v1.json    |  66 +--
- docs/workflow/T-007/pr/diffstat.txt                |   1 +
+ docs/workflow/T-007/README.md                      |  17 +-
+ docs/workflow/T-007/pr/diffstat.txt                |  17 +
  docs/workflow/T-007/pr/meta.json                   |  12 +
  docs/workflow/T-007/pr/review.md                   |  21 +
  docs/workflow/T-007/pr/scenarios.md                | 296 ++++++++++++
@@ -14,4 +15,4 @@
  tests/tasks/T-007/test_chart_img_client.py         | 261 ++++++++++
  worker_chart_export/chart_img.py                   | 537 +++++++++++++++++++++
  worker_chart_export/config.py                      |  14 +-
- 16 files changed, 1541 insertions(+), 159 deletions(-)
+ 17 files changed, 1573 insertions(+), 160 deletions(-)

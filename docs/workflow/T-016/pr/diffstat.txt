@@ -9,7 +9,7 @@
  docs/workflow/T-010/README.md                     | 112 +++++++++++++++++
  docs/workflow/T-011/README.md                     |  79 ++++++++++++
  docs/workflow/T-012/README.md                     | 109 ++++++++++++++++
- docs/workflow/T-013/README.md                     |  51 ++++++++
+ docs/workflow/T-013/README.md                     |  80 ++++++++++++
  docs/workflow/T-016/README.md                     |  59 ++++++++-
  docs/workflow/T-016/pr/diffstat.txt               |  22 ++++
  docs/workflow/T-016/pr/meta.json                  |  12 ++
@@ -19,4 +19,4 @@
  docs/workflow/T-016/pr/verify_scenarios_report.md |  62 ++++++++++
  docs/workflow/_templates/pr_scenarios.md          |   5 +-
  docs/workflow/_templates/task_readme.md           |  63 ++++++++++
- 21 files changed, 1389 insertions(+), 3 deletions(-)
+ 21 files changed, 1418 insertions(+), 3 deletions(-)

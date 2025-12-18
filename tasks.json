@@ -296,7 +296,7 @@
       "id": "T-016",
       "title": "TDD planned scenarios in task READMEs",
       "description": "Introduce a pre-dev TDD flow: each task README must define Planned Scenarios (with prerequisites/steps/expected) before coding. Update QA_CYCLE and templates to enforce the flow, and backfill Planned Scenarios for TODO tasks T-003..T-013.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [
@@ -305,6 +305,16 @@
       ],
       "depends_on": [
         "T-015"
+      ],
+      "commit": {
+        "hash": "831f4e0fa2b95043400d5907e33656d3da77e474",
+        "message": "📝 T-016 Refine T-013 planned scenarios"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-016/pr."
+        }
       ]
     },
     {
@@ -369,6 +379,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "7a2181460ffe53615c76689bdf320c308e9a594e18cd87b84b5aada38541f9b4"
+    "checksum": "14b027f03a5a499e3b0b0022d0abf3c72905e5df4b095e8317a2428428df73fc"
   }
 }

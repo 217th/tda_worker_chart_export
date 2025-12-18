@@ -14,6 +14,44 @@
 - Add/adjust templates so tasks have a standard “Planned Scenarios (TDD)” section with prerequisites/steps/expected results.
 - Backfill Planned Scenarios for all TODO tasks (T-003..T-013) in their READMEs.
 
+## Planned Scenarios (TDD)
+
+### Scenario 1: QA_CYCLE enforces pre-dev scenarios
+
+**Prerequisites**
+- None
+- Requires human-in-the-middle: NO
+
+**Steps**
+1) Update `docs/workflow/QA_CYCLE.md` to require Planned Scenarios in task READMEs.
+
+**Expected result**
+- QA_CYCLE explicitly describes the pre-dev requirement and references the template.
+
+### Scenario 2: Task README template includes Planned Scenarios
+
+**Prerequisites**
+- None
+- Requires human-in-the-middle: NO
+
+**Steps**
+1) Add a template under `docs/workflow/_templates/task_readme.md`.
+
+**Expected result**
+- Template includes a Planned Scenarios section with prerequisites/steps/expected results.
+
+### Scenario 3: TODO task READMEs include Planned Scenarios
+
+**Prerequisites**
+- Existing TODO tasks T-003..T-013.
+- Requires human-in-the-middle: NO
+
+**Steps**
+1) Add a Planned Scenarios (TDD) section to each TODO task README.
+
+**Expected result**
+- Each TODO task README contains concrete, testable scenario descriptions.
+
 ## Acceptance Criteria
 
 - `docs/workflow/QA_CYCLE.md` explicitly requires Planned Scenarios (TDD) in each task README before implementation.
@@ -35,5 +73,24 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `docs/workflow/QA_CYCLE.md`
+- `docs/workflow/T-003/README.md`
+- `docs/workflow/T-004/README.md`
+- `docs/workflow/T-005/README.md`
+- `docs/workflow/T-006/README.md`
+- `docs/workflow/T-007/README.md`
+- `docs/workflow/T-008/README.md`
+- `docs/workflow/T-009/README.md`
+- `docs/workflow/T-010/README.md`
+- `docs/workflow/T-011/README.md`
+- `docs/workflow/T-012/README.md`
+- `docs/workflow/T-013/README.md`
+- `docs/workflow/T-016/README.md`
+- `docs/workflow/T-016/pr/diffstat.txt`
+- `docs/workflow/T-016/pr/meta.json`
+- `docs/workflow/T-016/pr/review.md`
+- `docs/workflow/T-016/pr/scenarios.md`
+- `docs/workflow/T-016/pr/verify.log`
+- `docs/workflow/T-016/pr/verify_scenarios_report.md`
+- `docs/workflow/_templates/pr_scenarios.md`
 <!-- END AUTO SUMMARY -->

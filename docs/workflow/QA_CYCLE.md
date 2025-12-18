@@ -9,6 +9,14 @@ Deliverables live under each task's PR artifact folder:
 Automated tests accumulate under:
 - `tests/tasks/T-###/`
 
+## Pre-dev requirement (TDD)
+
+Before implementation starts, every task README **must** define **Planned Scenarios (TDD)**:
+- Put them in `docs/workflow/T-###/README.md`.
+- For each scenario, include: prerequisites / steps / expected result.
+- These scenarios are the source of truth for development; if scope changes, update them first.
+- Template: `docs/workflow/_templates/task_readme.md`.
+
 ## The 4-step QA cycle
 
 1) **List implemented scenarios**
@@ -43,4 +51,3 @@ Task directories use a hyphen (e.g. `T-002`). This is not a valid Python package
 
 Use the repository runner:
 - `python scripts/qa/run_all.py`
-

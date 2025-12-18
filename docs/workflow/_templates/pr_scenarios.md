@@ -2,6 +2,10 @@
 
 This file lists the concrete scenarios implemented in this task. If some logic is incomplete, explicitly mark limitations.
 
+Planned scenarios source:
+- `docs/workflow/T-XXX/README.md` → **Planned Scenarios (TDD)**
+- Each implemented scenario should map to a planned one (or explicitly note a justified deviation).
+
 References:
 - Spec(s): (link to relevant docs sections)
 
@@ -29,4 +33,3 @@ References:
 
 **Expected result**
 - ...
-

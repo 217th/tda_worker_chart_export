@@ -290,12 +290,27 @@
           "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-015/pr."
         }
       ]
+    },
+    {
+      "id": "T-016",
+      "title": "TDD planned scenarios in task READMEs",
+      "description": "Introduce a pre-dev TDD flow: each task README must define Planned Scenarios (with prerequisites/steps/expected) before coding. Update QA_CYCLE and templates to enforce the flow, and backfill Planned Scenarios for TODO tasks T-003..T-013.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "qa",
+        "workflow"
+      ],
+      "depends_on": [
+        "T-015"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "cb30fddba9a06cbab90e30d2fb06349bae3609d05653edc812fbae0a05cabe98"
+    "checksum": "c65158ebf02dc37f2ed3779ce48b7454314b74cd45730b0a5910aa1c11ff11fc"
   }
 }

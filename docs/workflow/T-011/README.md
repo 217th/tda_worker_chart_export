@@ -17,14 +17,17 @@
 
 ## Planned Scenarios (TDD)
 
-### Scenario 1: Harness definition (Firestore + GCS fakes)
+### Scenario 1: Harness definition (in‑memory Firestore + filesystem GCS)
 
 **Prerequisites**
-- Harness choice decided (see proposed task T-017 if specs are insufficient).
+- Harness choices decided:
+  - Firestore: in‑memory fake
+  - GCS: filesystem-backed fake
 - Requires human-in-the-middle: NO
 
 **Steps**
-1) Use the agreed harness for Firestore (emulator or in-memory fake) and GCS (filesystem-backed fake or server).
+1) Use the in‑memory Firestore fake.
+2) Use the filesystem-backed GCS fake.
 
 **Expected result**
 - Integration tests run deterministically without external network calls.

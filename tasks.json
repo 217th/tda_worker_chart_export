@@ -500,6 +500,12 @@
       "tags": [],
       "depends_on": [
         "T-016"
+      ],
+      "comments": [
+        {
+          "author": "ORCHESTRATOR",
+          "body": "Handing to REVIEWER: please review README.md (gs:// canonical, Etc/UTC default, chartImgSymbolTemplate required, Deploy/Observability outlined), branch task/T-021/project-readme, commit 2facbb33ea4a."
+        }
       ]
     }
   ],
@@ -507,6 +513,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "036e067d960835cd317d4d265dadea5f3864312d6e5a5f6bb36aadd1a5b3d987"
+    "checksum": "7ad5e2cd91414cccb68cd89ce63b806c4e09362e4745b09c919e532d96071188"
   }
 }

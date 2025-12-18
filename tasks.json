@@ -210,7 +210,7 @@
       "id": "T-008",
       "title": "Write PNG + manifest to GCS (gs://) + validate manifest",
       "description": "Implement artifact writing with deterministic paths:\n- PNG path: runs/<runId>/charts/<timeframe>/<chartTemplateId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png\n- Manifest path: runs/<runId>/steps/<stepId>/charts/manifest.json (overwrite allowed on retry)\n- Store URIs as gs://<bucket>/<path>\n- Validate manifest against docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json; surface MANIFEST_WRITE_FAILED / GCS_WRITE_FAILED accordingly.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [
@@ -220,6 +220,32 @@
       ],
       "depends_on": [
         "T-007"
+      ],
+      "commit": {
+        "hash": "1fd7b00e5258618db024c7bab3d8b9dec616955e",
+        "message": "🛠️ T-008 GCS manifest writer"
+      },
+      "comments": [
+        {
+          "author": "CODER",
+          "body": "Added GCS artifact helpers + schema validation; default paths use gs:// and deterministic manifest path."
+        },
+        {
+          "author": "TESTER",
+          "body": "T-008 tests pass via venv with jsonschema; see verify.log and scenarios report."
+        },
+        {
+          "author": "DOCS",
+          "body": "Added scenarios + verification report under PR artifacts."
+        },
+        {
+          "author": "REVIEWER",
+          "body": "Pending."
+        },
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-008/pr."
+        }
       ]
     },
     {
@@ -469,6 +495,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "75b3dc59ac7a9dbb4ee25656356efed258910b458410a260716a4b8a9a0f9961"
+    "checksum": "50f241ac23571af855b854eabc609c05cfd2a7be36805952b95a1d439cd6f70c"
   }
 }

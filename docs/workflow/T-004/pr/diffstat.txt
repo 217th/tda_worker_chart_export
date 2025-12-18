@@ -1,8 +1,8 @@
- docs/workflow/T-004/pr/diffstat.txt               |   0
+ docs/workflow/T-004/pr/diffstat.txt               |   8 +
  docs/workflow/T-004/pr/meta.json                  |   6 +
  docs/workflow/T-004/pr/scenarios.md               | 396 ++++++++++++++++++++++
  docs/workflow/T-004/pr/verify.log                 |   2 +
  docs/workflow/T-004/pr/verify_scenarios_report.md |  50 +++
  tests/tasks/T-004/test_orchestration.py           | 212 ++++++++++++
  worker_chart_export/orchestration.py              | 141 ++++++++
- 7 files changed, 807 insertions(+)
+ 7 files changed, 815 insertions(+)

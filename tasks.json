@@ -80,7 +80,7 @@
       "id": "T-004",
       "title": "Firestore two-phase claim + finalize step patch",
       "description": "Implement orchestration state transitions for CHART_EXPORT:\n- Phase 1: Firestore transaction claim READY->RUNNING (guard: if not READY, no-op)\n- Phase 2: after work completes, update RUNNING->SUCCEEDED|FAILED with finishedAt, outputs.outputsManifestGcsUri (SUCCEEDED required), and error{code,message,details} on failure\n- Patch must be minimal: do not clobber unrelated step fields or other steps.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [
@@ -90,6 +90,16 @@
       ],
       "depends_on": [
         "T-003"
+      ],
+      "commit": {
+        "hash": "59fb4b31eb2d934cd7b7c9a518e138d43fb19cb0",
+        "message": "🛠️ T-004 Firestore claim/finalize helpers"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-004/pr."
+        }
       ]
     },
     {
@@ -405,6 +415,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "a0b2d9af6325a2d90078653509ec1e2993736a673271a7600d57ba0f6841360c"
+    "checksum": "ee02c89faa7d4f9920c19ea37facdbfe27de1eaf32391a62c2d172b9e47d83aa"
   }
 }

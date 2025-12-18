@@ -118,5 +118,11 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `docs/workflow/T-004/pr/diffstat.txt`
+- `docs/workflow/T-004/pr/meta.json`
+- `docs/workflow/T-004/pr/scenarios.md`
+- `docs/workflow/T-004/pr/verify.log`
+- `docs/workflow/T-004/pr/verify_scenarios_report.md`
+- `tests/tasks/T-004/test_orchestration.py`
+- `worker_chart_export/orchestration.py`
 <!-- END AUTO SUMMARY -->

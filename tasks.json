@@ -196,7 +196,8 @@
         "integration"
       ],
       "depends_on": [
-        "T-010"
+        "T-010",
+        "T-017"
       ],
       "verify": [
         "python -m pytest -q"
@@ -305,12 +306,28 @@
       "depends_on": [
         "T-015"
       ]
+    },
+    {
+      "id": "T-017",
+      "title": "Define integration test harness (Firestore/GCS)",
+      "description": "Choose and document the concrete integration-test harness for Firestore and GCS (emulator vs in-memory fake; fake-gcs-server vs filesystem fake). Update T-011 to use the chosen harness, and document setup/limitations so tests run deterministically without network.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [
+        "tests",
+        "integration",
+        "harness"
+      ],
+      "depends_on": [
+        "T-010"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "c65158ebf02dc37f2ed3779ce48b7454314b74cd45730b0a5910aa1c11ff11fc"
+    "checksum": "d9e49c3bacf8648ec28207e389d912d808353db648e60519114aeacb052b187b"
   }
 }

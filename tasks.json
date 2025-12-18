@@ -54,7 +54,7 @@
       "id": "T-003",
       "title": "CloudEvent ingest: fast filter + deterministic READY pick",
       "description": "Implement Functions Framework CloudEvent adapter:\n- Fast no-op when no CHART_EXPORT step is READY\n- Deterministic selection when multiple READY (sort by stepId asc, pick first)\n- Explicit at-least-once safety: repeated events must no-op if target step is not READY\n- No network calls inside Firestore transaction (transaction reserved for claim only).",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [
@@ -64,6 +64,16 @@
       ],
       "depends_on": [
         "T-002"
+      ],
+      "commit": {
+        "hash": "989de926dcd7cdde0d49349d01507c167e74cb4f",
+        "message": "🧪 T-003 add handler tests"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-003/pr."
+        }
       ]
     },
     {
@@ -395,6 +405,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "5b8782d47b9b29e1c20de34a196822b16c8e1e35696170083b4f8f67ab643d48"
+    "checksum": "a0b2d9af6325a2d90078653509ec1e2993736a673271a7600d57ba0f6841360c"
   }
 }

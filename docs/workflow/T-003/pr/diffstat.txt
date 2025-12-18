@@ -1,12 +1,12 @@
- docs/workflow/T-003/README.md                     |  15 +-
- docs/workflow/T-003/pr/diffstat.txt               |   1 +
+ docs/workflow/T-003/README.md                     |  27 ++-
+ docs/workflow/T-003/pr/diffstat.txt               |  12 ++
  docs/workflow/T-003/pr/meta.json                  |  12 ++
  docs/workflow/T-003/pr/review.md                  |  21 +++
  docs/workflow/T-003/pr/scenarios.md               | 216 ++++++++++++++++++++++
- docs/workflow/T-003/pr/verify.log                 |   2 +
- docs/workflow/T-003/pr/verify_scenarios_report.md |  39 ++++
- tests/tasks/T-003/test_ingest.py                  |  78 ++++++++
+ docs/workflow/T-003/pr/verify.log                 |  23 +++
+ docs/workflow/T-003/pr/verify_scenarios_report.md |  52 ++++++
+ tests/tasks/T-003/test_ingest.py                  | 206 +++++++++++++++++++++
  worker_chart_export/entrypoints/cloud_event.py    |  66 +++++--
  worker_chart_export/ingest.py                     | 144 +++++++++++++++
  worker_chart_export/logging.py                    |   5 +-
- 11 files changed, 576 insertions(+), 23 deletions(-)
+ 11 files changed, 760 insertions(+), 24 deletions(-)

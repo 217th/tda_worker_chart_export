@@ -181,5 +181,20 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `docs-worker-chart-export/chart-templates/ctpl_price_ma1226_bb_macd1226_v1.json`
+- `docs-worker-chart-export/chart-templates/ctpl_price_ma1226_vol_v1.json`
+- `docs-worker-chart-export/chart-templates/ctpl_price_psar_adi_v1.json`
+- `docs-worker-chart-export/chart-templates/ctpl_price_rsi14_stochrsi_v1.json`
+- `docs-worker-chart-export/chart-templates/ctpl_price_vpvr_obv_v1.json`
+- `docs/workflow/T-007/pr/diffstat.txt`
+- `docs/workflow/T-007/pr/meta.json`
+- `docs/workflow/T-007/pr/review.md`
+- `docs/workflow/T-007/pr/scenarios.md`
+- `docs/workflow/T-007/pr/verify.log`
+- `docs/workflow/T-007/pr/verify_scenarios_report.md`
+- `requirements.txt`
+- `tests/tasks/T-005/test_templates.py`
+- `tests/tasks/T-007/test_chart_img_client.py`
+- `worker_chart_export/chart_img.py`
+- `worker_chart_export/config.py`
 <!-- END AUTO SUMMARY -->

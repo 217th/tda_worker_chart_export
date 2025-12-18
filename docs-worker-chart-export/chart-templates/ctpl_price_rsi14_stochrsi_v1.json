@@ -7,7 +7,7 @@
       "style": "candle",
       "theme": "light",
       "scale": "regular",
-      "timezone": "UTC",
+      "timezone": "Etc/UTC",
       "format": "png",
       "studies": [
         {

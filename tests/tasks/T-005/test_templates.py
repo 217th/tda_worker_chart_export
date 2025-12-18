@@ -33,7 +33,7 @@ class TestTemplates(unittest.TestCase):
             requests=[{"chartTemplateId": "ctpl_ok"}],
             scope_symbol="BTCUSDT",
             timeframe="1h",
-            default_timezone="UTC",
+            default_timezone="Etc/UTC",
             template_store=store,
             min_images=1,
         )
@@ -46,7 +46,7 @@ class TestTemplates(unittest.TestCase):
         self.assertEqual(item.interval, "1h")
         self.assertEqual(item.request["symbol"], "BINANCE:BTCUSDT")
         self.assertEqual(item.request["interval"], "1h")
-        self.assertEqual(item.request["timezone"], "UTC")
+        self.assertEqual(item.request["timezone"], "Etc/UTC")
         self.assertEqual(item.request["theme"], "dark")
 
     def test_template_overrides_symbol_interval_timezone(self) -> None:
@@ -69,13 +69,13 @@ class TestTemplates(unittest.TestCase):
             requests=[{"chartTemplateId": "ctpl_override"}],
             scope_symbol="ETHUSDT",
             timeframe="4h",
-            default_timezone="UTC",
+            default_timezone="Etc/UTC",
             template_store=store,
         )
         item = result.items[0]
         self.assertEqual(item.request["symbol"], "BYBIT:ETHUSDT.P")
         self.assertEqual(item.request["interval"], "4h")
-        self.assertEqual(item.request["timezone"], "UTC")
+        self.assertEqual(item.request["timezone"], "Etc/UTC")
 
     def test_missing_template_records_failure(self) -> None:
         store = DictTemplateStore({})
@@ -83,7 +83,7 @@ class TestTemplates(unittest.TestCase):
             requests=[{"chartTemplateId": "missing"}],
             scope_symbol="BTCUSDT",
             timeframe="1h",
-            default_timezone="UTC",
+            default_timezone="Etc/UTC",
             template_store=store,
         )
         self.assertEqual(len(result.items), 0)
@@ -98,7 +98,7 @@ class TestTemplates(unittest.TestCase):
             requests=[{"chartTemplateId": "bad"}],
             scope_symbol="BTCUSDT",
             timeframe="1h",
-            default_timezone="UTC",
+            default_timezone="Etc/UTC",
             template_store=store,
         )
         self.assertEqual(len(result.items), 0)
@@ -123,7 +123,7 @@ class TestTemplates(unittest.TestCase):
             ],
             scope_symbol="BTCUSDT",
             timeframe="1d",
-            default_timezone="UTC",
+            default_timezone="Etc/UTC",
             template_store=store,
             min_images=1,
         )
@@ -146,7 +146,7 @@ class TestTemplates(unittest.TestCase):
             requests=[{"chartTemplateId": "dup"}, {"chartTemplateId": "dup"}],
             scope_symbol="BTCUSDT",
             timeframe="1h",
-            default_timezone="UTC",
+            default_timezone="Etc/UTC",
             template_store=store,
             min_images=1,
         )
@@ -169,7 +169,7 @@ class TestTemplates(unittest.TestCase):
             requests=[{"chartTemplateId": "ctpl_ok"}],
             scope_symbol="BTCUSDT",
             timeframe="1h",
-            default_timezone="UTC",
+            default_timezone="Etc/UTC",
             template_store=store,
             min_images=2,
         )
@@ -192,7 +192,7 @@ class TestTemplates(unittest.TestCase):
             requests=[{"chartTemplateId": "ctpl_kind"}],
             scope_symbol="BTCUSDT",
             timeframe="1h",
-            default_timezone="UTC",
+            default_timezone="Etc/UTC",
             template_store=store,
         )
         self.assertEqual(result.items[0].kind, "Price + Volume")

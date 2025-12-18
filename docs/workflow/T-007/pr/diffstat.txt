@@ -1,0 +1,17 @@
+ .../ctpl_price_ma1226_bb_macd1226_v1.json          |  74 +--
+ .../chart-templates/ctpl_price_ma1226_vol_v1.json  |  48 +-
+ .../chart-templates/ctpl_price_psar_adi_v1.json    |  56 +--
+ .../ctpl_price_rsi14_stochrsi_v1.json              |  50 +-
+ .../chart-templates/ctpl_price_vpvr_obv_v1.json    |  66 +--
+ docs/workflow/T-007/pr/diffstat.txt                |   1 +
+ docs/workflow/T-007/pr/meta.json                   |  12 +
+ docs/workflow/T-007/pr/review.md                   |  21 +
+ docs/workflow/T-007/pr/scenarios.md                | 296 ++++++++++++
+ docs/workflow/T-007/pr/verify.log                  |  18 +
+ docs/workflow/T-007/pr/verify_scenarios_report.md  | 224 +++++++++
+ requirements.txt                                   |   2 +
+ tests/tasks/T-005/test_templates.py                |  20 +-
+ tests/tasks/T-007/test_chart_img_client.py         | 261 ++++++++++
+ worker_chart_export/chart_img.py                   | 537 +++++++++++++++++++++
+ worker_chart_export/config.py                      |  14 +-
+ 16 files changed, 1541 insertions(+), 159 deletions(-)

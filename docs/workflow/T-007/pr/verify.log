@@ -1,0 +1,18 @@
+
+=== T-007 ===
+test_429_limit_exceeded (test_chart_img_client.TestChartImgClient.test_429_limit_exceeded) ... ok
+test_500_is_retriable (test_chart_img_client.TestChartImgClient.test_500_is_retriable) ... ok
+test_http_200_non_png_is_failed (test_chart_img_client.TestChartImgClient.test_http_200_non_png_is_failed) ... ok
+test_mock_fixture_success (test_chart_img_client.TestChartImgClient.test_mock_fixture_success) ... ok
+test_mock_missing_fixture_returns_error (test_chart_img_client.TestChartImgClient.test_mock_missing_fixture_returns_error) ... ok
+test_mock_mode_does_not_call_network (test_chart_img_client.TestChartImgClient.test_mock_mode_does_not_call_network) ... ok
+test_record_mode_not_allowed_in_prod (test_chart_img_client.TestChartImgClient.test_record_mode_not_allowed_in_prod) ... ok
+test_record_mode_saves_fixture (test_chart_img_client.TestChartImgClient.test_record_mode_saves_fixture) ... ok
+test_record_mode_uses_fixture_if_present (test_chart_img_client.TestChartImgClient.test_record_mode_uses_fixture_if_present) ... ok
+test_limit_exceeded_switches_account (test_chart_img_client.TestChartImgRetries.test_limit_exceeded_switches_account) ... ok
+test_max_attempts_across_accounts (test_chart_img_client.TestChartImgRetries.test_max_attempts_across_accounts) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.005s
+
+OK

@@ -62,18 +62,22 @@ class WorkerConfig:
         if charts_api_mode not in ("real", "mock", "record"):
             raise ConfigError("CHARTS_API_MODE must be one of: real|mock|record")
 
-        charts_default_timezone = (os.environ.get("CHARTS_DEFAULT_TIMEZONE") or "UTC").strip()
+        charts_default_timezone = (
+            os.environ.get("CHARTS_DEFAULT_TIMEZONE") or "Etc/UTC"
+        ).strip()
         try:
             ZoneInfo(charts_default_timezone)
         except Exception as exc:  # pragma: no cover
             raise ConfigError(
-                "CHARTS_DEFAULT_TIMEZONE must be an IANA timezone name (e.g. UTC)"
+                "CHARTS_DEFAULT_TIMEZONE must be an IANA timezone name (e.g. Etc/UTC)"
             ) from exc
 
         accounts_json = cls._require_env("CHART_IMG_ACCOUNTS_JSON")
         chart_img_accounts = cls._parse_accounts_json(accounts_json)
 
         env = (os.environ.get("TDA_ENV") or os.environ.get("ENV") or "").strip() or None
+        if _is_prod_env(env) and charts_api_mode == "record":
+            raise ConfigError("CHARTS_API_MODE=record is not allowed in prod environment")
 
         return cls(
             charts_bucket=charts_bucket,
@@ -124,3 +128,9 @@ class WorkerConfig:
             raise ConfigError("CHART_IMG_ACCOUNTS_JSON must contain at least 1 account")
 
         return accounts
+
+
+def _is_prod_env(env: str | None) -> bool:
+    if env is None:
+        return False
+    return env.lower() in ("prod", "production")

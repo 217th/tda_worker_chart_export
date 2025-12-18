@@ -1,0 +1,12 @@
+{
+  "task_id": "T-007",
+  "task_title": "Chart-IMG client + mock/record fixtures",
+  "branch": "task/T-007/chart-img-client",
+  "base_branch": "main",
+  "author": "CODER",
+  "created_at": "2025-12-18T15:20:04+00:00",
+  "updated_at": "2025-12-18T16:14:15+00:00",
+  "head_sha": "db8d4e9adfb38bb8a8ea2c7e77cb49b1842b6203",
+  "merge_strategy": "squash",
+  "status": "OPEN"
+}

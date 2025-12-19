@@ -546,12 +546,22 @@
       "id": "T-022",
       "title": "Core engine wiring",
       "description": "Implement run_chart_export_step: wire together ingest (step pick), claim/finalize, template loading, usage/account selection, Chart-IMG client, GCS artifacts, manifest + status computation, logging; enable CLI/CloudEvent to execute end-to-end.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [],
       "depends_on": [
         "T-008"
+      ],
+      "commit": {
+        "hash": "47307b8c16a2a1c61c2332ee86ebb7db19677310",
+        "message": "🧾 T-022 meta refresh (post-review)"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-022/pr."
+        }
       ]
     }
   ],
@@ -559,6 +569,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "194b91d9f0f4d36f5d777d59e44738b3f89dafc6fca3d29e96c72dbbf8e5c2f9"
+    "checksum": "5cbe8083d59bd05dd4ffffa7abe6f000bc8aa124eb51d4408c86fbb8016c1aff"
   }
 }

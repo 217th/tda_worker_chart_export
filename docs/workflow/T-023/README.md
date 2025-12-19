@@ -68,7 +68,8 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 
 # IAM: GCS bucket write
 gcloud storage buckets add-iam-policy-binding gs://${ARTIFACTS_BUCKET} \
-  --member="serviceAccount:${RUNTIME_SA}" --role="roles/storage.objectAdmin"
+  --member="serviceAccount:${RUNTIME_SA}" \
+  --role="roles/storage.objectAdmin"
 
 # IAM: Secret Manager
 gcloud secrets add-iam-policy-binding chart-img-accounts \

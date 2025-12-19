@@ -563,12 +563,24 @@
           "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-022/pr."
         }
       ]
+    },
+    {
+      "id": "T-023",
+      "title": "GCP real env integration (tests + runbook alignment)",
+      "description": "Подготовить и задокументировать запуск интеграционных тестов worker_chart_export в реальном GCP: роли по prod_runbook_gcp, ARTIFACTS_BUCKET + secret chart-img-accounts, Firestore/GCS тестовые данные, опциональный Eventarc deploy, прогон CLI сценариев (mock/real), expected results.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [],
+      "depends_on": [
+        "T-022"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "5cbe8083d59bd05dd4ffffa7abe6f000bc8aa124eb51d4408c86fbb8016c1aff"
+    "checksum": "d84eef5c07378f05bb68eb49553cacc5d5886de8921ffe56ce5ac2f5250b390a"
   }
 }

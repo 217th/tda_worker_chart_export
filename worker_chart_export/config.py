@@ -17,6 +17,7 @@ DEFAULT_CHART_IMG_DAILY_LIMIT = 44
 
 @dataclass(frozen=True, slots=True)
 class ChartImgAccount:
+    # Описание одного аккаунта Chart-IMG из секрета CHART_IMG_ACCOUNTS_JSON.
     id: str
     api_key: str
     daily_limit: int = DEFAULT_CHART_IMG_DAILY_LIMIT
@@ -24,6 +25,7 @@ class ChartImgAccount:
 
 @dataclass(frozen=True, slots=True)
 class WorkerConfig:
+    # Основная конфигурация воркера, собирается один раз из переменных окружения/секретов.
     charts_bucket: str  # gs://<bucket>
     charts_api_mode: ChartsApiMode
     charts_default_timezone: str
@@ -40,6 +42,7 @@ class WorkerConfig:
 
     @staticmethod
     def _normalize_gs_bucket(value: str) -> str:
+        # Приводим CHARTS_BUCKET к виду gs://<bucket> и не даём указать путь внутри бакета.
         v = value.strip()
         if v.startswith("gs://"):
             v = v.removeprefix("gs://")
@@ -53,6 +56,7 @@ class WorkerConfig:
 
     @classmethod
     def from_env(cls) -> "WorkerConfig":
+        # Читает все требуемые переменные окружения/секреты и валидирует их.
         charts_bucket_raw = os.environ.get("CHARTS_BUCKET", "").strip()
         charts_bucket = cls._normalize_gs_bucket(
             charts_bucket_raw or cls._require_env("CHARTS_BUCKET")
@@ -89,6 +93,7 @@ class WorkerConfig:
 
     @staticmethod
     def _parse_accounts_json(raw_json: str) -> list[ChartImgAccount]:
+        # Жёсткая валидация структуры секрета CHART_IMG_ACCOUNTS_JSON.
         try:
             data = json.loads(raw_json)
         except json.JSONDecodeError as exc:

@@ -13,6 +13,10 @@ class CoreResult:
     run_id: str | None = None
     step_id: str | None = None
     outputs_manifest_gcs_uri: str | None = None
+    items_count: int | None = None
+    failures_count: int | None = None
+    min_images: int | None = None
+    error_code: str | None = None
 
 
 def run_chart_export_step(
@@ -21,4 +25,3 @@ def run_chart_export_step(
     raise NotImplementedYetError(
         "Core engine is not implemented yet (see T-003..T-008)."
     )
-

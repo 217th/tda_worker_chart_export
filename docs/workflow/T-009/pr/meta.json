@@ -1,0 +1,12 @@
+{
+  "task_id": "T-009",
+  "task_title": "CLI run-local wrapper (thin adapter over core engine)",
+  "branch": "task/T-009/cli",
+  "base_branch": "main",
+  "author": "CODER",
+  "created_at": "2025-12-19T09:37:44+00:00",
+  "updated_at": "2025-12-19T10:08:18+00:00",
+  "head_sha": "51ee5c671216b9f276c246be3e94210620fe465e",
+  "merge_strategy": "squash",
+  "status": "OPEN"
+}

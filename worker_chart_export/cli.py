@@ -6,11 +6,21 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 from .core import run_chart_export_step
 from .errors import ConfigError, NotImplementedYetError
 from .logging import configure_logging, log_event
 from .runtime import get_config
+
+
+def _ensure_default_api_mode(args: argparse.Namespace) -> None:
+    """For local runs, default CHARTS_API_MODE to mock if neither env nor flag set."""
+    if args.charts_api_mode:
+        return
+    if os.environ.get("CHARTS_API_MODE"):
+        return
+    os.environ["CHARTS_API_MODE"] = "mock"
 
 
 def _add_run_local_args(parser: argparse.ArgumentParser) -> None:
@@ -34,6 +44,8 @@ def _run_local(args: argparse.Namespace) -> int:
     if args.charts_bucket:
         os.environ["CHARTS_BUCKET"] = args.charts_bucket
 
+    _ensure_default_api_mode(args)
+
     logger = logging.getLogger("worker-chart-export")
     log_event(
         logger,
@@ -50,19 +62,9 @@ def _run_local(args: argparse.Namespace) -> int:
     result = run_chart_export_step(flow_run=flow_run, step_id=args.step_id, config=config)
 
     if args.output_summary == "json":
-        print(
-            json.dumps(
-                {
-                    "status": result.status,
-                    "runId": result.run_id,
-                    "stepId": result.step_id,
-                    "outputsManifestGcsUri": result.outputs_manifest_gcs_uri,
-                },
-                ensure_ascii=False,
-            )
-        )
+        print(json.dumps(_build_json_summary(result), ensure_ascii=False))
     elif args.output_summary == "text":
-        print(f"CHART_EXPORT {result.status}: manifest={result.outputs_manifest_gcs_uri or '-'}")
+        print(_build_text_summary(result))
     return 0 if result.status == "SUCCEEDED" else 1
 
 
@@ -93,3 +95,26 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+def _build_text_summary(result: Any) -> str:
+    manifest = result.outputs_manifest_gcs_uri or "-"
+    items = "-" if result.items_count is None else result.items_count
+    failures = "-" if result.failures_count is None else result.failures_count
+    return (
+        f"CHART_EXPORT {result.status}: "
+        f"manifest={manifest}, items={items}, failures={failures}"
+    )
+
+
+def _build_json_summary(result: Any) -> dict[str, Any]:
+    return {
+        "status": result.status,
+        "runId": result.run_id,
+        "stepId": result.step_id,
+        "outputsManifestGcsUri": result.outputs_manifest_gcs_uri,
+        "itemsCount": result.items_count,
+        "failuresCount": result.failures_count,
+        "minImages": result.min_images,
+        "errorCode": result.error_code,
+    }

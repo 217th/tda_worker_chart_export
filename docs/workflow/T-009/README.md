@@ -98,7 +98,8 @@
 
 ## Verify Steps
 
-- CLI smoke: `--output-summary=json` on a sample `flow_run` with `CHARTS_API_MODE=mock`.
+- Automated: `python -m pytest tests/tasks/T-009/test_cli.py`.
+- Manual (blocked until core is implemented): run planned scenarios 1–6 against real `flow_run` once the core engine (T-003..T-008 wiring) is available.
 
 ## Rollback Plan
 
@@ -107,5 +108,12 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `docs/workflow/T-009/README.md`
+- `docs/workflow/T-009/pr/diffstat.txt`
+- `docs/workflow/T-009/pr/meta.json`
+- `docs/workflow/T-009/pr/review.md`
+- `docs/workflow/T-009/pr/verify.log`
+- `tests/tasks/T-009/test_cli.py`
+- `worker_chart_export/cli.py`
+- `worker_chart_export/core.py`
 <!-- END AUTO SUMMARY -->

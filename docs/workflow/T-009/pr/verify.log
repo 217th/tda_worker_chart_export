@@ -1,0 +1,10 @@
+# Verify log
+
+2025-12-19:
+- Installed pytest into repo venv: `.venv/bin/pip install -U pytest`.
+- Ran CLI unit tests:
+  - Command: `.venv/bin/python -m pytest tests/tasks/T-009/test_cli.py`
+  - Result: PASS (5 passed)
+
+Manual scenario checks:
+- Not executed: core engine is still NotImplemented (T-009 scopes CLI adapter only), so end-to-end CLI scenarios with real flow_run/step cannot be run yet.

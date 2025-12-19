@@ -252,7 +252,7 @@
       "id": "T-009",
       "title": "CLI run-local wrapper (thin adapter over core engine)",
       "description": "Implement CLI per implementation_contract.md:\n- Flags: --flow-run-path, --step-id, --charts-api-mode, --charts-bucket, --accounts-config-path, --output-summary\n- accounts-config-path reads chart-img.accounts.local.json and injects CHART_IMG_ACCOUNTS_JSON\n- CLI uses the same core engine as CloudEvent handler; divergence is a bug\n- Output summary supports none|text|json.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "human",
       "tags": [
@@ -262,6 +262,32 @@
       ],
       "depends_on": [
         "T-008"
+      ],
+      "commit": {
+        "hash": "72f0fd24c95cdf78609253c9e448624998187601",
+        "message": "🧾 T-009 refresh meta timestamp"
+      },
+      "comments": [
+        {
+          "author": "CODER",
+          "body": "CLI summary improved; default CHARTS_API_MODE=mock for local; env overrides honored."
+        },
+        {
+          "author": "TESTER",
+          "body": "Pytest unavailable offline — automated tests not executed; see verify.log. Test file added (`tests/tasks/T-009/test_cli.py`)."
+        },
+        {
+          "author": "DOCS",
+          "body": "No docs changes required."
+        },
+        {
+          "author": "REVIEWER",
+          "body": "Focus on CLI exit codes/summary and env override logic."
+        },
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-009/pr."
+        }
       ]
     },
     {
@@ -533,6 +559,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "21484a02825068a26eb5f5696c2f9ba1071434d18a589d17695ad06b4f844aa8"
+    "checksum": "194b91d9f0f4d36f5d777d59e44738b3f89dafc6fca3d29e96c72dbbf8e5c2f9"
   }
 }

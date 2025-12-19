@@ -1,21 +1,23 @@
-# T-023: GCP real-env integration test setup & runbook alignment
+# T-023: GCP real-env integration tests (local invoke) & runbook alignment
 
 ## Summary
 
-- Подготовить реальное GCP окружение для интеграционных тестов worker_chart_export (без фейков), выдать роли по прод-ранбуку, развернуть (опционально) Eventarc триггер, и прогнать сценарии в реальном GCP.
+- Этап 1 (T-023): подготовить реальное GCP окружение и провести интеграционные тесты через локальный запуск (CLI), используя реальные Firestore/GCS/Secret Manager/Logging.
+- Этап 2 (отдельная задача T-024): деплой в Cloud Run Functions gen2 + Eventarc trigger и повторение сценариев в облаке (автоматизированный деплой и запуск).
 
 ## Goal
 
-- Иметь воспроизводимый набор gcloud команд для создания тестового окружения и прогон end-to-end тестов (CLI/опционально Eventarc) с реальными Firestore/GCS/Secret Manager.
+- Иметь воспроизводимый набор gcloud команд для создания тестового окружения и прогон end-to-end тестов (CLI, локальный invoke) с реальными Firestore/GCS/Secret Manager/Logging.
+- Зафиксировать зависимость для T-024 (облачный деплой + Eventarc).
 
-## Scope
+## Scope (T-023)
 
 - Роли runtime SA по шаблонам prod_runbook_gcp.md (Firestore RW, GCS write на ARTIFACTS_BUCKET, Secret Manager access, Logging).
-- Использовать ARTIFACTS_BUCKET и секрет `chart-img-accounts` (именно такое имя).
-- Настроить Firestore коллекции: `chart_templates`, `chart_img_accounts_usage`, `flow_runs` (тестовые данные).
+- Использовать ARTIFACTS_BUCKET и секрет `chart-img-accounts`.
+- Настроить Firestore: `chart_templates`, `chart_img_accounts_usage`, `flow_runs` (тестовые данные).
 - Настроить GCS bucket (uniform access; public read — опционально; gs:// канон).
-- Опционально: деплой `worker-chart-export` на Cloud Run Functions gen2 с concurrency=1, retry enabled, Eventarc trigger на update `flow_runs/{runId}`.
 - Прогон ручных/CLI сценариев в real GCP (mock/real Chart-IMG), фиксация ожидаемых результатов.
+- Облачный деплой + Eventarc — вынести в T-024 (следующий этап).
 
 ## Planned Scenarios (TDD)
 
@@ -49,11 +51,10 @@
 **Steps**: Повторный запуск на SUCCEEDED шаге.  
 **Expected**: No-op, статус остаётся SUCCEEDED, manifest URI без изменений.
 
-### Scenario 7 (опционально): Eventarc path
-**Steps**: Деплой функции, включить retry, инициировать Firestore update READY шага.  
-**Expected**: Аналог Scenario 2, но через Eventarc; логи в Cloud Logging.
+### Scenario 7 (перенесено в T-024): Eventarc path
+**Примечание**: деплой Cloud Run Functions gen2 и проверка Eventarc будут выполнены в задаче T-024.
 
-## gcloud команды (шаблоны)
+## gcloud команды (шаблоны) — T-023 (локальный invoke)
 
 ```bash
 # Vars
@@ -89,17 +90,7 @@ echo '[{"id":"acc1","apiKey":"XXX","dailyLimit":44}]' | \
 # Firestore: chart_img_accounts_usage
 # Firestore: flow_runs/{runId} c шагом READY (см. test_vectors/flow_run_ready_chart_step.json; подставить chartTemplateId и bucket)
 
-# (Опционально) Deploy Functions Framework gen2 для worker-chart-export
-gcloud functions deploy worker-chart-export \
-  --gen2 --runtime=python313 --region=${REGION} \
-  --source=. --entry-point=worker_chart_export.worker_chart_export \
-  --trigger-event-filters="type=google.cloud.firestore.document.v1.updated" \
-  --trigger-event-filters="resource=projects/${PROJECT_ID}/databases/(default)/documents/flow_runs/{runId}" \
-  --service-account=${RUNTIME_SA} \
-  --set-env-vars="CHARTS_BUCKET=gs://${ARTIFACTS_BUCKET}" \
-  --set-env-vars="CHARTS_API_MODE=mock" \
-  --set-secrets="CHART_IMG_ACCOUNTS_JSON=chart-img-accounts:latest" \
-  --concurrency=1 --max-instances=5 --timeout=300s
+# Деплой Eventarc/Cloud Run Functions отложен в T-024
 ```
 
 ## Risks
@@ -108,10 +99,10 @@ gcloud functions deploy worker-chart-export \
 - Права bucket/Firestore можно сузить (objectCreator вместо objectAdmin), адаптировать под политику.
 - Публичный bucket не обязателен в тестовой среде; учитывать требования безопасности.
 
-## Verify Steps
+## Verify Steps (T-023)
 
 - CLI сценарии 2–6 на реальном GCP, фиксация exit code, Firestore патчей, наличия PNG/manifest в GCS.
-- (Опционально) Eventarc сценарий 7: логи в Cloud Logging, PNG/manifest в GCS, шаг SUCCEEDED.
+- Eventarc сценарий вынесен в T-024.
 
 ## Rollback Plan
 

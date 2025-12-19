@@ -575,12 +575,24 @@
       "depends_on": [
         "T-022"
       ]
+    },
+    {
+      "id": "T-024",
+      "title": "GCP deploy & Eventarc demo",
+      "description": "Деплой worker-chart-export в Cloud Run Functions gen2 + Eventarc на Firestore update; повторение интеграционных сценариев в облаке (concurrency=1, retries идемпотентны), логирование в Cloud Logging. Автоматизировать gcloud/terraform шаги и проверить E2E.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [],
+      "depends_on": [
+        "T-023"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "d84eef5c07378f05bb68eb49553cacc5d5886de8921ffe56ce5ac2f5250b390a"
+    "checksum": "60e4e3dc2fb5d366c4f1239acedd00a234e5dc9acb49c3e7e27cc105cff8f2e6"
   }
 }

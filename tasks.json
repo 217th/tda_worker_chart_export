@@ -515,12 +515,24 @@
         "hash": "1779f72422e848732d05dfa469520b173d016bd2",
         "message": "📝 T-021 integrate root README"
       }
+    },
+    {
+      "id": "T-022",
+      "title": "Core engine wiring",
+      "description": "Implement run_chart_export_step: wire together ingest (step pick), claim/finalize, template loading, usage/account selection, Chart-IMG client, GCS artifacts, manifest + status computation, logging; enable CLI/CloudEvent to execute end-to-end.",
+      "status": "TODO",
+      "priority": "high",
+      "owner": "human",
+      "tags": [],
+      "depends_on": [
+        "T-008"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "5662fab81bba7631699377707a6cbb6c1a20f483f7a2c25119aeeed2930bd4be"
+    "checksum": "21484a02825068a26eb5f5696c2f9ba1071434d18a589d17695ad06b4f844aa8"
   }
 }

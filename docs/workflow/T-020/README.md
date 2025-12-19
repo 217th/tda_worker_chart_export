@@ -20,12 +20,12 @@
 
 ### Firestore
 
-- **In‑memory fake (DECISION)**: lightweight fake for local debugging/testing (no external process). This is the chosen harness for T‑020.
+- **In‑memory fake (DECISION)**: lightweight fake for local debugging/testing (no external process). This is the chosen harness for T‑020. Ключевые ограничения: частичная совместимость с транзакциями/масками полей; нужно документировать, что тесты не проверяют полноценный прод‑путь ODM.
 - Firebase Local Emulator Suite (Firestore emulator): not used for this task; would require Node.js + Java and still differs from prod.
 
 ### GCS
 
-- **Filesystem‑backed fake (DECISION)**: simple local file storage adapter (no HTTP), fastest; chosen for T‑020.
+- **Filesystem‑backed fake (DECISION)**: simple local file storage adapter (no HTTP), fastest; chosen for T‑020. Ограничения: нет signed URLs/ACL, eventual-consistency другая; нужно явное соответствие путям `gs://bucket/...` → `<tmpdir>/<bucket>/...`.
 - fake‑gcs‑server: not used for this task; closer to prod but heavier to run in CI.
 
 ## Plan

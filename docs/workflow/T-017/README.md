@@ -33,6 +33,9 @@
 **Expected result**
 - A clear decision with setup steps and limitations recorded in docs.
 
+**Decision (current plan)**
+- Используем *in-memory fake* Firestore для тестов/CI (без официального emulator), чтобы не требовать Java/Node и ускорить прогон. Нужно описать API совместимость и ограничения (частичные транзакции/field masks).
+
 ### Scenario 2: GCS harness decision
 
 **Prerequisites**
@@ -45,6 +48,9 @@
 
 **Expected result**
 - A clear decision with setup steps and limitations recorded in docs.
+
+**Decision (current plan)**
+- Используем *filesystem-backed fake* GCS: локальный каталог, маппинг `gs://<bucket>/...` → `<tmpdir>/<bucket>/...`, адаптер клиента. Без signed URLs, без ACL. Ограничения/расхождения с реальным GCS нужно зафиксировать.
 
 ### Scenario 3: T-011 updated to reference the chosen harness
 

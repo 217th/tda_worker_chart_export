@@ -1,0 +1,6 @@
+# Verify log
+
+2025-12-19:
+- Installed jsonschema (if not present in venv).
+- Ran unit tests:
+  - `.venv/bin/python -m pytest tests/tasks/T-022/test_core.py` → PASS (3)

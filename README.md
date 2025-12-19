@@ -5,7 +5,7 @@ Trading Decisions Assistant component that renders PNG charts via Chart-IMG base
 ## Overview
 
 - **Purpose**: Consume `flow_runs/{runId}` documents, pick READY `CHART_EXPORT` steps, render a chart per request, upload PNGs to GCS, write a manifest, and finalize the step status.
-- **Runtime**: Python 3.13, Functions Framework / Cloud Run. CLI shares the same core engine (to be finalized in T-009).
+- **Runtime**: Python 3.13, Functions Framework / Cloud Run. CLI и CloudEvent используют один и тот же core engine.
 - **Sources of truth**: `docs-worker-chart-export/*` (contracts, schemas, templates), `docs-general/*` (system context, read-only), `docs-gcp/*` (deployment guidance).
 
 ## Quickstart (local)
@@ -13,7 +13,7 @@ Trading Decisions Assistant component that renders PNG charts via Chart-IMG base
 1) Python 3.13 + venv: `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`.
 2) Prepare Chart-IMG accounts secret: copy `scripts/templates/chart-img.accounts.local.json.template`, fill keys, set `CHART_IMG_ACCOUNTS_JSON="$(cat ...)"`.
 3) Set required env: `CHARTS_BUCKET=gs://<bucket>`, optional `CHARTS_API_MODE=mock|real|record`, `CHARTS_DEFAULT_TIMEZONE=Etc/UTC` (default).
-4) Run CLI (core in-progress until T-009): `python -m worker_chart_export.cli run-local --flow-run-path ./tmp/flow_run.json --step-id step-1 --charts-bucket gs://<bucket> --charts-api-mode mock --accounts-config-path ./chart-img.accounts.local.json`.
+4) Run CLI: `python -m worker_chart_export.cli run-local --flow-run-path ./tmp/flow_run.json --step-id step-1 --charts-bucket gs://<bucket> --charts-api-mode mock --accounts-config-path ./chart-img.accounts.local.json`.
 5) Tests: `python -m pytest tests/tasks`.
 
 ## Processing Flow (high level)
@@ -40,11 +40,11 @@ Trading Decisions Assistant component that renders PNG charts via Chart-IMG base
 - **GCS**: shared artifacts bucket for PNGs and manifest (no signed URLs).
 - **Secrets Manager**: stores `CHART_IMG_ACCOUNTS_JSON` source; never logged.
 
-## CLI (status)
+## CLI
 
 - Command: `worker-chart-export run-local` with flags `--flow-run-path`, `--step-id`, `--charts-api-mode`, `--charts-bucket`, `--accounts-config-path`, `--output-summary (text|json|none)`.
-- Exit codes: 0 success, non-zero on failure (to be finalized in T-009).
-- CLI is a thin adapter over the core engine; behavior must match CloudEvent path.
+- Exit codes: 0 success, non-zero on failure.
+- CLI — тонкая обёртка над core; поведение совпадает с CloudEvent.
 
 ## Testing
 
@@ -67,7 +67,6 @@ Trading Decisions Assistant component that renders PNG charts via Chart-IMG base
 
 ## Known limitations / TODO
 
-- Core engine wiring for CLI + full step execution completes in T-009–T-013.
 - Integration harness (Firestore/GCS) tracked in T-017/T-020.
 - Symbol/exchange architecture alignment planned in T-019.
 - Keep README in sync with future task outcomes.

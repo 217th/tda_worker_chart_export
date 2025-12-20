@@ -132,6 +132,7 @@ def _is_precondition_error(exc: Exception) -> bool:
 
 def claim_step_transaction(*, client: Any, run_id: str, step_id: str) -> ClaimResult:
     doc_ref = client.collection("flow_runs").document(run_id)
+    logger = logging.getLogger("worker-chart-export")
     max_attempts = 3
     base_backoff = 0.2
     last_status: str | None = None
@@ -157,8 +158,17 @@ def claim_step_transaction(*, client: Any, run_id: str, step_id: str) -> ClaimRe
                 if attempt < max_attempts - 1:
                     time.sleep(base_backoff * (2**attempt))
                     continue
+                logger.info(
+                    {
+                        "event": "firestore_claim_precondition_failed",
+                        "message": "firestore_claim_precondition_failed",
+                        "runId": run_id,
+                        "stepId": step_id,
+                        "status": last_status,
+                        "attempts": attempt + 1,
+                    }
+                )
                 return ClaimResult(claimed=False, status=last_status, reason="precondition_failed")
-            logger = logging.getLogger("worker-chart-export")
             logger.error(
                 {
                     "event": "firestore_claim_error",

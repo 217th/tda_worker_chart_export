@@ -25,6 +25,10 @@ class AccountSelectionResult:
     exhausted_accounts: list[str]
 
 
+class ClaimContentionError(Exception):
+    pass
+
+
 def select_account_for_request(
     *,
     client: Any,
@@ -37,7 +41,15 @@ def select_account_for_request(
     exhausted: list[str] = []
 
     for account in accounts:
-        result = _try_claim_account(client=client, account=account, now=now)
+        try:
+            result = _try_claim_account(client=client, account=account, now=now)
+        except ClaimContentionError:
+            if logger is not None:
+                payload = {"accountId": account.id}
+                if log_context:
+                    payload.update(log_context)
+                log_event(logger, "chart_api_usage_claim_conflict", **payload)
+            continue
         if result is None:
             exhausted.append(account.id)
             continue
@@ -62,28 +74,55 @@ def mark_account_exhausted(
 ) -> AccountUsage:
     now = now or datetime.now(timezone.utc)
     doc_ref = client.collection("chart_img_accounts_usage").document(account.id)
-
-    def _mark(transaction: Any) -> AccountUsage:
-        snapshot = doc_ref.get(transaction=transaction)
-        data = snapshot.to_dict() if snapshot is not None else None
-        data = data if isinstance(data, Mapping) else {}
+    logger = logging.getLogger("worker-chart-export")
+    max_attempts = 3
+    base_backoff = 0.2
+    for attempt in range(max_attempts):
+        snapshot = doc_ref.get()
+        raw = snapshot.to_dict() if snapshot is not None else None
+        data = raw if isinstance(raw, Mapping) else {}
+        exists = isinstance(raw, Mapping)
 
         usage_today, window_start = _reset_window_if_needed(data, now)
         daily_limit = _resolve_daily_limit(account, data)
-
-        update = {
-            "windowStart": window_start,
-            "usageToday": daily_limit,
-        }
-        _transaction_set(transaction, doc_ref, update)
-        return AccountUsage(
-            account_id=account.id,
-            usage_today=daily_limit,
-            daily_limit=daily_limit,
-            window_start=window_start,
-        )
-
-    return _run_transaction(client, _mark)
+        update = {"windowStart": window_start, "usageToday": daily_limit}
+        try:
+            _write_usage_update(
+                client=client,
+                doc_ref=doc_ref,
+                snapshot=snapshot,
+                update=update,
+                create_if_missing=not exists,
+            )
+            return AccountUsage(
+                account_id=account.id,
+                usage_today=daily_limit,
+                daily_limit=daily_limit,
+                window_start=window_start,
+            )
+        except Exception as exc:
+            if _is_precondition_error(exc) or _is_aborted_error(exc):
+                if attempt < max_attempts - 1:
+                    time.sleep(base_backoff * (2**attempt))
+                    continue
+                log_event(
+                    logger,
+                    "usage_mark_exhausted_precondition_failed",
+                    accountId=account.id,
+                )
+                return AccountUsage(
+                    account_id=account.id,
+                    usage_today=daily_limit,
+                    daily_limit=daily_limit,
+                    window_start=window_start,
+                )
+            raise
+    return AccountUsage(
+        account_id=account.id,
+        usage_today=0,
+        daily_limit=account.daily_limit or DEFAULT_CHART_IMG_DAILY_LIMIT,
+        window_start=_utc_day_start(now),
+    )
 
 
 def _try_claim_account(
@@ -93,11 +132,13 @@ def _try_claim_account(
     now: datetime,
 ) -> AccountUsage | None:
     doc_ref = client.collection("chart_img_accounts_usage").document(account.id)
-
-    def _claim(transaction: Any) -> AccountUsage | None:
-        snapshot = doc_ref.get(transaction=transaction)
-        data = snapshot.to_dict() if snapshot is not None else None
-        data = data if isinstance(data, Mapping) else {}
+    max_attempts = 3
+    base_backoff = 0.2
+    for attempt in range(max_attempts):
+        snapshot = doc_ref.get()
+        raw = snapshot.to_dict() if snapshot is not None else None
+        data = raw if isinstance(raw, Mapping) else {}
+        exists = isinstance(raw, Mapping)
 
         usage_today, window_start = _reset_window_if_needed(data, now)
         daily_limit = _resolve_daily_limit(account, data)
@@ -105,20 +146,47 @@ def _try_claim_account(
         if usage_today >= daily_limit:
             if data.get("windowStart") != window_start or data.get("usageToday") != usage_today:
                 update = {"windowStart": window_start, "usageToday": usage_today}
-                _transaction_set(transaction, doc_ref, update)
+                try:
+                    _write_usage_update(
+                        client=client,
+                        doc_ref=doc_ref,
+                        snapshot=snapshot,
+                        update=update,
+                        create_if_missing=not exists,
+                    )
+                except Exception as exc:
+                    if _is_precondition_error(exc) or _is_aborted_error(exc):
+                        if attempt < max_attempts - 1:
+                            time.sleep(base_backoff * (2**attempt))
+                            continue
+                    # Best-effort update for exhausted path.
             return None
 
-        usage_today += 1
-        update = {"windowStart": window_start, "usageToday": usage_today}
-        _transaction_set(transaction, doc_ref, update)
-        return AccountUsage(
-            account_id=account.id,
-            usage_today=usage_today,
-            daily_limit=daily_limit,
-            window_start=window_start,
-        )
+        next_usage = usage_today + 1
+        update = {"windowStart": window_start, "usageToday": next_usage}
+        try:
+            _write_usage_update(
+                client=client,
+                doc_ref=doc_ref,
+                snapshot=snapshot,
+                update=update,
+                create_if_missing=not exists,
+            )
+            return AccountUsage(
+                account_id=account.id,
+                usage_today=next_usage,
+                daily_limit=daily_limit,
+                window_start=window_start,
+            )
+        except Exception as exc:
+            if _is_precondition_error(exc) or _is_aborted_error(exc):
+                if attempt < max_attempts - 1:
+                    time.sleep(base_backoff * (2**attempt))
+                    continue
+                raise ClaimContentionError("usage claim precondition failed") from exc
+            raise
 
-    return _run_transaction(client, _claim)
+    raise ClaimContentionError("usage claim precondition failed")
 
 
 def _resolve_daily_limit(account: ChartImgAccount, data: Mapping[str, Any]) -> int:
@@ -158,14 +226,6 @@ def _utc_day_start(now: datetime) -> str:
     return start.replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def _transaction_set(transaction: Any, doc_ref: Any, update: dict[str, Any]) -> None:
-    setter = getattr(transaction, "set", None)
-    if callable(setter):
-        setter(doc_ref, update, merge=True)
-    else:
-        transaction.update(doc_ref, update)
-
-
 def _is_aborted_error(exc: Exception) -> bool:
     try:
         from google.api_core import exceptions as gax_exceptions
@@ -176,33 +236,37 @@ def _is_aborted_error(exc: Exception) -> bool:
     return exc.__class__.__name__ == "Aborted"
 
 
-def _run_transaction(client: Any, fn: Any) -> Any:
-    max_attempts = 5
-    base_backoff = 0.2
-    last_exc: Exception | None = None
-    for attempt in range(max_attempts):
-        transaction = client.transaction()
-        begin = getattr(transaction, "_begin", None)
-        try:
-            if callable(begin):
-                begin()
-            result = fn(transaction)
-            commit = getattr(transaction, "commit", None)
-            if callable(commit):
-                commit()
-            return result
-        except Exception as exc:
-            last_exc = exc
-            rollback = getattr(transaction, "_rollback", None)
-            if callable(rollback):
-                try:
-                    rollback()
-                except Exception:
-                    pass
-            if _is_aborted_error(exc) and attempt < max_attempts - 1:
-                time.sleep(base_backoff * (2**attempt))
-                continue
-            raise
-    if last_exc is not None:
-        raise last_exc
-    raise RuntimeError("transaction failed without exception")
+def _is_precondition_error(exc: Exception) -> bool:
+    try:
+        from google.api_core import exceptions as gax_exceptions
+    except Exception:
+        gax_exceptions = None
+    if gax_exceptions is not None and isinstance(
+        exc, (gax_exceptions.FailedPrecondition, gax_exceptions.Conflict)
+    ):
+        return True
+    return exc.__class__.__name__ in ("FailedPrecondition", "PreconditionFailed", "Conflict")
+
+
+def _write_usage_update(
+    *,
+    client: Any,
+    doc_ref: Any,
+    snapshot: Any,
+    update: dict[str, Any],
+    create_if_missing: bool,
+) -> None:
+    if create_if_missing:
+        if hasattr(client, "write_option"):
+            option = client.write_option(exists=False)
+            doc_ref.set(update, merge=False, option=option)
+        else:
+            doc_ref.set(update, merge=False)
+        return
+
+    update_time = getattr(snapshot, "update_time", None)
+    if update_time is not None and hasattr(client, "write_option"):
+        option = client.write_option(last_update_time=update_time)
+        doc_ref.update(update, option=option)
+    else:
+        doc_ref.update(update)

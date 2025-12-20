@@ -76,6 +76,23 @@ def build_finalize_failure_update(
 
 def _run_transaction(client: Any, fn: Any) -> Any:
     transaction = client.transaction()
+    # google-cloud-firestore transactions must be explicitly started; for fakes, just call fn+commit.
+    begin = getattr(transaction, "_begin", None)
+    if callable(begin):
+        begin()
+        try:
+            result = fn(transaction)
+            transaction.commit()
+            return result
+        except Exception:
+            rollback = getattr(transaction, "_rollback", None)
+            if callable(rollback):
+                try:
+                    rollback()
+                except Exception:
+                    pass
+            raise
+
     result = fn(transaction)
     commit = getattr(transaction, "commit", None)
     if callable(commit):

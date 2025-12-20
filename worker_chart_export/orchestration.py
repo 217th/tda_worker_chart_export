@@ -100,6 +100,16 @@ def _run_transaction(client: Any, fn: Any) -> Any:
     return result
 
 
+def _is_aborted_error(exc: Exception) -> bool:
+    try:
+        from google.api_core import exceptions as gax_exceptions
+    except Exception:
+        gax_exceptions = None
+    if gax_exceptions is not None and isinstance(exc, gax_exceptions.Aborted):
+        return True
+    return exc.__class__.__name__ == "Aborted"
+
+
 def claim_step_transaction(*, client: Any, run_id: str, step_id: str) -> ClaimResult:
     doc_ref = client.collection("flow_runs").document(run_id)
 
@@ -128,6 +138,16 @@ def claim_step_transaction(*, client: Any, run_id: str, step_id: str) -> ClaimRe
             },
             exc_info=True,
         )
+        if _is_aborted_error(exc):
+            status = None
+            try:
+                snapshot = doc_ref.get()
+                flow_run = snapshot.to_dict() if snapshot is not None else None
+                flow_run = flow_run if isinstance(flow_run, dict) else {}
+                status = _get_step_status(flow_run, step_id)
+            except Exception:
+                status = None
+            return ClaimResult(claimed=False, status=status, reason="aborted")
         raise
 
 

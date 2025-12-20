@@ -597,12 +597,27 @@
       "depends_on": [
         "T-023"
       ]
+    },
+    {
+      "id": "T-026",
+      "title": "Scenario: Chart-IMG account exhaustion",
+      "description": "Validate CHART_API_LIMIT_EXCEEDED path by setting usageToday=dailyLimit for all chart_img_accounts_usage docs and running CLI; confirm FAILED, failures[] populated, no PNG/manifest writes.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "codex",
+      "tags": [
+        "tests",
+        "gcp"
+      ],
+      "depends_on": [
+        "T-023"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "f1d5f9e0e8fe2145e78b4c9e666d445816f2ade24dfd6c2f5733616b988ae5d3"
+    "checksum": "11c0e8260d401a81e510804bbc98d89b42119da0ce10a08c2663752dc2d9d20f"
   }
 }

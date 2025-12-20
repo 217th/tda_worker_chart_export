@@ -75,39 +75,6 @@ def build_finalize_failure_update(
     )
 
 
-def _run_transaction(client: Any, fn: Any) -> Any:
-    max_attempts = 5
-    base_backoff = 0.2
-    last_exc: Exception | None = None
-    for attempt in range(max_attempts):
-        transaction = client.transaction()
-        # google-cloud-firestore transactions must be explicitly started; for fakes, just call fn+commit.
-        begin = getattr(transaction, "_begin", None)
-        try:
-            if callable(begin):
-                begin()
-            result = fn(transaction)
-            commit = getattr(transaction, "commit", None)
-            if callable(commit):
-                commit()
-            return result
-        except Exception as exc:
-            last_exc = exc
-            rollback = getattr(transaction, "_rollback", None)
-            if callable(rollback):
-                try:
-                    rollback()
-                except Exception:
-                    pass
-            if _is_aborted_error(exc) and attempt < max_attempts - 1:
-                time.sleep(base_backoff * (2**attempt))
-                continue
-            raise
-    if last_exc is not None:
-        raise last_exc
-    raise RuntimeError("transaction failed without exception")
-
-
 def _is_aborted_error(exc: Exception) -> bool:
     try:
         from google.api_core import exceptions as gax_exceptions
@@ -194,17 +161,19 @@ def finalize_step(
     error: StepError | None = None,
 ) -> FinalizeResult:
     doc_ref = client.collection("flow_runs").document(run_id)
-
-    def _finalize(transaction: Any) -> FinalizeResult:
-        snapshot = doc_ref.get(transaction=transaction)
+    logger = logging.getLogger("worker-chart-export")
+    max_attempts = 3
+    base_backoff = 0.2
+    last_status: str | None = None
+    for attempt in range(max_attempts):
+        snapshot = doc_ref.get()
         flow_run = snapshot.to_dict() if snapshot is not None else None
         flow_run = flow_run if isinstance(flow_run, dict) else {}
         current_status = _get_step_status(flow_run, step_id)
+        last_status = current_status
 
         if current_status in ("SUCCEEDED", "FAILED"):
-            return FinalizeResult(
-                updated=False, status=current_status, reason="already_final"
-            )
+            return FinalizeResult(updated=False, status=current_status, reason="already_final")
         if current_status != "RUNNING":
             return FinalizeResult(updated=False, status=current_status, reason="not_running")
 
@@ -224,8 +193,40 @@ def finalize_step(
                 finished_at=finished_at,
                 error=error,
             )
+        try:
+            update_time = getattr(snapshot, "update_time", None)
+            if update_time is not None and hasattr(client, "write_option"):
+                option = client.write_option(last_update_time=update_time)
+                doc_ref.update(update, option=option)
+            else:
+                doc_ref.update(update)
+            return FinalizeResult(updated=True, status=current_status)
+        except Exception as exc:
+            if _is_precondition_error(exc) or _is_aborted_error(exc):
+                if attempt < max_attempts - 1:
+                    time.sleep(base_backoff * (2**attempt))
+                    continue
+                logger.info(
+                    {
+                        "event": "firestore_finalize_precondition_failed",
+                        "message": "firestore_finalize_precondition_failed",
+                        "runId": run_id,
+                        "stepId": step_id,
+                        "status": last_status,
+                        "attempts": attempt + 1,
+                    }
+                )
+                return FinalizeResult(updated=False, status=last_status, reason="precondition_failed")
+            logger.error(
+                {
+                    "event": "firestore_finalize_error",
+                    "message": "firestore_finalize_error",
+                    "runId": run_id,
+                    "stepId": step_id,
+                    "error": type(exc).__name__,
+                },
+                exc_info=True,
+            )
+            raise
 
-        transaction.update(doc_ref, update)
-        return FinalizeResult(updated=True, status=current_status)
-
-    return _run_transaction(client, _finalize)
+    return FinalizeResult(updated=False, status=last_status, reason="precondition_failed")

@@ -93,10 +93,6 @@ def main(argv: list[str] | None = None) -> int:
         return 3
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
-
-
 def _build_text_summary(result: Any) -> str:
     manifest = result.outputs_manifest_gcs_uri or "-"
     items = "-" if result.items_count is None else result.items_count
@@ -118,3 +114,7 @@ def _build_json_summary(result: Any) -> dict[str, Any]:
         "minImages": result.min_images,
         "errorCode": result.error_code,
     }
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

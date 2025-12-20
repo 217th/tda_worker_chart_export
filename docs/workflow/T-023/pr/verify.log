@@ -38,3 +38,42 @@ Environment: real GCP (project kb-agent-479608, Firestore db tda-db, bucket gs:/
 Notes:
 - Firestore writes use optimistic update with precondition; no 409 errors during these runs.
 - Fixtures created locally under docs-worker-chart-export/fixtures/ (not committed).
+
+## Scenario: CLI invalid stepId
+- Command:
+  CHART_IMG_ACCOUNTS_JSON="$(gcloud secrets versions access latest --secret chart-img-accounts --project kb-agent-479608)" \
+    python -m worker_chart_export.cli run-local \
+      --flow-run-path /home/dd-user/projects/tda_worker_chart_export/tmp/flow_run_demo.json \
+      --step-id charts:1H:NON_EXISTENT_STEP \
+      --charts-bucket gs://tda-artifacts-test \
+      --charts-api-mode record
+- runId: 20251220-145500_BTCUSDT_demo5
+- Expected: exit!=0, errorCode=VALIDATION_FAILED, Firestore unchanged
+- Observed: exit=1, CHART_EXPORT FAILED; Firestore step remained SUCCEEDED
+- Result: PASS
+
+## Scenario: Idempotent retry (SUCCEEDED)
+- Command:
+  CHART_IMG_ACCOUNTS_JSON="$(gcloud secrets versions access latest --secret chart-img-accounts --project kb-agent-479608)" \
+    python -m worker_chart_export.cli run-local \
+      --flow-run-path /home/dd-user/projects/tda_worker_chart_export/tmp/flow_run_demo.json \
+      --step-id charts:1H:ctpl_price_ma1226_vol_v1 \
+      --charts-bucket gs://tda-artifacts-test \
+      --charts-api-mode record
+- runId: 20251220-145500_BTCUSDT_demo5
+- Expected: no-op, step remains SUCCEEDED
+- Observed: claim_attempt claimed=false status=SUCCEEDED, exit=0
+- Result: PASS
+
+## Scenario: GCS write failure (bad bucket)
+- Command:
+  CHART_IMG_ACCOUNTS_JSON="$(gcloud secrets versions access latest --secret chart-img-accounts --project kb-agent-479608)" \
+    python -m worker_chart_export.cli run-local \
+      --flow-run-path /home/dd-user/projects/tda_worker_chart_export/tmp/flow_run_demo.json \
+      --step-id charts:1H:ctpl_price_ma1226_vol_v1 \
+      --charts-bucket gs://tda-artifacts-test-typo \
+      --charts-api-mode record
+- runId: 20251220-152000_BTCUSDT_demo7
+- Expected: FAILED with GCS_WRITE_FAILED/MANIFEST_WRITE_FAILED
+- Observed: FAILED with error.code=MANIFEST_WRITE_FAILED (error: NotFound)
+- Result: PASS

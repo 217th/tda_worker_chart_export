@@ -225,3 +225,25 @@ python -m worker_chart_export.cli run-local \
 ## Rollback Plan
 
 - Удалить тестовые документы из Firestore, объекты из GCS; при необходимости удалить роли/секреты/функцию.
+- Дата: 20 Dec 2025
+- runId: `20251220-152000_BTCUSDT_demo7`
+- Источник аккаунтов: Secret Manager (`chart-img-accounts`)
+- Режим: `record`
+- Неверный bucket: `gs://tda-artifacts-test-typo`
+- Итог: `FAILED`
+- Error code: `MANIFEST_WRITE_FAILED` (error: `NotFound`)
+- PNG/manifest: не записаны
+
+### Scenario 3: CLI invalid stepId (факт)
+
+- Дата: 20 Dec 2025
+- runId: `20251220-145500_BTCUSDT_demo5` (SUCCEEDED)
+- stepId: `charts:1H:NON_EXISTENT_STEP`
+- Итог: exit=1, `VALIDATION_FAILED`
+- Firestore шаг не изменён (SUCCEEDED)
+
+### Scenario 6: Idempotent retry (факт)
+
+- Дата: 20 Dec 2025
+- runId: `20251220-145500_BTCUSDT_demo5` (SUCCEEDED)
+- Итог: no-op (`claimed=false`), exit=0, статус шага без изменений

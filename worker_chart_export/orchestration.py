@@ -118,45 +118,59 @@ def _is_aborted_error(exc: Exception) -> bool:
     return exc.__class__.__name__ == "Aborted"
 
 
+def _is_precondition_error(exc: Exception) -> bool:
+    try:
+        from google.api_core import exceptions as gax_exceptions
+    except Exception:
+        gax_exceptions = None
+    if gax_exceptions is not None and isinstance(
+        exc, (gax_exceptions.FailedPrecondition, gax_exceptions.Conflict)
+    ):
+        return True
+    return exc.__class__.__name__ in ("FailedPrecondition", "PreconditionFailed", "Conflict")
+
+
 def claim_step_transaction(*, client: Any, run_id: str, step_id: str) -> ClaimResult:
     doc_ref = client.collection("flow_runs").document(run_id)
-
-    def _claim(transaction: Any) -> ClaimResult:
-        snapshot = doc_ref.get(transaction=transaction)
+    max_attempts = 3
+    base_backoff = 0.2
+    last_status: str | None = None
+    for attempt in range(max_attempts):
+        snapshot = doc_ref.get()
         flow_run = snapshot.to_dict() if snapshot is not None else None
         flow_run = flow_run if isinstance(flow_run, dict) else {}
         status = _get_step_status(flow_run, step_id)
+        last_status = status
         if status != "READY":
             return ClaimResult(claimed=False, status=status, reason="not_ready")
         update = build_claim_update(step_id)
-        transaction.update(doc_ref, update)
-        return ClaimResult(claimed=True, status=status)
-
-    try:
-        return _run_transaction(client, _claim)
-    except Exception as exc:
-        logger = logging.getLogger("worker-chart-export")
-        logger.error(
-            {
-                "event": "firestore_claim_error",
-                "message": "firestore_claim_error",
-                "runId": run_id,
-                "stepId": step_id,
-                "error": type(exc).__name__,
-            },
-            exc_info=True,
-        )
-        if _is_aborted_error(exc):
-            status = None
-            try:
-                snapshot = doc_ref.get()
-                flow_run = snapshot.to_dict() if snapshot is not None else None
-                flow_run = flow_run if isinstance(flow_run, dict) else {}
-                status = _get_step_status(flow_run, step_id)
-            except Exception:
-                status = None
-            return ClaimResult(claimed=False, status=status, reason="aborted")
-        raise
+        try:
+            update_time = getattr(snapshot, "update_time", None)
+            if update_time is not None and hasattr(client, "write_option"):
+                option = client.write_option(last_update_time=update_time)
+                doc_ref.update(update, option=option)
+            else:
+                doc_ref.update(update)
+            return ClaimResult(claimed=True, status=status)
+        except Exception as exc:
+            if _is_precondition_error(exc) or _is_aborted_error(exc):
+                if attempt < max_attempts - 1:
+                    time.sleep(base_backoff * (2**attempt))
+                    continue
+                return ClaimResult(claimed=False, status=last_status, reason="precondition_failed")
+            logger = logging.getLogger("worker-chart-export")
+            logger.error(
+                {
+                    "event": "firestore_claim_error",
+                    "message": "firestore_claim_error",
+                    "runId": run_id,
+                    "stepId": step_id,
+                    "error": type(exc).__name__,
+                },
+                exc_info=True,
+            )
+            raise
+    return ClaimResult(claimed=False, status=last_status, reason="precondition_failed")
 
 
 def finalize_step(

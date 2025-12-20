@@ -104,6 +104,30 @@ echo '[{"id":"acc1","apiKey":"XXX","dailyLimit":44}]' | \
 - CLI сценарии 2–6 на реальном GCP, фиксация exit code, Firestore патчей, наличия PNG/manifest в GCS.
 - Eventarc сценарий вынесен в T-024.
 
+## Выполненные прогоны (факт)
+
+### Record + Secret Manager (боевой, 3 графика)
+
+- Дата: 20 Dec 2025
+- runId: `20251220-145500_BTCUSDT_demo5`
+- Источник аккаунтов: Secret Manager (`CHART_IMG_ACCOUNTS_JSON` из `chart-img-accounts`)
+- Режим: `record`
+- requests: 3 (ctpl_price_ma1226_vol_v1, ctpl_price_rsi14_stochrsi_v1, ctpl_price_psar_adi_v1)
+- Итог: `SUCCEEDED`, items=3, failures=0
+- Manifest:
+  - `gs://tda-artifacts-test/runs/20251220-145500_BTCUSDT_demo5/steps/charts:1H:ctpl_price_ma1226_vol_v1/charts/manifest.json`
+
+### Record (боевой, 1 график)
+
+- Дата: 20 Dec 2025
+- runId: `20251220-142500_BTCUSDT_demo4`
+- Источник аккаунтов: локальный файл (CLI `--accounts-config-path`)
+- Режим: `record`
+- requests: 1 (ctpl_price_ma1226_vol_v1)
+- Итог: `SUCCEEDED`, items=1, failures=0
+- Manifest:
+  - `gs://tda-artifacts-test/runs/20251220-142500_BTCUSDT_demo4/steps/charts:1H:ctpl_price_ma1226_vol_v1/charts/manifest.json`
+
 ## Пошаговая инструкция (выполняет оператор в консоли/Cloud Shell)
 
 ### Vars (задать один раз)

@@ -1,0 +1,40 @@
+# Verify Report — T-023
+
+Date: 2025-12-20
+Operator: human (local CLI)
+Environment: real GCP (project kb-agent-479608, Firestore db tda-db, bucket gs://tda-artifacts-test)
+
+## Scenario: Record + Secret Manager (3 requests)
+- Command:
+  CHART_IMG_ACCOUNTS_JSON="$(gcloud secrets versions access latest --secret chart-img-accounts --project kb-agent-479608)" \
+    python -m worker_chart_export.cli run-local \
+      --flow-run-path /home/dd-user/projects/tda_worker_chart_export/tmp/flow_run_demo.json \
+      --step-id charts:1H:ctpl_price_ma1226_vol_v1 \
+      --charts-bucket gs://tda-artifacts-test \
+      --charts-api-mode record
+- runId: 20251220-145500_BTCUSDT_demo5
+- Expected: step SUCCEEDED, 3 items, manifest in GCS
+- Observed:
+  - chart_api_call_finished: ok=true (3 calls)
+  - step_completed: status=SUCCEEDED, itemsCount=3, failuresCount=0
+  - outputsManifestGcsUri: gs://tda-artifacts-test/runs/20251220-145500_BTCUSDT_demo5/steps/charts:1H:ctpl_price_ma1226_vol_v1/charts/manifest.json
+- Result: PASS
+
+## Scenario: Record (1 request, local accounts file)
+- Command:
+  python -m worker_chart_export.cli run-local \
+    --flow-run-path /home/dd-user/projects/tda_worker_chart_export/tmp/flow_run_demo.json \
+    --step-id charts:1H:ctpl_price_ma1226_vol_v1 \
+    --charts-bucket gs://tda-artifacts-test \
+    --charts-api-mode record \
+    --accounts-config-path /home/dd-user/.secrets/tda/chart-img.accounts.local.json
+- runId: 20251220-142500_BTCUSDT_demo4
+- Expected: step SUCCEEDED, 1 item, manifest in GCS
+- Observed:
+  - step_completed: status=SUCCEEDED, itemsCount=1, failuresCount=0
+  - outputsManifestGcsUri: gs://tda-artifacts-test/runs/20251220-142500_BTCUSDT_demo4/steps/charts:1H:ctpl_price_ma1226_vol_v1/charts/manifest.json
+- Result: PASS
+
+Notes:
+- Firestore writes use optimistic update with precondition; no 409 errors during these runs.
+- Fixtures created locally under docs-worker-chart-export/fixtures/ (not committed).

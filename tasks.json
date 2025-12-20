@@ -612,12 +612,27 @@
       "depends_on": [
         "T-023"
       ]
+    },
+    {
+      "id": "T-025",
+      "title": "Simplify GCS artifact paths",
+      "description": "Reduce nesting in Cloud Storage object paths for PNGs/manifest; update contracts/specs, code, tests, and runbooks; document migration/compatibility considerations.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "codex",
+      "tags": [
+        "gcs",
+        "artifacts"
+      ],
+      "depends_on": [
+        "T-008"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "11c0e8260d401a81e510804bbc98d89b42119da0ce10a08c2663752dc2d9d20f"
+    "checksum": "95b04c3627f62c1be7d0e4c8da3a6c080647ba4c89eaf0663d637d02b42cf991"
   }
 }

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import logging
+import time
 from typing import Any, Mapping, Literal
 
 
@@ -75,29 +76,36 @@ def build_finalize_failure_update(
 
 
 def _run_transaction(client: Any, fn: Any) -> Any:
-    transaction = client.transaction()
-    # google-cloud-firestore transactions must be explicitly started; for fakes, just call fn+commit.
-    begin = getattr(transaction, "_begin", None)
-    if callable(begin):
-        begin()
+    max_attempts = 5
+    base_backoff = 0.2
+    last_exc: Exception | None = None
+    for attempt in range(max_attempts):
+        transaction = client.transaction()
+        # google-cloud-firestore transactions must be explicitly started; for fakes, just call fn+commit.
+        begin = getattr(transaction, "_begin", None)
         try:
+            if callable(begin):
+                begin()
             result = fn(transaction)
-            transaction.commit()
+            commit = getattr(transaction, "commit", None)
+            if callable(commit):
+                commit()
             return result
-        except Exception:
+        except Exception as exc:
+            last_exc = exc
             rollback = getattr(transaction, "_rollback", None)
             if callable(rollback):
                 try:
                     rollback()
                 except Exception:
                     pass
+            if _is_aborted_error(exc) and attempt < max_attempts - 1:
+                time.sleep(base_backoff * (2**attempt))
+                continue
             raise
-
-    result = fn(transaction)
-    commit = getattr(transaction, "commit", None)
-    if callable(commit):
-        commit()
-    return result
+    if last_exc is not None:
+        raise last_exc
+    raise RuntimeError("transaction failed without exception")
 
 
 def _is_aborted_error(exc: Exception) -> bool:

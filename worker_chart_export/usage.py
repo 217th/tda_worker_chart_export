@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
@@ -165,10 +166,43 @@ def _transaction_set(transaction: Any, doc_ref: Any, update: dict[str, Any]) -> 
         transaction.update(doc_ref, update)
 
 
+def _is_aborted_error(exc: Exception) -> bool:
+    try:
+        from google.api_core import exceptions as gax_exceptions
+    except Exception:
+        gax_exceptions = None
+    if gax_exceptions is not None and isinstance(exc, gax_exceptions.Aborted):
+        return True
+    return exc.__class__.__name__ == "Aborted"
+
+
 def _run_transaction(client: Any, fn: Any) -> Any:
-    transaction = client.transaction()
-    result = fn(transaction)
-    commit = getattr(transaction, "commit", None)
-    if callable(commit):
-        commit()
-    return result
+    max_attempts = 5
+    base_backoff = 0.2
+    last_exc: Exception | None = None
+    for attempt in range(max_attempts):
+        transaction = client.transaction()
+        begin = getattr(transaction, "_begin", None)
+        try:
+            if callable(begin):
+                begin()
+            result = fn(transaction)
+            commit = getattr(transaction, "commit", None)
+            if callable(commit):
+                commit()
+            return result
+        except Exception as exc:
+            last_exc = exc
+            rollback = getattr(transaction, "_rollback", None)
+            if callable(rollback):
+                try:
+                    rollback()
+                except Exception:
+                    pass
+            if _is_aborted_error(exc) and attempt < max_attempts - 1:
+                time.sleep(base_backoff * (2**attempt))
+                continue
+            raise
+    if last_exc is not None:
+        raise last_exc
+    raise RuntimeError("transaction failed without exception")

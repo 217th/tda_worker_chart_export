@@ -14,6 +14,7 @@ class DummyConfig:
     charts_api_mode = "mock"
     charts_default_timezone = "Etc/UTC"
     chart_img_accounts = []
+    firestore_database = "tda-db"
     service = "worker-chart-export"
     env = "test"
 
@@ -21,7 +22,7 @@ class DummyConfig:
 def test_no_ready_step_returns_validation_failed(monkeypatch):
     flow_run = {"runId": "run1", "steps": {}}
 
-    monkeypatch.setattr(core, "_firestore_client", lambda: object())
+    monkeypatch.setattr(core, "_firestore_client", lambda *_args, **_kwargs: object())
     monkeypatch.setattr(core, "_storage_client", lambda: object())
 
     result = core.run_chart_export_step(flow_run=flow_run, step_id=None, config=DummyConfig())
@@ -83,7 +84,7 @@ def test_build_requests_failure_propagates(monkeypatch):
         finalized["error"] = kwargs.get("error")
 
     monkeypatch.setattr(core, "finalize_step", fake_finalize)
-    monkeypatch.setattr(core, "_firestore_client", lambda: object())
+    monkeypatch.setattr(core, "_firestore_client", lambda *_args, **_kwargs: object())
     monkeypatch.setattr(core, "_storage_client", lambda: object())
 
     result = core.run_chart_export_step(flow_run=flow_run, step_id=None, config=DummyConfig())
@@ -150,7 +151,7 @@ def test_no_accounts_limit_exceeded(monkeypatch):
         lambda **kwargs: ("gs://dummy/runs/run1/steps/s1/manifest.json", None),
     )
     monkeypatch.setattr(core, "finalize_step", lambda **kwargs: None)
-    monkeypatch.setattr(core, "_firestore_client", lambda: object())
+    monkeypatch.setattr(core, "_firestore_client", lambda *_args, **_kwargs: object())
     monkeypatch.setattr(core, "_storage_client", lambda: object())
 
     result = core.run_chart_export_step(flow_run=flow_run, step_id=None, config=DummyConfig())

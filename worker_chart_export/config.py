@@ -30,6 +30,7 @@ class WorkerConfig:
     charts_api_mode: ChartsApiMode
     charts_default_timezone: str
     chart_img_accounts: tuple[ChartImgAccount, ...]
+    firestore_database: str = "(default)"
     service: str = "worker-chart-export"
     env: str | None = None
 
@@ -83,11 +84,16 @@ class WorkerConfig:
         if _is_prod_env(env) and charts_api_mode == "record":
             raise ConfigError("CHARTS_API_MODE=record is not allowed in prod environment")
 
+        firestore_database = (os.environ.get("FIRESTORE_DB") or "(default)").strip()
+        if firestore_database == "":
+            raise ConfigError("FIRESTORE_DB must not be empty")
+
         return cls(
             charts_bucket=charts_bucket,
             charts_api_mode=charts_api_mode,  # type: ignore[assignment]
             charts_default_timezone=charts_default_timezone,
             chart_img_accounts=tuple(chart_img_accounts),
+            firestore_database=firestore_database,
             env=env,
         )
 

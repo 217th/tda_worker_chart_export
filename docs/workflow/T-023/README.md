@@ -170,6 +170,7 @@ gcloud secrets versions add chart-img-accounts --project=${PROJECT_ID} --data-fi
 ### 6. Локальный запуск CLI (mock, безопасный)
 ```bash
 export GOOGLE_CLOUD_PROJECT=${PROJECT_ID}
+export FIRESTORE_DB=tda-db
 export CHARTS_BUCKET=gs://${ARTIFACTS_BUCKET}
 export CHARTS_API_MODE=mock
 export CHART_IMG_ACCOUNTS_JSON="$(gcloud secrets versions access latest --secret=chart-img-accounts --project=${PROJECT_ID})"

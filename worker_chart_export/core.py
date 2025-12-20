@@ -57,7 +57,7 @@ def run_chart_export_step(
     now: datetime | None = None,
 ) -> CoreResult:
     logger = logging.getLogger("worker-chart-export")
-    firestore_client = firestore_client or _firestore_client()
+    firestore_client = firestore_client or _firestore_client(config.firestore_database)
     storage_client = storage_client or _storage_client()
     chart_img_client = chart_img_client or _build_chart_img_client(config)
     now = now or datetime.now(timezone.utc)
@@ -402,12 +402,20 @@ _STORAGE_CLIENT = None
 
 
 def _firestore_client():
-    global _FS_CLIENT
-    if _FS_CLIENT is None:
+    raise RuntimeError("Use _firestore_client(database=...)")
+
+
+_FS_CLIENTS: dict[str, Any] = {}
+
+
+def _firestore_client(database: str):
+    client = _FS_CLIENTS.get(database)
+    if client is None:
         from google.cloud import firestore  # type: ignore
 
-        _FS_CLIENT = firestore.Client()
-    return _FS_CLIENT
+        client = firestore.Client(database=database)
+        _FS_CLIENTS[database] = client
+    return client
 
 
 def _storage_client():

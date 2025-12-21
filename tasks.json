@@ -590,12 +590,22 @@
       "id": "T-024",
       "title": "GCP deploy & Eventarc demo",
       "description": "Деплой worker-chart-export в Cloud Run Functions gen2 + Eventarc на Firestore update; повторение интеграционных сценариев в облаке (concurrency=1, retries идемпотентны), логирование в Cloud Logging. Автоматизировать gcloud/terraform шаги и проверить E2E.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "high",
       "owner": "human",
       "tags": [],
       "depends_on": [
         "T-023"
+      ],
+      "commit": {
+        "hash": "1993594b6be084d51f2dfc48d01035391de404dd",
+        "message": "🧹 T-024 ignore local fixtures"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Cloud Run Functions gen2 deployment validated; Eventarc wiring, GCS/Secret failure scenarios verified; see docs/workflow/T-024/pr/verify.log and docs/workflow/lessons_learned_cloud_functions_gen2_deploy.md."
+        }
       ]
     },
     {
@@ -633,6 +643,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "95b04c3627f62c1be7d0e4c8da3a6c080647ba4c89eaf0663d637d02b42cf991"
+    "checksum": "05f48661b93dc5f90ceb51da09624a99f2a829cc326e4e5e3c4e32a07bc134de"
   }
 }

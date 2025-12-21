@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from importlib import resources
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,6 +15,7 @@ from .orchestration import StepError
 MANIFEST_SCHEMA_PATH = Path(
     "docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json"
 )
+MANIFEST_SCHEMA_RESOURCE = "charts_outputs_manifest.schema.json"
 
 
 @dataclass(frozen=True, slots=True)
@@ -205,9 +207,17 @@ def write_manifest(
 
 
 def _load_manifest_schema(schema_path: Path | None) -> dict[str, Any]:
-    path = schema_path or MANIFEST_SCHEMA_PATH
-    raw = path.read_text("utf-8")
-    return json.loads(raw)
+    if schema_path is not None:
+        raw = schema_path.read_text("utf-8")
+        return json.loads(raw)
+    try:
+        raw = resources.files("worker_chart_export.contracts").joinpath(
+            MANIFEST_SCHEMA_RESOURCE
+        ).read_text("utf-8")
+        return json.loads(raw)
+    except Exception:
+        raw = MANIFEST_SCHEMA_PATH.read_text("utf-8")
+        return json.loads(raw)
 
 
 def _parse_gs_bucket(value: str) -> str:

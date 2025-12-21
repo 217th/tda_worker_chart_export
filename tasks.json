@@ -627,7 +627,7 @@
       "id": "T-025",
       "title": "Simplify GCS artifact paths",
       "description": "Reduce nesting in Cloud Storage object paths for PNGs/manifest; update contracts/specs, code, tests, and runbooks; document migration/compatibility considerations.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "codex",
       "tags": [
@@ -636,6 +636,16 @@
       ],
       "depends_on": [
         "T-008"
+      ],
+      "commit": {
+        "hash": "bb7f4bf75efb68479cd41abf6ac7c70446e9077e",
+        "message": "📌 T-025 refresh PR artifacts"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: cloud regression scenarios executed in GCP; see docs/workflow/T-025/pr/verify.log."
+        }
       ]
     }
   ],
@@ -643,6 +653,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "05f48661b93dc5f90ceb51da09624a99f2a829cc326e4e5e3c4e32a07bc134de"
+    "checksum": "c37c4f88b415ef108c1de125a8ee2ecd7a1779d47ce8ac18678b06e4fa7817f3"
   }
 }

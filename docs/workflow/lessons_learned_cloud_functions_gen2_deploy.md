@@ -143,6 +143,16 @@ has `storage.objectAdmin`.
 **Lesson:** Manifest write failures surface clearly via `MANIFEST_WRITE_FAILED`;
 use this scenario to validate GCS wiring.
 
+### 12) Secret Manager bad JSON fails fast at config
+
+**Symptom:** `config_error` with `CHART_IMG_ACCOUNTS_JSON must be a valid JSON array`
+and stack trace in logs.
+**Fix:** Validate secret contents (JSON array of `{id, apiKey}`) and redeploy
+with correct secret version.
+
+**Lesson:** Misconfigured secrets are caught early; expect no step execution
+and no artifacts when config fails.
+
 ## Canonical deploy command (post-fixes)
 
 ```

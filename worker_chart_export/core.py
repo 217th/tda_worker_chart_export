@@ -212,12 +212,14 @@ def run_chart_export_step(
 
     success = len(manifest_items) >= min_images
     if not success:
-        code = failures[0]["error"]["code"] if failures else "VALIDATION_FAILED"
+        first_error = failures[0]["error"] if failures else {"code": "VALIDATION_FAILED", "message": "minImages not satisfied"}
+        code = first_error.get("code", "VALIDATION_FAILED")
+        message = first_error.get("message", "minImages not satisfied")
         return _finalize_failure(
             firestore_client,
             run_id,
             step_id,
-            StepError(code=code, message="minImages not satisfied"),
+            StepError(code=code, message=message),
             logger,
             outputs_manifest_gcs_uri=manifest_uri,
             items_count=len(manifest_items),

@@ -52,6 +52,13 @@ Result:
 - Error: "CHART_IMG_ACCOUNTS_JSON must be a valid JSON array"
 - No step execution (config failure)
 
+Scenario 3: Invalid stepId (Cloud Run interpretation)
+Note: Cloud Run does not accept stepId; worker auto-selects READY CHART_EXPORT.
+Setup: flow_run without READY CHART_EXPORT (or non-CHART_EXPORT steps only).
+Result:
+- Log event: cloud_event_noop
+- reason=no_ready_step
+
 Scenario: Idempotent retry
 RunId: 20251221-083000_BTCUSDT_demo3
 Update repeated after SUCCEEDED

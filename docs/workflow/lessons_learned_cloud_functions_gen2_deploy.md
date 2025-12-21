@@ -153,6 +153,14 @@ with correct secret version.
 **Lesson:** Misconfigured secrets are caught early; expect no step execution
 and no artifacts when config fails.
 
+### 13) Cloud Run does not accept stepId overrides
+
+**Symptom:** Cannot reproduce "invalid stepId" behavior from CLI in Cloud Run.
+**Fix:** Treat Scenario 3 as "no READY CHART_EXPORT" which yields
+`cloud_event_noop` with `reason=no_ready_step`.
+
+**Lesson:** Cloud Run handler auto-selects READY steps; stepId is only a CLI concern.
+
 ## Canonical deploy command (post-fixes)
 
 ```

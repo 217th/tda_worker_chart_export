@@ -29,6 +29,13 @@ Result:
 - Reason: runId regex mismatch (underscore in suffix)
 Outcome: documented; subsequent runId updated to pass regex.
 
+Scenario 6: Missing chart template
+RunId: 20251221-083000_BTCUSDT_demo4
+Template: non-existent chartTemplateId
+Result:
+- Firestore error.code=VALIDATION_FAILED
+- Firestore error.message="Chart template not found"
+
 Scenario: Idempotent retry
 RunId: 20251221-083000_BTCUSDT_demo3
 Update repeated after SUCCEEDED

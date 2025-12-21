@@ -123,6 +123,16 @@ solely on `data` for Firestore-triggered flows.
 **Lesson:** runId format is part of manifest schema validation; invalid runId
 will fail the step even if PNG generation succeeds.
 
+### 10) Missing chart template should surface original error
+
+**Symptom:** Missing template produced `VALIDATION_FAILED` with generic
+`minImages not satisfied`.
+**Fix:** Preserve original failure message (e.g., `Chart template not found`)
+when `minImages` fails because all items failed.
+
+**Lesson:** Validation failures should be specific to the root cause to avoid
+misleading operators.
+
 ## Canonical deploy command (post-fixes)
 
 ```

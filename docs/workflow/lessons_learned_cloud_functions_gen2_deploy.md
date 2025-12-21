@@ -11,6 +11,10 @@ deploy of `worker-chart-export` to Cloud Functions (gen2) in `europe-west4`.
   requirements, granting correct IAM roles, and sanitizing the source bundle
   with `.gcloudignore`.
 - Firestore trigger works for a **non-default** database in `europe-west4`.
+- CloudEvent payload for Firestore updates may arrive without `data`; handler
+  should fallback to fetching `flow_run` from Firestore by `subject` runId.
+- Manifest schema must be bundled with runtime; docs-only paths are excluded
+  by `.gcloudignore`.
 
 ## Issues and fixes
 
@@ -64,6 +68,21 @@ gcloud projects add-iam-policy-binding <PROJECT_ID> \
 
 **Lesson:** Eventarc trigger delivery is blocked without `eventReceiver`.
 
+### 5) Cloud Run invocation permissions missing
+
+**Symptom:** HTTP 403 from Cloud Run on Eventarc delivery.  
+**Fix:** Grant `roles/run.invoker` to the Eventarc trigger service account:
+
+```
+gcloud run services add-iam-policy-binding worker-chart-export \
+  --region=europe-west4 \
+  --project <PROJECT_ID> \
+  --member="serviceAccount:<RUNTIME_SA>" \
+  --role="roles/run.invoker"
+```
+
+**Lesson:** Eventarc triggers require Cloud Run invoker permissions.
+
 ### 5) Region and DB alignment
 
 **Symptom:** Trigger validation errors when Firestore DB region mismatched.  
@@ -80,6 +99,29 @@ must be aligned.
 
 **Lesson:** If `gcloud` crashes mid-deploy, retry from a known-good environment
 before debugging the config.
+
+### 7) Firestore event data missing in CloudEvent
+
+**Symptom:** CloudEvent `data` is `None`, causing `event_filtered`.  
+**Fix:** Extract `runId` from `subject` and fetch `flow_run` from Firestore.
+
+**Lesson:** CloudEvent payloads may not include document data; avoid relying
+solely on `data` for Firestore-triggered flows.
+
+### 8) Manifest schema missing in runtime bundle
+
+**Symptom:** `FileNotFoundError` on manifest schema path in Cloud Run.  
+**Fix:** Package schema inside the application (resources) and load from there.
+
+**Lesson:** Anything required at runtime must be bundled; `docs-*` are excluded.
+
+### 9) Manifest validation failure due to runId format
+
+**Symptom:** `VALIDATION_FAILED` with runId regex mismatch.  
+**Fix:** Use runId suffix without `_` (only `[a-z0-9]{3,6}`).
+
+**Lesson:** runId format is part of manifest schema validation; invalid runId
+will fail the step even if PNG generation succeeds.
 
 ## Canonical deploy command (post-fixes)
 

@@ -31,9 +31,16 @@ class JsonFormatter(logging.Formatter):
 
 def configure_logging(*, level: str | None = None) -> None:
     lvl = (level or os.environ.get("LOG_LEVEL") or "INFO").upper().strip()
-    logging.basicConfig(level=lvl, format="%(message)s")
     root = logging.getLogger()
+    root.setLevel(lvl)
+    if not root.handlers:
+        handler = logging.StreamHandler()
+        handler.setLevel(lvl)
+        handler.setFormatter(JsonFormatter())
+        root.addHandler(handler)
+        return
     for handler in root.handlers:
+        handler.setLevel(lvl)
         handler.setFormatter(JsonFormatter())
 
 

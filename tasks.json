@@ -680,12 +680,27 @@
           "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-027/pr."
         }
       ]
+    },
+    {
+      "id": "T-028",
+      "title": "Finalize MVP",
+      "description": "Housekeeping for MVP: update .gitignore with standard Python paths and project-specific ignore patterns (docs-*, import-firestore*, /tmp).",
+      "status": "TODO",
+      "priority": "low",
+      "owner": "codex",
+      "tags": [
+        "housekeeping",
+        "mvp"
+      ],
+      "depends_on": [
+        ""
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "1d02fc61ed6d6e7d8464032cf67ae556c095408e19688793e33fea99c2cbf60f"
+    "checksum": "3c35cec82d67f8f86e37d6fe03e311c30534fae8080964fcd1f1ec73cb7c8ee1"
   }
 }

@@ -85,6 +85,7 @@
 
 - Check updated specs + test vectors reference the new gs:// paths.
 - Run regression test bundle (per QA harness).
+- Cloud regression practice: `docs/workflow/cloud_regression_practice.md`.
 
 ## Rollback Plan
 

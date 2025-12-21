@@ -74,14 +74,14 @@
 ## 5) Выходы: артефакты в GCS
 ### 5.1 PNG paths
 Для каждого успешно полученного изображения воркер пишет PNG в директорию:
-- `runs/<runId>/charts/<timeframe>/<chartTemplateId>/`
+- `charts/<runId>/<stepId>/`
 
 Имя файла PNG (см. `charts_images_naming.md`):
 - `<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`
 
 ### 5.2 Manifest path
 Воркер пишет один `ChartsOutputsManifest` JSON в:
-- `runs/<runId>/steps/<stepId>/charts/manifest.json`
+- `charts/<runId>/<stepId>/manifest.json`
 
 **Важно (привязка к шагу)**:
 - Путь к manifest зависит только от `runId` и `stepId`, а **не** от конкретного `chartTemplateId`.
@@ -157,7 +157,7 @@ Event trigger может быть at-least-once.
   - downstream должен ориентироваться на `manifest.items[]`, а не на “все PNG в директории”
   - при повторном успешном выполнении воркер может создать **новые PNG-файлы** (с новым `generatedAt` в имени) и обновить manifest; старые PNG в директории считаются “старыми версиями” и игнорируются downstream.
     - Требование MVP: воркер **не обязан** удалять/очищать старые PNG при retry.
-    - Критерий идемпотентности: для фиксированных `runId+stepId` итоговое состояние определяется **только** содержимым последнего `ChartsOutputsManifest`, а не набором файлов в `runs/<runId>/charts/...`.
+    - Критерий идемпотентности: для фиксированных `runId+stepId` итоговое состояние определяется **только** содержимым последнего `ChartsOutputsManifest`, а не набором файлов в `charts/<runId>/<stepId>/...`.
 
 ---
 

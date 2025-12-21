@@ -23,7 +23,7 @@ Trading Decisions Assistant component that renders PNG charts via Chart-IMG base
 3) **Templates** (T-005): load `chart_templates/{chartTemplateId}`; required `chartImgSymbolTemplate`; `scope.symbol` expected without slash (e.g., `BTCUSDT`).
 4) **Accounts & limits** (T-006): transactional usage in `chart_img_accounts_usage/{accountId}`, daily window reset (UTC), attempts counted, 429 marks account exhausted.
 5) **Chart-IMG client** (T-007): modes `real|mock|record`; bounded retries/backoff; errors `CHART_API_FAILED | CHART_API_LIMIT_EXCEEDED | CHART_API_MOCK_MISSING`; timezone default `Etc/UTC`.
-6) **Artifacts** (T-008): PNG path `runs/<runId>/charts/<timeframe>/<chartTemplateId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`; manifest path `runs/<runId>/steps/<stepId>/charts/manifest.json`; URIs `gs://...`; manifest validated; no `signed_url/expires_at`.
+6) **Artifacts** (T-008): PNG path `charts/<runId>/<stepId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`; manifest path `charts/<runId>/<stepId>/manifest.json`; URIs `gs://...`; manifest validated; no `signed_url/expires_at`.
 7) **Finalize** (T-004): patch `RUNNING -> SUCCEEDED|FAILED` with outputs or error code; idempotent on repeated finalize.
 
 ## Configuration (env)

@@ -36,6 +36,7 @@ class TestGcsArtifacts(unittest.TestCase):
         generated = GeneratedAt(rfc3339="2025-12-18T12:34:56Z", filename_stamp="20251218-123456")
         path = build_png_object_path(
             run_id="20251218-123456_BTCUSDT_abcd",
+            step_id="charts:1h:ctpl_price_psar_adi_v1",
             timeframe="1h",
             chart_template_id="ctpl_price_psar_adi_v1",
             generated_at_filename=generated.filename_stamp,
@@ -43,14 +44,14 @@ class TestGcsArtifacts(unittest.TestCase):
         )
         self.assertEqual(
             path,
-            "runs/20251218-123456_BTCUSDT_abcd/charts/1h/ctpl_price_psar_adi_v1/"
+            "charts/20251218-123456_BTCUSDT_abcd/charts:1h:ctpl_price_psar_adi_v1/"
             "20251218-123456_BTCUSDT_1h_ctpl_price_psar_adi_v1.png",
         )
         uri = gs_uri(bucket_gs="gs://charts-bucket", object_path=path)
         self.assertEqual(
             uri,
-            "gs://charts-bucket/runs/20251218-123456_BTCUSDT_abcd/charts/1h/"
-            "ctpl_price_psar_adi_v1/20251218-123456_BTCUSDT_1h_ctpl_price_psar_adi_v1.png",
+            "gs://charts-bucket/charts/20251218-123456_BTCUSDT_abcd/"
+            "charts:1h:ctpl_price_psar_adi_v1/20251218-123456_BTCUSDT_1h_ctpl_price_psar_adi_v1.png",
         )
 
     def test_upload_pngs_partial_failure(self) -> None:
@@ -75,13 +76,14 @@ class TestGcsArtifacts(unittest.TestCase):
         ]
         fail_path = build_png_object_path(
             run_id="run-1",
+            step_id="step1",
             timeframe="1h",
             chart_template_id="ctpl_b",
             generated_at_filename=generated.filename_stamp,
             symbol_slug="BTCUSDT",
         )
         uploader = FakeUploader(bucket_gs="gs://charts", fail_paths={fail_path}, uploads=[])
-        result = upload_pngs(uploader=uploader, run_id="run-1", inputs=inputs)
+        result = upload_pngs(uploader=uploader, run_id="run-1", step_id="step1", inputs=inputs)
         self.assertEqual(len(result.items), 1)
         self.assertEqual(len(result.failures), 1)
         failure = result.failures[0]
@@ -130,6 +132,7 @@ class TestGcsArtifacts(unittest.TestCase):
         result = upload_pngs(
             uploader=uploader,
             run_id="run-1",
+            step_id="step1",
             inputs=[
                 PngUploadInput(
                     chart_template_id="ctpl_a",

@@ -58,19 +58,20 @@ class GcsUploader:
 def build_png_object_path(
     *,
     run_id: str,
+    step_id: str,
     timeframe: str,
     chart_template_id: str,
     generated_at_filename: str,
     symbol_slug: str,
 ) -> str:
     return (
-        f"runs/{run_id}/charts/{timeframe}/{chart_template_id}/"
+        f"charts/{run_id}/{step_id}/"
         f"{generated_at_filename}_{symbol_slug}_{timeframe}_{chart_template_id}.png"
     )
 
 
 def build_manifest_object_path(*, run_id: str, step_id: str) -> str:
-    return f"runs/{run_id}/steps/{step_id}/charts/manifest.json"
+    return f"charts/{run_id}/{step_id}/manifest.json"
 
 
 def gs_uri(*, bucket_gs: str, object_path: str) -> str:
@@ -91,6 +92,7 @@ def upload_pngs(
     *,
     uploader: GcsUploader,
     run_id: str,
+    step_id: str,
     inputs: Sequence[PngUploadInput],
 ) -> PngUploadResult:
     items: list[dict[str, Any]] = []
@@ -99,6 +101,7 @@ def upload_pngs(
     for entry in inputs:
         object_path = build_png_object_path(
             run_id=run_id,
+            step_id=step_id,
             timeframe=entry.timeframe,
             chart_template_id=entry.chart_template_id,
             generated_at_filename=entry.generated_at.filename_stamp,

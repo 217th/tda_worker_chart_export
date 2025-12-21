@@ -139,7 +139,7 @@ class TestFirestoreClaimFinalize(unittest.TestCase):
             step_id="stepA",
             status="SUCCEEDED",
             finished_at="2025-12-15T10:26:15Z",
-            outputs_manifest_gcs_uri="gs://bucket/runs/run-1/steps/stepA/charts/manifest.json",
+            outputs_manifest_gcs_uri="gs://bucket/charts/run-1/stepA/manifest.json",
         )
         self.assertTrue(result.updated)
         flow_run = client._store["flow_runs"]["run-1"]
@@ -148,7 +148,7 @@ class TestFirestoreClaimFinalize(unittest.TestCase):
         self.assertEqual(step["finishedAt"], "2025-12-15T10:26:15Z")
         self.assertEqual(
             step["outputs"]["outputsManifestGcsUri"],
-            "gs://bucket/runs/run-1/steps/stepA/charts/manifest.json",
+            "gs://bucket/charts/run-1/stepA/manifest.json",
         )
         self.assertEqual(step["outputs"]["keep"], "yes")
         self.assertIn("stepB", flow_run["steps"])

@@ -75,7 +75,7 @@ def test_build_requests_failure_propagates(monkeypatch):
     monkeypatch.setattr(
         core,
         "write_manifest",
-        lambda **kwargs: ("gs://dummy/runs/run1/steps/s1/manifest.json", None),
+        lambda **kwargs: ("gs://dummy/charts/run1/s1/manifest.json", None),
     )
     finalized = {}
 
@@ -148,7 +148,7 @@ def test_no_accounts_limit_exceeded(monkeypatch):
     monkeypatch.setattr(
         core,
         "write_manifest",
-        lambda **kwargs: ("gs://dummy/runs/run1/steps/s1/manifest.json", None),
+        lambda **kwargs: ("gs://dummy/charts/run1/s1/manifest.json", None),
     )
     monkeypatch.setattr(core, "finalize_step", lambda **kwargs: None)
     monkeypatch.setattr(core, "_firestore_client", lambda *_args, **_kwargs: object())

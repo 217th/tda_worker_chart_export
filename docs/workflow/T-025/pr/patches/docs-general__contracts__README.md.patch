@@ -1,0 +1,13 @@
+--- docs-general/contracts/README.md
++++ docs-general/contracts/README.md
+@@ -25,8 +25,8 @@
+ Формально схема путей не валидируется JSON Schema, но для читабельности и отладки придерживаемся:
+ 
+ - `runs/<runId>/ohlcv/<timeframe>.json`
+-- `runs/<runId>/charts/<timeframe>/<chartTemplateId>/manifest.json`
+-- `runs/<runId>/charts/<timeframe>/<chartTemplateId>/<generatedAt>__<symbolSlug>__<timeframe>__<chartTemplateId>__<kind>.png`
++- `charts/<runId>/<stepId>/manifest.json`
++- `charts/<runId>/<stepId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`
+ - `runs/<runId>/reports/<timeframe>/<stepId>.json`
+ - `runs/<runId>/recommendations/<stepId>.json`
+ 

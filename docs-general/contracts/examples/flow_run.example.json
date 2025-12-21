@@ -61,7 +61,7 @@
       "inputs": {
         "llm": { "promptId": "prompt_month_v1", "modelId": "model_gpt_4o_mini" },
         "ohlcv_gcs_uri": "gcs://artifacts-bucket/runs/20251215-102530_BTC-USDT_k3f7a/ohlcv/1M.json",
-        "charts_outputsManifestGcsUri": "gcs://artifacts-bucket/runs/20251215-102530_BTC-USDT_k3f7a/charts/1M/ctpl_default_v1/manifest.json"
+        "charts_outputsManifestGcsUri": "gcs://artifacts-bucket/charts/20251215-102530_BTC-USDT_k3f7a/charts:1M:ctpl_default_v1/manifest.json"
       },
       "outputs": {}
     }

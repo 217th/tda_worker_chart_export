@@ -38,9 +38,9 @@
 - Модули/функции: `chart_img.ChartImgClient.fetch`, `chart_img.fetch_with_retries`, `core._execute_chart_request`.
 
 ## 7) Загрузка артефактов в GCS
-- Для каждого успешного PNG: путь `runs/<runId>/charts/<timeframe>/<chartTemplateId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`, где `symbolSlug = scope.symbol`.
+- Для каждого успешного PNG: путь `charts/<runId>/<stepId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`, где `symbolSlug = scope.symbol`.
 - Формируется manifest: `schemaVersion=1`, `runId`, `stepId`, `createdAt` (RFC3339), `symbol`, `timeframe`, `minImages`, `requested`, `items`, `failures`.
-- Валидируется manifest по JSON Schema; запись в `runs/<runId>/steps/<stepId>/charts/manifest.json` (`gs://` URI).
+- Валидируется manifest по JSON Schema; запись в `charts/<runId>/<stepId>/manifest.json` (`gs://` URI).
 - Модули/функции: `gcs_artifacts.upload_pngs`, `gcs_artifacts.build_manifest`, `gcs_artifacts.validate_manifest`, `gcs_artifacts.write_manifest`.
 
 ## 8) Итоговый статус шага

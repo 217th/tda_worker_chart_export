@@ -1,0 +1,6 @@
+# Verify log
+
+Status: NOT RUN (no automated or manual verification executed in this task).
+Notes:
+- Path updates are purely deterministic string changes; recommend running
+  `python scripts/qa/run_all.sh` once available.

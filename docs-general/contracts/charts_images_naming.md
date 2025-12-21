@@ -6,13 +6,12 @@
 - по какому символу
 - какой таймфрейм
 - какой шаблон
-- какой “вид” изображения (kind)
 
 ## Директория
 
 Для единообразия с manifest'ом:
 
-`runs/<runId>/charts/<timeframe>/<chartTemplateId>/`
+`charts/<runId>/<stepId>/`
 
 > Примечание: `runId` уже содержит timestamp + symbolSlug, но мы дублируем
 > семантику и в имени PNG — это удобно при копировании/шеринге ссылок на файл.
@@ -20,7 +19,7 @@
 ## Формат имени файла PNG
 
 ```
-<generatedAt>__<symbolSlug>__<timeframe>__<chartTemplateId>__<kind>.png
+<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png
 ```
 
 Где:
@@ -28,11 +27,10 @@
 - `symbolSlug`: например `BTC-USDT` (без `/`)
 - `timeframe`: например `1M`, `1w`, `4h`
 - `chartTemplateId`: например `ctpl_default_v1`
-- `kind`: например `price`, `volume`, `rsi`, `macd`
 
 ### Пример
 
-`runs/20251215-102530_BTC-USDT_k3f7a/charts/1M/ctpl_default_v1/20251215-102612__BTC-USDT__1M__ctpl_default_v1__price.png`
+`charts/20251215-102530_BTC-USDT_k3f7a/charts:1M:ctpl_default_v1/20251215-102612_BTC-USDT_1M_ctpl_default_v1.png`
 
 ## Связь с manifest
 

@@ -182,7 +182,12 @@ def run_chart_export_step(
         )
         for req, png in successes
     ]
-    upload_result = upload_pngs(uploader=uploader, run_id=run_id, inputs=png_inputs)
+    upload_result = upload_pngs(
+        uploader=uploader,
+        run_id=run_id,
+        step_id=step_id,
+        inputs=png_inputs,
+    )
     failures.extend(upload_result.failures)
     manifest_items = upload_result.items
 

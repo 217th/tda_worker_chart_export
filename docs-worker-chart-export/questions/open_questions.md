@@ -36,7 +36,7 @@
 - Допустимо и ожидаемо, что при retry (повторном выполнении шага для того же `runId+stepId`) воркер создаёт **новые** PNG с другим `generatedAt` в имени, не переиспользуя старые файлы.
 - Воркер не обязан чистить директорию от старых PNG; инвариант идемпотентности обеспечивается тем, что:
   - итоговое состояние для `runId+stepId` определяется **только** последним `ChartsOutputsManifest`;
-  - downstream-системы обязаны ориентироваться на `manifest.items[]`, а не на “все PNG в runs/<runId>/charts/...`.
+  - downstream-системы обязаны ориентироваться на `manifest.items[]`, а не на “все PNG в charts/<runId>/<stepId>/...`.
 - См.:
   - `docs-worker-chart-export/spec/implementation_contract.md`, раздел **9) Retries и идемпотентность**;
   - `docs-worker-chart-export/contracts/charts_images_naming.md`.

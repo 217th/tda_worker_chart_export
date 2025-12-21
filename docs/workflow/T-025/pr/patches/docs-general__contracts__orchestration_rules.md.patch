@@ -1,0 +1,11 @@
+--- docs-general/contracts/orchestration_rules.md
++++ docs-general/contracts/orchestration_rules.md
+@@ -57,7 +57,7 @@
+ - `runId` + `stepId` должны однозначно определять **выходные артефакты**.
+ - Воркеры пишут в GCS по детерминированным путям, например:
+   - `runs/<runId>/ohlcv/<timeframe>.json`
+-  - `runs/<runId>/steps/<stepId>/charts/manifest.json`
++  - `charts/<runId>/<stepId>/manifest.json`
+ 
+ ### Повторный запуск шага
+ 

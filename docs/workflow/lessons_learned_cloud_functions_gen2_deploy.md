@@ -136,7 +136,7 @@ misleading operators.
 ### 11) GCS bucket typo causes manifest write failure
 
 **Symptom:** Step fails with `MANIFEST_WRITE_FAILED` and `NotFound` on
-`runs/<runId>/steps/<stepId>/charts/manifest.json`.
+`charts/<runId>/<stepId>/manifest.json`.
 **Fix:** Ensure `CHARTS_BUCKET` points to an existing bucket and runtime SA
 has `storage.objectAdmin`.
 

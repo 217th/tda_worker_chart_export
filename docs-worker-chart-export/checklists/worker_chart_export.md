@@ -1,7 +1,7 @@
 # CHART_EXPORT Worker — Checklist
 
 - Inputs: `requests[]` with `chartTemplateId`; `minImages`; `scope.symbol` (базовый, например `BTCUSDT`) и `timeframe` из шага. См. `docs-worker-chart-export/contracts/flow_run.schema.json`.
-- Outputs: PNG files per naming rule (`docs-worker-chart-export/contracts/charts_images_naming.md`); manifest at `runs/<runId>/steps/<stepId>/charts/manifest.json` obeying `docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json`.
+- Outputs: PNG files per naming rule (`docs-worker-chart-export/contracts/charts_images_naming.md`); manifest at `charts/<runId>/<stepId>/manifest.json` obeying `docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json`.
 - Success rule: SUCCEEDED when `len(items) >= minImages`; otherwise FAILED. См. `docs-general/contracts/orchestration_rules.md`.
 - Idempotency: manifest path детерминированный для `runId+stepId`. На retry воркер должен обеспечивать консистентность: перезаписывать manifest детерминированно и, по возможности, не плодить “лишние” PNG (или гарантировать, что downstream использует только `manifest.items[]`).
 - Error handling: populate `failures[]` in manifest with codes/messages; set step `error` when below threshold.

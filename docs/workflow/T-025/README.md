@@ -7,6 +7,8 @@
 ## Goal
 
 - Define and implement a shorter, still deterministic, gs:// path scheme for chart artifacts and manifests.
+  - PNG: `charts/<runId>/<stepId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`
+  - Manifest: `charts/<runId>/<stepId>/manifest.json`
 
 ## Scope
 
@@ -91,5 +93,24 @@
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- `README.md`
+- `docs-general/contracts/README.md`
+- `docs-general/contracts/charts_images_naming.md`
+- `docs-general/contracts/examples/flow_run.example.json`
+- `docs-general/contracts/orchestration_rules.md`
+- `docs-worker-chart-export/checklists/worker_chart_export.md`
+- `docs-worker-chart-export/contracts/charts_images_naming.md`
+- `docs-worker-chart-export/questions/open_questions.md`
+- `docs-worker-chart-export/spec/implementation_contract.md`
+- `docs-worker-chart-export/test_vectors/expected_flow_run_step_patch.json`
+- `docs-worker-chart-export/test_vectors/expected_manifest.json`
+- `docs/workflow/T-008/README.md`
+- `docs/workflow/T-025/README.md`
+- `docs/workflow/T-025/pr/diffstat.txt`
+- `docs/workflow/T-025/pr/meta.json`
+- `docs/workflow/T-025/pr/patches/docs-general__contracts__README.md.patch`
+- `docs/workflow/T-025/pr/patches/docs-general__contracts__charts_images_naming.md.patch`
+- `docs/workflow/T-025/pr/patches/docs-general__contracts__examples__flow_run.example.json.patch`
+- `docs/workflow/T-025/pr/patches/docs-general__contracts__orchestration_rules.md.patch`
+- `docs/workflow/T-025/pr/review.md`
 <!-- END AUTO SUMMARY -->

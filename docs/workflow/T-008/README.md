@@ -10,8 +10,8 @@
 
 ## Scope
 
-- PNG path: `runs/<runId>/charts/<timeframe>/<chartTemplateId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`.
-- Manifest path: `runs/<runId>/steps/<stepId>/charts/manifest.json` (deterministic, overwrite allowed).
+- PNG path: `charts/<runId>/<stepId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`.
+- Manifest path: `charts/<runId>/<stepId>/manifest.json` (deterministic, overwrite allowed).
 - Emit `gs://<bucket>/<path>` URIs in outputs/manifest.
 - Validate manifest against `docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json`.
 - Invariant: for every logical request (`inputs.requests[*]`) the manifest must contain either an `items[]` element or a corresponding `failures[]` element (no “missing” requests).
@@ -32,8 +32,8 @@
 2) Write manifest to the deterministic path.
 
 **Expected result**
-- PNG stored at `gs://<bucket>/runs/<runId>/charts/<timeframe>/<chartTemplateId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`.
-- Manifest stored at `gs://<bucket>/runs/<runId>/steps/<stepId>/charts/manifest.json`.
+- PNG stored at `gs://<bucket>/charts/<runId>/<stepId>/<generatedAt>_<symbolSlug>_<timeframe>_<chartTemplateId>.png`.
+- Manifest stored at `gs://<bucket>/charts/<runId>/<stepId>/manifest.json`.
 - Manifest validates against the JSON schema.
 
 ### Scenario 2: Partial GCS failure (one PNG fails, others succeed)

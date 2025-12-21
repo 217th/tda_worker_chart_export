@@ -29,7 +29,7 @@ def test_text_summary_success(monkeypatch, capsys, tmp_path):
             status="SUCCEEDED",
             run_id="run1",
             step_id="s1",
-            outputs_manifest_gcs_uri="gs://bucket/runs/run1/manifest.json",
+            outputs_manifest_gcs_uri="gs://bucket/charts/run1/s1/manifest.json",
             items_count=2,
             failures_count=0,
         )

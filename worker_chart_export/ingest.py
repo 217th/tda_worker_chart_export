@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from typing import Any, Mapping
 
 
@@ -35,6 +36,7 @@ def parse_flow_run_event(cloud_event: Any) -> FlowRunEvent | None:
     event_type = get_cloud_event_attr(cloud_event, "type")
     subject = get_cloud_event_attr(cloud_event, "subject")
     data = get_cloud_event_attr(cloud_event, "data")
+    data = _normalize_event_data(data)
 
     if not isinstance(data, Mapping):
         return None
@@ -58,6 +60,20 @@ def parse_flow_run_event(cloud_event: Any) -> FlowRunEvent | None:
         event_type=event_type,
         subject=subject,
     )
+
+
+def _normalize_event_data(data: Any) -> Any:
+    if isinstance(data, (bytes, bytearray)):
+        try:
+            return json.loads(data.decode("utf-8"))
+        except Exception:
+            return data
+    if isinstance(data, str):
+        try:
+            return json.loads(data)
+        except Exception:
+            return data
+    return data
 
 
 def pick_ready_chart_export_step(flow_run: Mapping[str, Any]) -> str | None:

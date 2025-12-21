@@ -58,7 +58,15 @@ def _handle_cloud_event(cloud_event: Any) -> None:
 
     parsed = parse_flow_run_event(cloud_event)
     if parsed is None:
-        log_event(logger, "cloud_event_ignored", **base_fields, reason="event_filtered")
+        data = get_cloud_event_attr(cloud_event, "data")
+        log_event(
+            logger,
+            "cloud_event_ignored",
+            **base_fields,
+            reason="event_filtered",
+            dataType=str(type(data)),
+            dataPreview=str(data)[:512],
+        )
         return
 
     flow_run = parsed.flow_run

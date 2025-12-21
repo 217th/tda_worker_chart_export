@@ -9,6 +9,7 @@
 - Подтвердить end‑to‑end обработку Eventarc → worker → Firestore/GCS/Logging.
 - Проверить идемпотентность при повторных событиях.
 - Убедиться, что Secret Manager и GCS используются корректно в облаке.
+- Подтвердить доставку stdout/err из Cloud Run Functions gen2 в Cloud Logging и наличие ключевых структурированных событий.
 - Автоматизировать деплой через gcloud.
 
 ## Expected Demonstration Result
@@ -16,7 +17,7 @@
 1) Обновление `flow_runs/{runId}` (READY шаг) вызывает Eventarc и функцию.
 2) Шаг становится `SUCCEEDED`.
 3) В GCS появляются PNG + manifest.
-4) В Cloud Logging фиксируются события `claim_attempt`, `chart_api_call_*`, `step_completed`.
+4) В Cloud Logging фиксируются события `claim_attempt`, `chart_api_call_*`, `step_completed` (stdout/err автоматически экспортируется Cloud Run Functions gen2).
 5) Повторный update приводит к no‑op (step остаётся `SUCCEEDED`).
 
 ## Planned Scenarios (TDD)
@@ -27,7 +28,7 @@
 1) Создать/обновить `flow_runs/{runId}` с READY шагом CHART_EXPORT.  
 2) Подождать Eventarc‑вызова и обработки.  
 3) Проверить Firestore, GCS и Cloud Logging.  
-**Expected**: step SUCCEEDED; PNG + manifest в GCS; корректные логи.
+**Expected**: step SUCCEEDED; PNG + manifest в GCS; корректные логи в Cloud Logging.
 
 ### Scenario 2: Idempotent retry
 **Steps**: Повторить update того же `flow_runs/{runId}` после SUCCEEDED.  
@@ -121,7 +122,7 @@ gcloud functions deploy worker-chart-export \
 3) Проверить:
    - Firestore: шаг SUCCEEDED, outputsManifestGcsUri заполнен  
    - GCS: PNG + manifest существуют  
-   - Cloud Logging: события claim/chart_api/step_completed  
+   - Cloud Logging: события claim/chart_api/step_completed (stdout/err ingestion)  
 4) Повторить update для идемпотентности.  
 
 ## Risks

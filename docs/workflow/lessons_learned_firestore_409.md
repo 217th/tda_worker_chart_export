@@ -28,7 +28,7 @@
 2) **Audit logs** показали, что писатель один и тот же (principalEmail = пользователь).
 3) **Прямой update без транзакции** работает:
    ```bash
-   python -c "from google.cloud import firestore; client=firestore.Client(database='tda-db'); doc=client.collection('flow_runs').document('...'); doc.update({'steps.<stepId>.status':'RUNNING'}); print('updated')"
+   python -c "from google.cloud import firestore; client=firestore.Client(database='YOUR_FIRESTORE_DB'); doc=client.collection('flow_runs').document('...'); doc.update({'steps.<stepId>.status':'RUNNING'}); print('updated')"
    ```
    Это исключает проблему со схемой/документом.
 

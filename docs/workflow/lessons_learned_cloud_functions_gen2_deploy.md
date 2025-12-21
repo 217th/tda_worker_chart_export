@@ -3,14 +3,14 @@
 ## Context
 
 This document captures the issues we hit and the fixes that led to a successful
-deploy of `worker-chart-export` to Cloud Functions (gen2) in `europe-west4`.
+deploy of `worker-chart-export` to Cloud Functions (gen2) in `YOUR_REGION`.
 
 ## Key outcomes
 
 - Deploy succeeded after aligning Eventarc filters with Firestore provider
   requirements, granting correct IAM roles, and sanitizing the source bundle
   with `.gcloudignore`.
-- Firestore trigger works for a **non-default** database in `europe-west4`.
+- Firestore trigger works for a **non-default** database in `YOUR_REGION`.
 - CloudEvent payload for Firestore updates may arrive without `data`; handler
   should fallback to fetching `flow_run` from Firestore by `subject` runId.
 - Manifest schema must be bundled with runtime; docs-only paths are excluded
@@ -45,7 +45,7 @@ container. Keep `main.py` small and delegate to application entrypoint.
 
 ```
 --trigger-event-filters="type=google.cloud.firestore.document.v1.updated"
---trigger-event-filters="database=tda-db-europe-west4"
+--trigger-event-filters="database=YOUR_FIRESTORE_DB"
 --trigger-event-filters="namespace=(default)"
 --trigger-event-filters-path-pattern="document=flow_runs/{runId}"
 ```
@@ -75,7 +75,7 @@ gcloud projects add-iam-policy-binding <PROJECT_ID> \
 
 ```
 gcloud run services add-iam-policy-binding worker-chart-export \
-  --region=europe-west4 \
+  --region=YOUR_REGION \
   --project <PROJECT_ID> \
   --member="serviceAccount:<RUNTIME_SA>" \
   --role="roles/run.invoker"
@@ -87,7 +87,7 @@ gcloud run services add-iam-policy-binding worker-chart-export \
 
 **Symptom:** Trigger validation errors when Firestore DB region mismatched.  
 **Fix:** Use Firestore DB in the same region as Eventarc trigger:
-`europe-west4` in our case.
+`YOUR_REGION` in our case.
 
 **Lesson:** Firestore DB, Eventarc trigger region, and Cloud Function region
 must be aligned.
@@ -166,16 +166,16 @@ and no artifacts when config fails.
 ```
 gcloud functions deploy worker-chart-export \
   --gen2 \
-  --region=europe-west4 \
+  --region=YOUR_REGION \
   --runtime=python313 \
   --source=. \
   --entry-point=worker_chart_export \
-  --service-account=tda-worker-chart-export-test@kb-agent-479608.iam.gserviceaccount.com \
-  --set-env-vars="ARTIFACTS_BUCKET=tda-artifacts-test,FIRESTORE_DB=tda-db-europe-west4,CHARTS_API_MODE=record" \
-  --set-secrets="CHART_IMG_ACCOUNTS_JSON=projects/kb-agent-479608/secrets/chart-img-accounts:latest" \
-  --trigger-location=europe-west4 \
+  --service-account=YOUR_RUNTIME_SA@YOUR_PROJECT_ID.iam.gserviceaccount.com \
+  --set-env-vars="ARTIFACTS_BUCKET=YOUR_ARTIFACTS_BUCKET,FIRESTORE_DB=YOUR_FIRESTORE_DB,CHARTS_API_MODE=record" \
+  --set-secrets="CHART_IMG_ACCOUNTS_JSON=projects/YOUR_PROJECT_ID/secrets/chart-img-accounts:latest" \
+  --trigger-location=YOUR_REGION \
   --trigger-event-filters="type=google.cloud.firestore.document.v1.updated" \
-  --trigger-event-filters="database=tda-db-europe-west4" \
+  --trigger-event-filters="database=YOUR_FIRESTORE_DB" \
   --trigger-event-filters="namespace=(default)" \
   --trigger-event-filters-path-pattern="document=flow_runs/{runId}"
 ```
@@ -186,4 +186,4 @@ gcloud functions deploy worker-chart-export \
 - Eventarc trigger exists and references the function.
 - Firestore update on `flow_runs/{runId}` triggers the function.
 - Logs appear in Cloud Logging.
-- Artifacts land in `gs://tda-artifacts-test/...`.
+- Artifacts land in `gs://YOUR_ARTIFACTS_BUCKET/...`.

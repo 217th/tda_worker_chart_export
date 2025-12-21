@@ -95,7 +95,7 @@ gcloud secrets versions add chart-img-accounts --project=${PROJECT_ID} --data-fi
   - `windowStart`: текущая дата 00:00:00Z
   - `usageToday`: 0
   - `dailyLimit`: по желанию
-- `flow_runs/{runId}`: READY шаг `CHART_EXPORT` (в базе `tda-db-europe-west4`)
+- `flow_runs/{runId}`: READY шаг `CHART_EXPORT` (в базе `YOUR_FIRESTORE_DB`)
 
 ## Deploy (Cloud Run Functions gen2)
 
@@ -108,11 +108,11 @@ gcloud functions deploy worker-chart-export \
   --entry-point=worker_chart_export \
   --trigger-location=${REGION} \
   --trigger-event-filters="type=google.cloud.firestore.document.v1.updated" \
-  --trigger-event-filters="database=tda-db-europe-west4" \
+  --trigger-event-filters="database=YOUR_FIRESTORE_DB" \
   --trigger-event-filters="namespace=(default)" \
   --trigger-event-filters-path-pattern="document=flow_runs/{runId}" \
   --service-account=${RUNTIME_SA} \
-  --set-env-vars="CHARTS_BUCKET=gs://${ARTIFACTS_BUCKET},CHARTS_API_MODE=record,CHARTS_DEFAULT_TIMEZONE=Etc/UTC,FIRESTORE_DB=tda-db-europe-west4,ARTIFACTS_BUCKET=${ARTIFACTS_BUCKET}" \
+  --set-env-vars="CHARTS_BUCKET=gs://${ARTIFACTS_BUCKET},CHARTS_API_MODE=record,CHARTS_DEFAULT_TIMEZONE=Etc/UTC,FIRESTORE_DB=YOUR_FIRESTORE_DB,ARTIFACTS_BUCKET=${ARTIFACTS_BUCKET}" \
   --set-secrets="CHART_IMG_ACCOUNTS_JSON=projects/${PROJECT_ID}/secrets/chart-img-accounts:latest" \
   --concurrency=1 \
   --retry

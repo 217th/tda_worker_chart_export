@@ -1,9 +1,9 @@
 T-024 Cloud Run Functions gen2 verification log
 Date: 2025-12-21
-Project: kb-agent-479608
-Region: europe-west4
-Firestore DB: tda-db-europe-west4
-Bucket: gs://tda-artifacts-test
+Project: YOUR_PROJECT_ID
+Region: YOUR_REGION
+Firestore DB: YOUR_FIRESTORE_DB
+Bucket: gs://YOUR_ARTIFACTS_BUCKET
 
 Prerequisites
 - APIs enabled: run, eventarc, firestore, secretmanager, storage, logging, cloudbuild, artifactregistry
@@ -20,7 +20,7 @@ Result:
 - Cloud Logging: cloud_event_finished status=SUCCEEDED outputsManifestGcsUri populated
 - Firestore: step status SUCCEEDED
 - GCS: manifest exists at
-  gs://tda-artifacts-test/runs/20251221-083000_BTCUSDT_demo3/steps/charts:1H:ctpl_price_ma1226_vol_v1/charts/manifest.json
+  gs://YOUR_ARTIFACTS_BUCKET/runs/20251221-083000_BTCUSDT_demo3/steps/charts:1H:ctpl_price_ma1226_vol_v1/charts/manifest.json
 
 Scenario: Invalid runId format (pre-fix)
 RunId: 20251221-083000_BTCUSDT_demo_cf2
@@ -38,7 +38,7 @@ Result:
 
 Scenario 4: GCS write failure (invalid bucket)
 RunId: 20251221-093100_BTCUSDT_demo
-Bucket: gs://tda-artifacts-test-typo
+Bucket: gs://YOUR_ARTIFACTS_BUCKET_TYPO
 Result:
 - Firestore error.code=MANIFEST_WRITE_FAILED
 - error.details.error=NotFound

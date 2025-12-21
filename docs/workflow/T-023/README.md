@@ -115,7 +115,7 @@ echo '[{"id":"acc1","apiKey":"XXX","dailyLimit":44}]' | \
 - requests: 3 (ctpl_price_ma1226_vol_v1, ctpl_price_rsi14_stochrsi_v1, ctpl_price_psar_adi_v1)
 - Итог: `SUCCEEDED`, items=3, failures=0
 - Manifest:
-  - `gs://tda-artifacts-test/runs/20251220-145500_BTCUSDT_demo5/steps/charts:1H:ctpl_price_ma1226_vol_v1/charts/manifest.json`
+  - `gs://YOUR_ARTIFACTS_BUCKET/runs/20251220-145500_BTCUSDT_demo5/steps/charts:1H:ctpl_price_ma1226_vol_v1/charts/manifest.json`
 
 ### Record (боевой, 1 график)
 
@@ -126,7 +126,7 @@ echo '[{"id":"acc1","apiKey":"XXX","dailyLimit":44}]' | \
 - requests: 1 (ctpl_price_ma1226_vol_v1)
 - Итог: `SUCCEEDED`, items=1, failures=0
 - Manifest:
-  - `gs://tda-artifacts-test/runs/20251220-142500_BTCUSDT_demo4/steps/charts:1H:ctpl_price_ma1226_vol_v1/charts/manifest.json`
+  - `gs://YOUR_ARTIFACTS_BUCKET/runs/20251220-142500_BTCUSDT_demo4/steps/charts:1H:ctpl_price_ma1226_vol_v1/charts/manifest.json`
 
 ## Пошаговая инструкция (выполняет оператор в консоли/Cloud Shell)
 
@@ -134,7 +134,7 @@ echo '[{"id":"acc1","apiKey":"XXX","dailyLimit":44}]' | \
 ```bash
 PROJECT_ID=your-project-id
 REGION=europe-west1          # пример
-ARTIFACTS_BUCKET=tda-artifacts-test
+ARTIFACTS_BUCKET=YOUR_ARTIFACTS_BUCKET
 RUNTIME_SA=worker-chart-export-test@${PROJECT_ID}.iam.gserviceaccount.com
 ```
 
@@ -194,7 +194,7 @@ gcloud secrets versions add chart-img-accounts --project=${PROJECT_ID} --data-fi
 ### 6. Локальный запуск CLI (mock, безопасный)
 ```bash
 export GOOGLE_CLOUD_PROJECT=${PROJECT_ID}
-export FIRESTORE_DB=tda-db
+export FIRESTORE_DB=YOUR_FIRESTORE_DB
 export CHARTS_BUCKET=gs://${ARTIFACTS_BUCKET}
 export CHARTS_API_MODE=mock
 export CHART_IMG_ACCOUNTS_JSON="$(gcloud secrets versions access latest --secret=chart-img-accounts --project=${PROJECT_ID})"
@@ -229,7 +229,7 @@ python -m worker_chart_export.cli run-local \
 - runId: `20251220-152000_BTCUSDT_demo7`
 - Источник аккаунтов: Secret Manager (`chart-img-accounts`)
 - Режим: `record`
-- Неверный bucket: `gs://tda-artifacts-test-typo`
+- Неверный bucket: `gs://YOUR_ARTIFACTS_BUCKET_TYPO`
 - Итог: `FAILED`
 - Error code: `MANIFEST_WRITE_FAILED` (error: `NotFound`)
 - PNG/manifest: не записаны

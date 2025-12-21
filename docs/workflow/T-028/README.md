@@ -12,6 +12,7 @@
 
 - Add standard Python ignore entries.
 - Add/normalize: `/docs-*`, `import-firestore*`, `/tmp`.
+- Replace real GCP identifiers in `docs/workflow/*` with placeholders.
 
 ## References
 
@@ -20,7 +21,8 @@
 ## Plan
 
 1) Update `.gitignore` with required patterns.
-2) Validate there are no unintended deletions or overlaps with existing rules.
+2) Replace real GCP identifiers in `docs/workflow/*` with placeholders.
+3) Validate there are no unintended deletions or overlaps with existing rules.
 
 ## Planned Scenarios (TDD)
 
@@ -45,6 +47,17 @@
 
 **Expected result**
 - All requested patterns are present and normalized.
+
+### Scenario 3: No real GCP identifiers in docs/workflow
+
+**Prerequisites**
+- None.
+
+**Steps**
+1) Scan `docs/workflow/*` for real project/bucket/db/region identifiers.
+
+**Expected result**
+- All real identifiers replaced by placeholders (e.g., `YOUR_PROJECT_ID`, `YOUR_FIRESTORE_DB`).
 
 ## Risks
 

@@ -22,10 +22,10 @@ work. Use this whenever a task requires verification in real GCP.
 ## Standard environment variables
 
 ```
-export PROJECT_ID="kb-agent-479608"
-export FIRESTORE_DB="tda-db-europe-west4"
-export ARTIFACTS_BUCKET="tda-artifacts-test"
-export REGION="europe-west4"
+export PROJECT_ID="YOUR_PROJECT_ID"
+export FIRESTORE_DB="YOUR_FIRESTORE_DB"
+export ARTIFACTS_BUCKET="YOUR_ARTIFACTS_BUCKET"
+export REGION="YOUR_REGION"
 export FUNCTION_NAME="worker-chart-export"
 export STEP_ID="charts:1H:ctpl_price_ma1226_vol_v1"
 ```

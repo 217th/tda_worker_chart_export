@@ -62,6 +62,13 @@ def parse_flow_run_event(cloud_event: Any) -> FlowRunEvent | None:
     )
 
 
+def extract_run_id_from_subject(subject: str | None) -> str | None:
+    doc_path = _extract_doc_path(subject, {})
+    if not doc_path:
+        return None
+    return _extract_run_id(doc_path)
+
+
 def _normalize_event_data(data: Any) -> Any:
     if isinstance(data, (bytes, bytearray)):
         try:

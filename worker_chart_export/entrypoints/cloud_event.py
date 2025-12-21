@@ -10,6 +10,8 @@ from worker_chart_export.ingest import (
     parse_flow_run_event,
     pick_ready_chart_export_step,
     get_cloud_event_attr,
+    extract_run_id_from_subject,
+    FlowRunEvent,
 )
 from worker_chart_export.logging import configure_logging, log_event
 from worker_chart_export.runtime import get_config
@@ -58,16 +60,39 @@ def _handle_cloud_event(cloud_event: Any) -> None:
 
     parsed = parse_flow_run_event(cloud_event)
     if parsed is None:
-        data = get_cloud_event_attr(cloud_event, "data")
-        log_event(
-            logger,
-            "cloud_event_ignored",
-            **base_fields,
-            reason="event_filtered",
-            dataType=str(type(data)),
-            dataPreview=str(data)[:512],
+        run_id = extract_run_id_from_subject(subject)
+        if not run_id:
+            data = get_cloud_event_attr(cloud_event, "data")
+            log_event(
+                logger,
+                "cloud_event_ignored",
+                **base_fields,
+                reason="event_filtered",
+                dataType=str(type(data)),
+                dataPreview=str(data)[:512],
+            )
+            return
+        from google.cloud import firestore  # type: ignore
+
+        client = firestore.Client(database=config.firestore_database)
+        snapshot = client.collection("flow_runs").document(run_id).get()
+        if not snapshot.exists:
+            log_event(
+                logger,
+                "cloud_event_ignored",
+                **base_fields,
+                reason="flow_run_not_found",
+                runId=run_id,
+            )
+            return
+        flow_run = snapshot.to_dict() or {}
+        parsed = FlowRunEvent(
+            run_id=run_id,
+            flow_run=flow_run,
+            event_id=event_id,
+            event_type=event_type,
+            subject=subject,
         )
-        return
 
     flow_run = parsed.flow_run
     run_id = parsed.run_id

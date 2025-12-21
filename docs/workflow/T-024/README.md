@@ -137,6 +137,14 @@ gcloud functions deploy worker-chart-export \
 - Удалить функцию, Eventarc‑триггер, тестовые документы и объекты из GCS.
 - Отозвать роли у SA при необходимости.
 
+## References
+
+- @docs-gcp/runbook/prod_runbook_gcp.md
+- @docs-worker-chart-export/implementation_contract.md
+- @docs-worker-chart-export/contracts/flow_run.schema.json
+- @docs-worker-chart-export/contracts/charts_outputs_manifest.schema.json
+- @docs/workflow/lessons_learned_cloud_functions_gen2_deploy.md
+
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->

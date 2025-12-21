@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from worker_chart_export.core import run_chart_export_step
+from worker_chart_export.errors import ConfigError
 from worker_chart_export.ingest import (
     is_firestore_update_event,
     parse_flow_run_event,
@@ -22,12 +24,23 @@ def _handle_cloud_event(cloud_event: Any) -> None:
     configure_logging()
     logger = logging.getLogger("worker-chart-export")
 
-    # Config is parsed once per process; errors should fail fast (misconfiguration).
-    config = get_config()
-
     event_id = get_cloud_event_attr(cloud_event, "id")
     event_type = get_cloud_event_attr(cloud_event, "type")
     subject = get_cloud_event_attr(cloud_event, "subject")
+
+    try:
+        # Config is parsed once per process; errors should fail fast (misconfiguration).
+        config = get_config()
+    except ConfigError as exc:
+        log_event(
+            logger,
+            "config_error",
+            eventId=event_id,
+            eventType=event_type,
+            subject=subject,
+            error=str(exc),
+        )
+        raise
 
     base_fields = {
         "service": config.service,
@@ -67,7 +80,18 @@ def _handle_cloud_event(cloud_event: Any) -> None:
         return
 
     log_event(logger, "ready_step_selected", **base_fields, stepId=step_id)
-    # Execution, claim, and step finalization are implemented in T-004+.
+    result = run_chart_export_step(flow_run=flow_run, step_id=step_id, config=config)
+    log_event(
+        logger,
+        "cloud_event_finished",
+        **base_fields,
+        stepId=step_id,
+        status=result.status,
+        outputsManifestGcsUri=result.outputs_manifest_gcs_uri,
+        itemsCount=result.items_count,
+        failuresCount=result.failures_count,
+        errorCode=result.error_code,
+    )
 
 
 if functions_framework is not None:  # pragma: no cover

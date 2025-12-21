@@ -151,5 +151,9 @@ gcloud functions deploy worker-chart-export \
 ## Changes Summary (auto)
 
 <!-- BEGIN AUTO SUMMARY -->
-- (no file changes)
+- Added Cloud Functions Gen2 runtime fixes: CloudEvent handler executes core,
+  supports empty payloads via Firestore fetch, and logs reliably.
+- Packaged manifest schema into runtime to avoid missing-docs failures in Cloud Run.
+- Recorded Cloud Run verification runs and failure scenarios in pr/verify.log.
+- Updated deploy command and risks based on real GCP runbook outcomes.
 <!-- END AUTO SUMMARY -->

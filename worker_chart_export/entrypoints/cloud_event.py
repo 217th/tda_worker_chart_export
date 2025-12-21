@@ -102,6 +102,8 @@ def _handle_cloud_event(cloud_event: Any) -> None:
     if isinstance(flow_key, str):
         base_fields["flowKey"] = flow_key
 
+    log_event(logger, "cloud_event_parsed", **base_fields)
+
     steps = flow_run.get("steps") if isinstance(flow_run, dict) else None
     if not isinstance(steps, dict):
         log_event(logger, "cloud_event_ignored", **base_fields, reason="invalid_steps")

@@ -1,0 +1,10 @@
+ .../spec/implementation_contract.md                |  3 +-
+ docs/workflow/T-027/pr/diffstat.txt                | 10 ++++
+ docs/workflow/T-027/pr/meta.json                   | 12 +++++
+ docs/workflow/T-027/pr/review.md                   | 17 +++++++
+ docs/workflow/T-027/pr/verify.log                  | 17 +++++++
+ docs/workflow/cloud_regression_practice.md         |  8 +++
+ tests/tasks/T-002/test_scenarios_cloud_event.py    |  1 +
+ tests/tasks/T-027/test_cloud_event_parsed.py       | 59 ++++++++++++++++++++++
+ worker_chart_export/entrypoints/cloud_event.py     |  2 +
+ 9 files changed, 128 insertions(+), 1 deletion(-)

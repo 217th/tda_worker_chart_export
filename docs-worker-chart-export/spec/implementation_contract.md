@@ -165,7 +165,8 @@ Event trigger может быть at-least-once.
 Логи должны следовать конвенции из `docs-gcp/runbook/prod_runbook_gcp.md` (раздел Logging).
 
 Минимальные события:
-- received event (runId, stepId)
+- received event (raw CloudEvent; may not include runId/flowKey)
+- parsed event (runId, flowKey) — emitted after flow_run parsing
 - claim succeeded/failed
 - chart api call started/finished (+ duration)
 - manifest written (+ gcs uri)

@@ -1,0 +1,17 @@
+# Verify log
+
+Status: PASS
+
+Command(s):
+- python -m pytest tests/tasks/T-027/test_cloud_event_parsed.py tests/tasks/T-002/test_scenarios_cloud_event.py
+
+Result:
+- 2 passed
+
+Cloud regression (economical, 0 Chart-IMG calls):
+- Deployed function from branch `task/T-027/cloud-event-parsed`.
+- Triggered flow_run with missing template to avoid Chart-IMG usage:
+  runId=20251221-164200_BTCUSDT_demo27m, stepId=charts:1H:ctpl_price_ma1226_vol_v1
+- Observed Cloud Logging events:
+  - cloud_event_parsed (runId + flowKey present)
+  - cloud_event_finished (VALIDATION_FAILED)

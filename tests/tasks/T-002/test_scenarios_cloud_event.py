@@ -35,4 +35,5 @@ class TestScenarioCloudEvent(unittest.TestCase):
             except Exception:
                 continue
         self.assertTrue(any(item.get("event") == "cloud_event_received" for item in json_lines))
+        self.assertFalse(any(item.get("event") == "cloud_event_parsed" for item in json_lines))
         self.assertTrue(any(item.get("reason") == "event_type_filtered" for item in json_lines))

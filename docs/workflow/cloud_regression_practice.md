@@ -54,6 +54,14 @@ gcloud functions deploy "${FUNCTION_NAME}" \
 Notes:
 - If deploy returns `unable to queue the operation`, wait ~20s and retry.
 - Make sure function is redeployed after code changes to avoid stale behavior.
+- In automation, deploy/log commands may time out locally while the GCP operation continues.
+  If you see a timeout without a hard error, re-run with a longer timeout and/or
+  confirm status in Cloud Console or with a fresh `gcloud functions describe`.
+- Expect multiple Firestore update triggers per run:
+  - The worker writes claim/finalize updates to the same `flow_runs/{runId}` document.
+  - Each write emits a new Eventarc event with a new `eventId`.
+  - Only the first event typically performs work; subsequent events should log
+    `cloud_event_noop` with `reason=no_ready_step`. This is normal/idempotent.
 
 ## 2) Create a flow_run and trigger update
 

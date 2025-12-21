@@ -4,10 +4,10 @@
  docs/workflow/T-024/README.md                      |  6 ++--
  docs/workflow/T-024/pr/verify.log                  | 12 ++++----
  docs/workflow/T-028/README.md                      | 15 +++++++++-
- docs/workflow/T-028/pr/diffstat.txt                |  2 ++
+ docs/workflow/T-028/pr/diffstat.txt                | 13 +++++++++
  docs/workflow/T-028/pr/meta.json                   | 12 ++++++++
  docs/workflow/T-028/pr/verify.log                  |  3 ++
  docs/workflow/cloud_regression_practice.md         |  8 ++---
  .../lessons_learned_cloud_functions_gen2_deploy.md | 24 +++++++--------
  docs/workflow/lessons_learned_firestore_409.md     |  2 +-
- 12 files changed, 105 insertions(+), 47 deletions(-)
+ 12 files changed, 116 insertions(+), 47 deletions(-)

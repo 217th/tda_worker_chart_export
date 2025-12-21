@@ -685,7 +685,7 @@
       "id": "T-028",
       "title": "Finalize MVP",
       "description": "Housekeeping for MVP: update .gitignore with standard Python paths and project-specific ignore patterns (docs-*, import-firestore*, /tmp).",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "low",
       "owner": "codex",
       "tags": [
@@ -694,6 +694,16 @@
       ],
       "depends_on": [
         ""
+      ],
+      "commit": {
+        "hash": "046497e1b62bc049543739d3049076cf86ca98d4",
+        "message": "📌 T-028 refresh PR artifacts"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-028/pr."
+        }
       ]
     }
   ],
@@ -701,6 +711,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "3c35cec82d67f8f86e37d6fe03e311c30534fae8080964fcd1f1ec73cb7c8ee1"
+    "checksum": "3e0c6a977cc6d5c56a6ea153f4bb34364ecf3eab33af47aeab8d35ee9d8c1933"
   }
 }

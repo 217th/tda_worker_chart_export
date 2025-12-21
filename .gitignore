@@ -9,3 +9,4 @@ __pycache__
 import_firestore_chart_templates.py
 /.codex-resume
 tmp/
+docs-worker-chart-export/fixtures/

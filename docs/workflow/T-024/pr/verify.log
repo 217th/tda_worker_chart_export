@@ -1,0 +1,42 @@
+T-024 Cloud Run Functions gen2 verification log
+Date: 2025-12-21
+Project: kb-agent-479608
+Region: europe-west4
+Firestore DB: tda-db-europe-west4
+Bucket: gs://tda-artifacts-test
+
+Prerequisites
+- APIs enabled: run, eventarc, firestore, secretmanager, storage, logging, cloudbuild, artifactregistry
+- RUNTIME_SA granted: datastore.user, storage.objectAdmin, secretAccessor, logging.logWriter, eventarc.eventReceiver, run.invoker
+- Secret: chart-img-accounts populated
+- chart_templates and chart_img_accounts_usage present in Firestore
+
+Scenario 1: Happy path (Eventarc update -> SUCCEEDED)
+RunId: 20251221-083000_BTCUSDT_demo3
+Doc: flow_runs/20251221-083000_BTCUSDT_demo3
+Update: trigger.source changed (manual)
+Result:
+- Logs: cloud_event_received -> ready_step_selected -> chart_api_call_finished ok=true -> step_completed
+- Cloud Logging: cloud_event_finished status=SUCCEEDED outputsManifestGcsUri populated
+- Firestore: step status SUCCEEDED
+- GCS: manifest exists at
+  gs://tda-artifacts-test/runs/20251221-083000_BTCUSDT_demo3/steps/charts:1H:ctpl_price_ma1226_vol_v1/charts/manifest.json
+
+Scenario: Invalid runId format (pre-fix)
+RunId: 20251221-083000_BTCUSDT_demo_cf2
+Result:
+- cloud_event_finished status=FAILED errorCode=VALIDATION_FAILED
+- Reason: runId regex mismatch (underscore in suffix)
+Outcome: documented; subsequent runId updated to pass regex.
+
+Scenario: Idempotent retry
+RunId: 20251221-083000_BTCUSDT_demo3
+Update repeated after SUCCEEDED
+Result:
+- Logs: cloud_event_noop reason=no_ready_step
+- Firestore: step remains SUCCEEDED
+- No new GCS artifacts
+
+Notes
+- CloudEvent payload for Firestore update arrived with data=None; handler now fetches flow_run from Firestore.
+- Manifest schema must be bundled with runtime; docs path is excluded by .gcloudignore.

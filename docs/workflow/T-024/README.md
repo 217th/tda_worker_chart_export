@@ -106,12 +106,14 @@ gcloud functions deploy worker-chart-export \
   --region=${REGION} \
   --source=. \
   --entry-point=worker_chart_export \
+  --trigger-location=${REGION} \
   --trigger-event-filters="type=google.cloud.firestore.document.v1.updated" \
-  --trigger-event-filters="database=projects/${PROJECT_ID}/databases/tda-db-europe-west4" \
-  --trigger-event-filters="document=projects/${PROJECT_ID}/databases/tda-db-europe-west4/documents/flow_runs/{runId}" \
+  --trigger-event-filters="database=tda-db-europe-west4" \
+  --trigger-event-filters="namespace=(default)" \
+  --trigger-event-filters-path-pattern="document=flow_runs/{runId}" \
   --service-account=${RUNTIME_SA} \
-  --set-env-vars="CHARTS_BUCKET=gs://${ARTIFACTS_BUCKET},CHARTS_API_MODE=record,CHARTS_DEFAULT_TIMEZONE=Etc/UTC,FIRESTORE_DB=tda-db-europe-west4" \
-  --set-secrets="CHART_IMG_ACCOUNTS_JSON=chart-img-accounts:latest" \
+  --set-env-vars="CHARTS_BUCKET=gs://${ARTIFACTS_BUCKET},CHARTS_API_MODE=record,CHARTS_DEFAULT_TIMEZONE=Etc/UTC,FIRESTORE_DB=tda-db-europe-west4,ARTIFACTS_BUCKET=${ARTIFACTS_BUCKET}" \
+  --set-secrets="CHART_IMG_ACCOUNTS_JSON=projects/${PROJECT_ID}/secrets/chart-img-accounts:latest" \
   --concurrency=1 \
   --retry
 ```
@@ -131,6 +133,7 @@ gcloud functions deploy worker-chart-export \
 - Runtime `python313` может быть недоступен в gen2 (тогда нужен container‑based deploy).
 - Ошибки Secret Manager приводят к CONFIG_ERROR и падению функции.
 - Record‑режим расходует лимиты Chart‑IMG; для частых тестов использовать mock.
+- `runId` должен соответствовать regex схемы манифеста (без `_` в суффиксе).
 
 ## Rollback Plan
 

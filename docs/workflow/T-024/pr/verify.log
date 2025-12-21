@@ -36,6 +36,14 @@ Result:
 - Firestore error.code=VALIDATION_FAILED
 - Firestore error.message="Chart template not found"
 
+Scenario 4: GCS write failure (invalid bucket)
+RunId: 20251221-093100_BTCUSDT_demo
+Bucket: gs://tda-artifacts-test-typo
+Result:
+- Firestore error.code=MANIFEST_WRITE_FAILED
+- error.details.error=NotFound
+- error.details.objectPath=.../charts/manifest.json
+
 Scenario: Idempotent retry
 RunId: 20251221-083000_BTCUSDT_demo3
 Update repeated after SUCCEEDED

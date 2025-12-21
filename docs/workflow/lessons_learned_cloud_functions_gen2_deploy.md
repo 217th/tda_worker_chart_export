@@ -133,6 +133,16 @@ when `minImages` fails because all items failed.
 **Lesson:** Validation failures should be specific to the root cause to avoid
 misleading operators.
 
+### 11) GCS bucket typo causes manifest write failure
+
+**Symptom:** Step fails with `MANIFEST_WRITE_FAILED` and `NotFound` on
+`runs/<runId>/steps/<stepId>/charts/manifest.json`.
+**Fix:** Ensure `CHARTS_BUCKET` points to an existing bucket and runtime SA
+has `storage.objectAdmin`.
+
+**Lesson:** Manifest write failures surface clearly via `MANIFEST_WRITE_FAILED`;
+use this scenario to validate GCS wiring.
+
 ## Canonical deploy command (post-fixes)
 
 ```

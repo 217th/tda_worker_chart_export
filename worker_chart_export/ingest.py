@@ -126,8 +126,11 @@ def decode_firestore_value(value: Any) -> Any:
 
 
 def _extract_doc_path(subject: str | None, data: Mapping[str, Any]) -> str | None:
-    if isinstance(subject, str) and "/documents/flow_runs/" in subject:
-        return subject
+    if isinstance(subject, str):
+        if "/documents/flow_runs/" in subject:
+            return subject
+        if "documents/flow_runs/" in subject:
+            return f"/{subject}"
     value = data.get("value")
     name = value.get("name") if isinstance(value, Mapping) else None
     if isinstance(name, str) and "/documents/flow_runs/" in name:

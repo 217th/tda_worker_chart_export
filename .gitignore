@@ -11,6 +11,8 @@ import_firestore_chart_templates.py
 /tmp
 /docs-*
 import-firestore*
+import_firestore*
+/scripts/import_firestore*
 docs-worker-chart-export/fixtures/
 
 # Python

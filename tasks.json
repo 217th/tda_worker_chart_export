@@ -647,12 +647,27 @@
           "body": "Verified: cloud regression scenarios executed in GCP; see docs/workflow/T-025/pr/verify.log."
         }
       ]
+    },
+    {
+      "id": "T-027",
+      "title": "Add cloud_event_parsed log with runId/flowKey",
+      "description": "Emit a second CloudEvent log after flow_run parsing so runId/flowKey appear in logs; update docs/tests and QA scenarios accordingly.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "codex",
+      "tags": [
+        "logging",
+        "cloudevent"
+      ],
+      "depends_on": [
+        "T-003"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "c37c4f88b415ef108c1de125a8ee2ecd7a1779d47ce8ac18678b06e4fa7817f3"
+    "checksum": "51acb3ca3ebca4b59fe00efb94b787c343669235bc1a92deabef340bd64a067c"
   }
 }

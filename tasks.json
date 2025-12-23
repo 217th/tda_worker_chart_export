@@ -696,8 +696,8 @@
         ""
       ],
       "commit": {
-        "hash": "4a75b5de5a8a81000998bf848a03d7bd895899bf",
-        "message": "📝 T-028 refresh README"
+        "hash": "e36fcf6650f12aca3cafc8bdf9f3c31add084fbb",
+        "message": "🧾 T-028 add logging practices doc"
       },
       "comments": [
         {
@@ -711,6 +711,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "8524334fb6eb2d4d41654373d56eeb2271adcd83f128369aebc55515eff0b57f"
+    "checksum": "7a0ec0a18ff3963d1463c87f380920feb00e9025844dc9a151f711d5307a2904"
   }
 }

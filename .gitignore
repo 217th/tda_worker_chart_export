@@ -5,6 +5,7 @@
 __pycache__/
 .pytest_cache/
 /.venv
+.vscode/
 .codex-swarm/worktrees
 import_firestore_chart_templates.py
 /.codex-resume

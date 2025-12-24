@@ -63,7 +63,16 @@ def run_chart_export_step(
     now = now or datetime.now(timezone.utc)
 
     run_id = _require_run_id(flow_run)
-    step_id = step_id or pick_ready_chart_export_step(flow_run)
+    if step_id is None:
+        pick = pick_ready_chart_export_step(flow_run)
+        step_id = pick.step_id
+        if pick.blocked:
+            log_event(
+                logger,
+                "depends_on_blocked",
+                runId=run_id,
+                blockedSteps=_format_blocked_steps(pick.blocked),
+            )
     log_event(logger, "core_start", runId=run_id, stepId=step_id)
     if not step_id:
         return CoreResult(status="FAILED", run_id=run_id, error_code="VALIDATION_FAILED")
@@ -77,6 +86,17 @@ def run_chart_export_step(
         return CoreResult(status=step["status"], run_id=run_id, step_id=step_id)
 
     if step.get("status") != "READY":
+        return CoreResult(status="FAILED", run_id=run_id, step_id=step_id, error_code="VALIDATION_FAILED")
+
+    unmet = _unmet_dependencies(flow_run, step)
+    if unmet:
+        log_event(
+            logger,
+            "depends_on_blocked",
+            runId=run_id,
+            stepId=step_id,
+            unmetDependencies=unmet,
+        )
         return CoreResult(status="FAILED", run_id=run_id, step_id=step_id, error_code="VALIDATION_FAILED")
 
     claim = claim_step_transaction(client=firestore_client, run_id=run_id, step_id=step_id)
@@ -395,6 +415,51 @@ def _get_step(flow_run: Mapping[str, Any], step_id: str) -> Mapping[str, Any] | 
     if step.get("stepType") != "CHART_EXPORT":
         return StepError(code="VALIDATION_FAILED", message="stepType must be CHART_EXPORT")
     return step
+
+
+def _unmet_dependencies(
+    flow_run: Mapping[str, Any], step: Mapping[str, Any]
+) -> list[dict[str, str]]:
+    steps = flow_run.get("steps")
+    if not isinstance(steps, Mapping):
+        return []
+    depends_on = step.get("dependsOn")
+    if not isinstance(depends_on, Sequence) or isinstance(depends_on, (str, bytes, bytearray)):
+        return []
+    unmet: list[dict[str, str]] = []
+    for dep_id in depends_on:
+        if not isinstance(dep_id, str) or not dep_id.strip():
+            continue
+        dep = steps.get(dep_id)
+        if not isinstance(dep, Mapping):
+            unmet.append({"stepId": dep_id, "status": "MISSING"})
+            continue
+        status = dep.get("status")
+        if status != "SUCCEEDED":
+            status_str = status if isinstance(status, str) and status else "UNKNOWN"
+            unmet.append({"stepId": dep_id, "status": status_str})
+    return unmet
+
+
+def _format_blocked_steps(blocked: Sequence[Any]) -> list[dict[str, Any]]:
+    rendered: list[dict[str, Any]] = []
+    for item in blocked:
+        step_id = getattr(item, "step_id", None)
+        unmet = getattr(item, "unmet", None)
+        entry: dict[str, Any] = {}
+        if isinstance(step_id, str):
+            entry["stepId"] = step_id
+        if unmet is not None:
+            entry["unmet"] = [
+                {
+                    "stepId": getattr(dep, "step_id", ""),
+                    "status": getattr(dep, "status", "UNKNOWN"),
+                }
+                for dep in unmet
+            ]
+        if entry:
+            rendered.append(entry)
+    return rendered
 
 
 def _require_run_id(flow_run: Mapping[str, Any]) -> str:

@@ -78,6 +78,7 @@ The following events are emitted by the current implementation.
 | `cloud_event_received` | `entrypoints/cloud_event.py` | `service`, `env`, `eventId`, `eventType`, `subject` | Emitted for every incoming event. |
 | `cloud_event_ignored` | `entrypoints/cloud_event.py` | Base fields + `reason`; optional `dataType`, `dataPreview`, `runId` | Reasons include `event_type_filtered`, `event_filtered`, `flow_run_not_found`, `invalid_steps`. |
 | `cloud_event_parsed` | `entrypoints/cloud_event.py` | Base fields + `runId`, optional `flowKey` | Emitted after runId/flowKey extracted. |
+| `depends_on_blocked` | `entrypoints/cloud_event.py`, `core.py` | `blockedSteps` or `unmetDependencies` | One or more READY steps blocked because dependencies are not `SUCCEEDED`. |
 | `cloud_event_noop` | `entrypoints/cloud_event.py` | Base fields + `reason` | `reason=no_ready_step`. |
 | `ready_step_selected` | `entrypoints/cloud_event.py` | Base fields + `stepId` | Indicates which step will be processed. |
 | `cloud_event_finished` | `entrypoints/cloud_event.py` | Base fields + `stepId`, `status`, `outputsManifestGcsUri`, `itemsCount`, `failuresCount`, `errorCode` | Final outcome emitted after core finishes. |

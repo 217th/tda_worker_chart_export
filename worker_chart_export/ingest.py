@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 
 @dataclass(frozen=True, slots=True)
@@ -12,6 +12,24 @@ class FlowRunEvent:
     event_id: str | None
     event_type: str | None
     subject: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class BlockedDependency:
+    step_id: str
+    status: str
+
+
+@dataclass(frozen=True, slots=True)
+class BlockedStep:
+    step_id: str
+    unmet: tuple[BlockedDependency, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ReadyStepPick:
+    step_id: str | None
+    blocked: tuple[BlockedStep, ...]
 
 
 def get_cloud_event_attr(cloud_event: Any, key: str, default: Any = None) -> Any:
@@ -83,12 +101,13 @@ def _normalize_event_data(data: Any) -> Any:
     return data
 
 
-def pick_ready_chart_export_step(flow_run: Mapping[str, Any]) -> str | None:
+def pick_ready_chart_export_step(flow_run: Mapping[str, Any]) -> ReadyStepPick:
     steps = flow_run.get("steps")
     if not isinstance(steps, Mapping):
-        return None
+        return ReadyStepPick(step_id=None, blocked=())
 
     ready_steps: list[str] = []
+    blocked_steps: list[BlockedStep] = []
     for step_id, step in steps.items():
         if not isinstance(step_id, str):
             continue
@@ -98,12 +117,43 @@ def pick_ready_chart_export_step(flow_run: Mapping[str, Any]) -> str | None:
             continue
         if step.get("status") != "READY":
             continue
+        unmet = _find_unmet_dependencies(steps=steps, depends_on=_get_depends_on(step))
+        if unmet:
+            blocked_steps.append(BlockedStep(step_id=step_id, unmet=tuple(unmet)))
+            continue
         ready_steps.append(step_id)
 
     if not ready_steps:
-        return None
+        return ReadyStepPick(step_id=None, blocked=tuple(blocked_steps))
 
-    return sorted(ready_steps)[0]
+    return ReadyStepPick(step_id=sorted(ready_steps)[0], blocked=tuple(blocked_steps))
+
+
+def _get_depends_on(step: Mapping[str, Any]) -> Sequence[str]:
+    depends_on = step.get("dependsOn")
+    if not isinstance(depends_on, Sequence) or isinstance(depends_on, (str, bytes, bytearray)):
+        return []
+    values: list[str] = []
+    for item in depends_on:
+        if isinstance(item, str) and item.strip():
+            values.append(item.strip())
+    return values
+
+
+def _find_unmet_dependencies(
+    *, steps: Mapping[str, Any], depends_on: Sequence[str]
+) -> list[BlockedDependency]:
+    unmet: list[BlockedDependency] = []
+    for dep_id in depends_on:
+        dep = steps.get(dep_id)
+        if not isinstance(dep, Mapping):
+            unmet.append(BlockedDependency(step_id=dep_id, status="MISSING"))
+            continue
+        status = dep.get("status")
+        if status != "SUCCEEDED":
+            status_str = status if isinstance(status, str) and status else "UNKNOWN"
+            unmet.append(BlockedDependency(step_id=dep_id, status=status_str))
+    return unmet
 
 
 def decode_firestore_fields(fields: Mapping[str, Any]) -> dict[str, Any]:

@@ -109,7 +109,22 @@ def _handle_cloud_event(cloud_event: Any) -> None:
         log_event(logger, "cloud_event_ignored", **base_fields, reason="invalid_steps")
         return
 
-    step_id = pick_ready_chart_export_step(flow_run)
+    pick = pick_ready_chart_export_step(flow_run)
+    if pick.blocked:
+        log_event(
+            logger,
+            "depends_on_blocked",
+            **base_fields,
+            blockedSteps=[
+                {
+                    "stepId": item.step_id,
+                    "unmet": [{"stepId": dep.step_id, "status": dep.status} for dep in item.unmet],
+                }
+                for item in pick.blocked
+            ],
+        )
+
+    step_id = pick.step_id
     if step_id is None:
         log_event(logger, "cloud_event_noop", **base_fields, reason="no_ready_step")
         return

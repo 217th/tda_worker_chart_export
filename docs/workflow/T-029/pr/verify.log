@@ -1,0 +1,5 @@
+Command:
+  python3 scripts/qa/run_all.py --task T-029
+
+Result:
+  PASS

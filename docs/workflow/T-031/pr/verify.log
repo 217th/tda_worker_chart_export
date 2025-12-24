@@ -1,0 +1,14 @@
+T-031 verification (docs-only)
+
+Checks performed:
+- Confirmed `docs/workflow/cloud_run_functions_gen2_deploy_first_try.md` contains placeholders only (no real project IDs, bucket names, service account emails, URLs).
+- Confirmed content covers:
+  - first deploy vs update deploy
+  - ENTRY_POINT agent-derived
+  - robust env vars input (file vs inline)
+  - requirements.txt presence check
+  - trigger SA vs runtime SA separation
+  - trigger-diff guard on update deploy
+  - Eventarc + Firestore and Eventarc + Storage notes (incl. transport pitfalls)
+
+No code/runtime tests were required for this docs-only task.

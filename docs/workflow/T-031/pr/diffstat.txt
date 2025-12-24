@@ -1,0 +1,13 @@
+T-031 diffstat
+
+NOTE: This is a docs-only task executed directly on `main`.
+Primary files changed:
+- docs/workflow/cloud_run_functions_gen2_deploy_first_try.md
+- docs/workflow/cloud_regression_practice.md
+- docs/workflow/lessons_learned_cloud_functions_gen2_deploy.md
+
+Commits:
+- 4535c059e145 📝 T-031 refine gen2 deploy playbook
+- 5867cf7f0905 📝 T-031 fold deploy lessons into playbook
+- ca732447bc80 📝 T-031 expand deploy playbook with more pitfalls
+- b682c9aee7b2 📝 T-031 address deploy playbook review feedback

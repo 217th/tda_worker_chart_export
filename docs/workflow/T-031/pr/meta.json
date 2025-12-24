@@ -1,0 +1,13 @@
+{
+  "taskId": "T-031",
+  "kind": "docs-only",
+  "base": "main",
+  "branch": "main",
+  "note": "This task was executed directly on main; PR artifacts are recorded for traceability in branch_pr workflow mode.",
+  "commits": [
+    "4535c059e14537a67441e9fd320396219fa1f2b3",
+    "5867cf7f0905d029883b68ffbd8abe2bcca5f342",
+    "ca732447bc805f725a264b03a8f8fa04a03b5f0a",
+    "b682c9aee7b2ce1527c173758790512bfa5b8815"
+  ]
+}

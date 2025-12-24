@@ -725,12 +725,27 @@
         "hash": "1dd5b09f1b07849931dffebdba0fe9e5d1f385ac",
         "message": "🧾 T-029 expand logging practices"
       }
+    },
+    {
+      "id": "T-030",
+      "title": "Universal Cloud Run Functions gen2 deploy instruction",
+      "description": "Single-file, unambiguous playbook for repeatable Cloud Run Functions gen2 deploy and smoke verification (first try).",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "codex",
+      "tags": [
+        "docs",
+        "gcp"
+      ],
+      "depends_on": [
+        "T-024"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "d756dfa7cf9a3c4a0bd9f58ad7b33d11a306b7f45fd4dc60fbdc91d2c7f7dde5"
+    "checksum": "7d94e3316e827fba32cde93b24bc3417e9865b066cdf8a271d12c91e90c189a1"
   }
 }

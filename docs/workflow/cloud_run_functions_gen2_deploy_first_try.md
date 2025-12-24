@@ -37,7 +37,7 @@ FUNCTION_NAME=
 RUNTIME=python313
 SOURCE_DIR=.
 
-# Trigger kind (required): firestore | http | pubsub
+# Trigger kind (required): firestore | http | pubsub | eventarc_storage
 TRIGGER_KIND=firestore
 
 # Firestore trigger (required if TRIGGER_KIND=firestore)
@@ -47,6 +47,11 @@ FIRESTORE_NAMESPACE=(default)
 FIRESTORE_TRIGGER_EVENT_TYPE=google.cloud.firestore.document.v1.updated
 FIRESTORE_TRIGGER_DOCUMENT_PATH=flow_runs/{runId}
 
+# Eventarc trigger identity (optional)
+# If omitted:
+# - for TRIGGER_KIND=firestore or TRIGGER_KIND=eventarc_storage, the agent should default to TRIGGER_SA_EMAIL=RUNTIME_SA_EMAIL
+TRIGGER_SA_EMAIL=
+
 # HTTP trigger (optional, only if TRIGGER_KIND=http)
 # If omitted: default is authenticated-only.
 HTTP_ALLOW_UNAUTHENTICATED=false
@@ -55,11 +60,21 @@ HTTP_ALLOW_UNAUTHENTICATED=false
 PUBSUB_TOPIC=
 PUBSUB_TOPIC_CREATE_IF_MISSING=false
 
+# Eventarc + Cloud Storage trigger (required if TRIGGER_KIND=eventarc_storage)
+# Bucket name only (no gs:// prefix).
+EVENTARC_STORAGE_BUCKET=
+EVENTARC_STORAGE_EVENT_TYPE=google.cloud.storage.object.v1.finalized
+
 # Runtime Service Account (required)
 RUNTIME_SA_EMAIL=
 
-# Environment variables (optional; comma-separated KEY=VALUE)
-ENV_VARS=
+# Environment variables (optional)
+# Choose one mode:
+# - ENV_VARS_MODE=file: preferred (robust for commas/JSON); provide ENV_VARS_FILE
+# - ENV_VARS_MODE=inline: provide ENV_VARS_INLINE (gcloud syntax: KEY=VALUE,KEY=VALUE)
+ENV_VARS_MODE=file  # file | inline
+ENV_VARS_FILE=
+ENV_VARS_INLINE=
 
 # Secrets (optional; comma-separated KEY=projects/<PROJECT_ID>/secrets/<NAME>:<VERSION>)
 # Many services do not need secrets. If empty, do not set any secrets.
@@ -139,6 +154,19 @@ Agent checks (hard requirements):
 test -f "${SOURCE_DIR}/main.py"
 test -f "${SOURCE_DIR}/.gcloudignore"
 ```
+
+Dependency packaging checks (Python runtime):
+
+By default, Cloud Run Functions gen2 Python deployments expect `requirements.txt` in the source directory.
+If it is missing, a deploy can still succeed (infrastructure becomes ACTIVE), but the function can crash on first invocation due to missing dependencies.
+
+Agent must do:
+
+```bash
+test -f "${SOURCE_DIR}/requirements.txt"
+```
+
+If your project intentionally does not use `requirements.txt` (custom build/workflow), human-in-the-middle is required to confirm the intended dependency mechanism.
 
 Critical runtime-assets rule:
 - If your code reads files at runtime (schemas, JSON templates, etc.), those files must be included in the deploy source.
@@ -278,17 +306,27 @@ Use the smallest roles that satisfy required actions:
   - Cloud Run Functions automatically ships stdout/stderr to Cloud Logging; no IAM role is usually needed for that.
   - Only grant `roles/logging.logWriter` if your code calls Cloud Logging API directly.
 
-#### 4.6.2 Eventarc roles (only for TRIGGER_KIND=firestore)
+#### 4.6.2 Eventarc roles (only for TRIGGER_KIND=firestore or TRIGGER_KIND=eventarc_storage)
 
-If using Firestore/Eventarc:
-- runtime SA needs: `roles/eventarc.eventReceiver` (project-level)
-- the Eventarc trigger SA must be allowed to invoke the Cloud Run service (roles/run.invoker) (Section 4.9)
+Eventarc involves two distinct identities:
+- **Runtime identity**: what your function code runs as (this playbook calls it `RUNTIME_SA_EMAIL`).
+- **Trigger delivery identity**: what Eventarc uses to deliver events to your function (this playbook calls it `TRIGGER_SA_EMAIL`).
 
-Grant Eventarc receiver to runtime SA:
+Security rule:
+- Do not assume these are always the same. If you care about least privilege, use a **dedicated trigger SA**.
+
+Defaults (if `TRIGGER_SA_EMAIL` is omitted):
+- The agent should default `TRIGGER_SA_EMAIL=${RUNTIME_SA_EMAIL}`.
+
+Required roles:
+- Trigger delivery identity needs: `roles/eventarc.eventReceiver` (project-level) to receive events.
+- Trigger delivery identity needs: `roles/run.invoker` on the Cloud Run service to invoke the function (Section 4.9).
+
+Grant Eventarc receiver to the trigger delivery identity:
 
 ```bash
 gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
-  --member="serviceAccount:${RUNTIME_SA_EMAIL}" \
+  --member="serviceAccount:${TRIGGER_SA_EMAIL}" \
   --role="roles/eventarc.eventReceiver"
 ```
 
@@ -334,7 +372,8 @@ Build identity is relevant only when:
 Agent composes the deploy command based on `TRIGGER_KIND`.
 
 Important:
-- If `ENV_VARS` is empty, omit `--set-env-vars` entirely.
+- If `ENV_VARS_MODE=file`, use `--env-vars-file` and omit `--set-env-vars`.
+- If `ENV_VARS_MODE=inline`, use `--set-env-vars` and omit `--env-vars-file`.
 - If `SECRET_ENV_VARS` is empty, omit `--set-secrets` entirely.
 
 #### 4.8.1 Firestore trigger (Eventarc) — recommended filters and meaning
@@ -362,6 +401,7 @@ gcloud functions deploy "${FUNCTION_NAME}" \
   --source "${SOURCE_DIR}" \
   --entry-point "${ENTRY_POINT}" \
   --service-account "${RUNTIME_SA_EMAIL}" \
+  --trigger-service-account "${TRIGGER_SA_EMAIL}" \
   --trigger-location "${REGION}" \
   --trigger-event-filters "type=${FIRESTORE_TRIGGER_EVENT_TYPE}" \
   --trigger-event-filters "database=${FIRESTORE_DB}" \
@@ -369,17 +409,51 @@ gcloud functions deploy "${FUNCTION_NAME}" \
   --trigger-event-filters-path-pattern "document=${FIRESTORE_TRIGGER_DOCUMENT_PATH}"
 ```
 
-If you have env vars:
+Env vars (choose exactly one):
+
+If `ENV_VARS_MODE=file`:
 ```bash
-  --set-env-vars "${ENV_VARS}"
+  --env-vars-file "${ENV_VARS_FILE}"
 ```
+
+If `ENV_VARS_MODE=inline`:
+```bash
+  --set-env-vars "${ENV_VARS_INLINE}"
+```
+
+Important for `ENV_VARS_MODE=inline`:
+- `--set-env-vars` uses a comma-separated list. If a value contains commas, you must not pass raw JSON. Use `ENV_VARS_MODE=file` instead.
+- If you absolutely must stay inline, you must escape commas and equals per gcloud parsing rules (example: `VALUE_WITH_COMMA\\,MORE`), but prefer the file mode.
 
 If you have secrets:
 ```bash
   --set-secrets "${SECRET_ENV_VARS}"
 ```
 
-#### 4.8.2 HTTP trigger
+#### 4.8.2 Eventarc + Cloud Storage trigger
+
+Use this only when you want Eventarc events sourced from Cloud Storage (object finalized, deleted, etc.).
+
+Deploy command:
+
+```bash
+gcloud functions deploy "${FUNCTION_NAME}" \
+  --gen2 \
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --runtime "${RUNTIME}" \
+  --source "${SOURCE_DIR}" \
+  --entry-point "${ENTRY_POINT}" \
+  --service-account "${RUNTIME_SA_EMAIL}" \
+  --trigger-service-account "${TRIGGER_SA_EMAIL}" \
+  --trigger-location "${REGION}" \
+  --trigger-event-filters "type=${EVENTARC_STORAGE_EVENT_TYPE}" \
+  --trigger-event-filters "bucket=${EVENTARC_STORAGE_BUCKET}"
+```
+
+Env vars and secrets apply the same way as in the Firestore trigger section (use `--env-vars-file` / `--set-env-vars` and optional `--set-secrets`).
+
+#### 4.8.3 HTTP trigger
 
 Deploy:
 
@@ -400,7 +474,7 @@ If `HTTP_ALLOW_UNAUTHENTICATED=true`, also add:
   --allow-unauthenticated
 ```
 
-#### 4.8.3 Pub/Sub trigger
+#### 4.8.4 Pub/Sub trigger
 
 Human must supply `PUBSUB_TOPIC`.
 
@@ -424,7 +498,7 @@ gcloud functions deploy "${FUNCTION_NAME}" \
 
 ### 4.9 Post-deploy: allow Eventarc delivery to invoke Cloud Run service (firestore only)
 
-If `TRIGGER_KIND=firestore`, ensure the Eventarc trigger identity can invoke the Cloud Run service.
+If `TRIGGER_KIND=firestore` or `TRIGGER_KIND=eventarc_storage`, ensure the Eventarc trigger identity can invoke the Cloud Run service.
 
 1) Determine which service account the trigger uses:
 
@@ -519,13 +593,28 @@ Always re-derive entry point from code (Section 4.3). Do not assume it stayed th
 ### 5.3 Deploy update (explicit, deterministic)
 
 Rules:
-- Use the same trigger kind as currently deployed unless the human requests a trigger change.
+- Use the same trigger kind as currently deployed unless the human explicitly requests a trigger change.
 - Keep existing env vars and secrets unless the human requests changes.
 - Do not redo API enablement and IAM unless errors occur.
 
-Perform the same deploy command as in first deploy (Section 4.8) using:
-- existing trigger values from `eventTrigger` (preferred), and/or
-- the human-provided input block.
+Critical safety rule (avoid accidental trigger rewrites):
+- The agent must **diff** the deploy request block (Section 1) against the currently deployed configuration (Section 5.1).
+- If the deploy request block suggests a different trigger kind or materially different trigger settings (e.g., Firestore → HTTP, different Firestore DB, different document path pattern, different bucket for storage-trigger), the agent must STOP and ask for explicit confirmation before applying a change.
+
+Human-in-the-middle confirmation prompt:
+```text
+Deployed trigger != requested trigger.
+Confirm whether you want to CHANGE the trigger (potentially destructive / behavior-changing), or whether the request block is stale.
+Reply with one of:
+- KEEP_DEPLOYED_TRIGGER
+- CHANGE_TRIGGER (and confirm the new desired settings)
+```
+
+Only after confirmation, perform the deploy.
+
+Deploy command construction:
+- Prefer existing trigger values from `eventTrigger` (deployed state) when doing a pure update.
+- Use the request block only for non-trigger config changes (env vars, secrets, runtime SA), unless the human confirmed a trigger change.
 
 ### 5.4 Confirm deploy status
 
@@ -767,6 +856,35 @@ Human-in-the-middle checklist:
 gcloud run services describe "${FUNCTION_NAME}" --project "${PROJECT_ID}" --region "${REGION}" --format="yaml(metadata)"
 ```
 
+### 8.9 Eventarc storage triggers: Pub/Sub transport permissions (advanced)
+
+If you are using Eventarc events sourced from Cloud Storage (e.g. `google.cloud.storage.object.v1.finalized`), there is a Pub/Sub transport layer under the hood.
+
+In some org setups, delivery can fail because the Cloud Storage service identity cannot publish to the Eventarc-managed Pub/Sub topic.
+
+Symptoms:
+- Storage-triggered events never arrive at the function
+- Eventarc trigger exists, but there are Pub/Sub permission errors in logs/audit logs mentioning `pubsub.publisher`
+
+Agent procedure (human-in-the-middle may be required for IAM changes):
+1) Identify the Eventarc trigger and its Pub/Sub topic:
+```bash
+gcloud functions describe "${FUNCTION_NAME}" --gen2 --project "${PROJECT_ID}" --region "${REGION}" \
+  --format="yaml(eventTrigger)"
+```
+2) If the output includes a Pub/Sub topic reference, inspect its IAM policy:
+```bash
+gcloud pubsub topics get-iam-policy "<TOPIC_NAME_OR_FULL_PATH>" --project "${PROJECT_ID}"
+```
+3) Identify the actual failing principal from audit logs (preferred). If you cannot, a common identity for Cloud Storage notifications is:
+`service-${PROJECT_NUMBER}@gs-project-accounts.iam.gserviceaccount.com`
+
+4) Grant `roles/pubsub.publisher` to the principal on that topic (only if evidence shows this is the root cause).
+
+Important:
+- Do not apply this blindly. Always confirm the principal from logs/audit logs when possible.
+- If the org disallows topic IAM changes, human-in-the-middle is required.
+
 ---
 
 ## 9) Notes for agents (to avoid “first try” regressions)
@@ -780,4 +898,4 @@ gcloud run services describe "${FUNCTION_NAME}" --project "${PROJECT_ID}" --regi
 7) Firestore/Eventarc delivery is at-least-once. Your system must be idempotent.
 8) If the function writes back to the same Firestore document that triggers it, expect multiple trigger invocations for a single logical run (one per write). This is normal; later invocations should typically be safe no-ops.
 9) If `gcloud functions deploy` returns `unable to queue the operation`, wait briefly (e.g., ~20s) and retry once.
-10) Prefer `--env-vars-file` only if the project already uses a reviewed env file workflow; otherwise keep env vars inline and explicit in the deploy request block.
+10) Prefer `--env-vars-file` when env var values can contain commas/JSON, or whenever you want to avoid quoting/escaping pitfalls. Use inline `--set-env-vars` only for simple values.

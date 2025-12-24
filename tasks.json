@@ -705,12 +705,28 @@
           "body": "Verified: Integrated via squash; verify=skipped(no commands); pr=docs/workflow/T-028/pr."
         }
       ]
+    },
+    {
+      "id": "T-029",
+      "title": "Honor dependsOn before processing",
+      "description": "Ensure worker only starts CHART_EXPORT step when all dependsOn steps are SUCCEEDED. Add logging for blocked steps and tests.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "codex",
+      "tags": [
+        "logic",
+        "orchestration"
+      ],
+      "depends_on": [
+        "T-003",
+        "T-004"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "7a0ec0a18ff3963d1463c87f380920feb00e9025844dc9a151f711d5307a2904"
+    "checksum": "dd5469be34bfa5ba703cd6d229d913c9a71f2a3364ddac8971086a307a04fa15"
   }
 }

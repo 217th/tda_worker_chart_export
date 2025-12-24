@@ -749,7 +749,7 @@
       "id": "T-031",
       "title": "Refine gen2 deploy playbook",
       "description": "Expand cloud_run_functions_gen2_deploy_first_try.md: split first deploy vs update deploy, clarify trigger filter meanings, make ENTRY_POINT and BUILD SA derivation agent-driven, make secrets/IAM conditional on used services, add human-in-the-middle debug steps, and mark smoke verification as opt-in. Keep single-file, English, unambiguous.",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "codex",
       "tags": [
@@ -758,6 +758,16 @@
       ],
       "depends_on": [
         "T-030"
+      ],
+      "commit": {
+        "hash": "b682c9aee7b2ce1527c173758790512bfa5b8815",
+        "message": "📝 T-031 address deploy playbook review feedback"
+      },
+      "comments": [
+        {
+          "author": "INTEGRATOR",
+          "body": "Verified: Updated universal Cloud Run Functions gen2 deploy playbook; folded legacy deploy docs into it; added safety checks for env vars, requirements, and trigger diffs."
+        }
       ]
     }
   ],
@@ -765,6 +775,6 @@
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "407f77e71e21f1916152d7afd8e5371692f293115f30fd51423bd74978d5dcd2"
+    "checksum": "c6278df80d7e2134150cf9d628a9954bc86571b270027d922eaa2b87747b5aa5"
   }
 }

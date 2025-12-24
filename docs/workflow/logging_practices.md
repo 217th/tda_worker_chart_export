@@ -137,6 +137,7 @@ The following events are emitted by the current implementation.
 - In Cloud Run gen2, logs appear under `run.googleapis.com/stdout` and `run.googleapis.com/stderr`.
 - If you need per-event filtering, query `jsonPayload.event` in Cloud Logging.
 - `cloud_event_received` may appear multiple times for a single run due to Firestore updates; follow with `cloud_event_noop` for expected retries.
+- When a READY step has unmet `dependsOn`, `depends_on_blocked` is emitted and the worker **does not claim** the step.
 
 ## Reuse checklist for other components
 

@@ -147,6 +147,31 @@ Critical runtime-assets rule:
 If the agent cannot confirm which files are runtime-required:
 - human-in-the-middle required (Section 7.1). The human must confirm which files are needed at runtime.
 
+#### 4.2.1 Monorepo / multiple `main.py` pitfall (wrong entrypoint packaged)
+
+In real projects it is common to have:
+- a repo-root `main.py` for a CLI or local runner, and
+- a different function entrypoint under a subdirectory.
+
+If you deploy from the repo root (`SOURCE_DIR=.`), Cloud Functions may package the wrong `main.py`.
+
+Agent rule:
+- If there are multiple `main.py` files in the repo, the agent must ensure `SOURCE_DIR` points at the directory that contains the intended Cloud Functions `main.py`.
+
+Agent diagnostic:
+
+```bash
+python3 - <<'PY'
+from pathlib import Path
+paths = sorted(str(p) for p in Path(".").rglob("main.py"))
+print("\n".join(paths))
+PY
+```
+
+If more than one path is printed:
+- human-in-the-middle is allowed (ask which one is the Cloud Function entrypoint), OR
+- set `SOURCE_DIR` explicitly to the correct folder and re-run the packaging checks.
+
 ### 4.3 Derive `ENTRY_POINT` (agent-only, deterministic)
 
 The agent must determine the Cloud Run Functions entry point from the codebase.
@@ -275,6 +300,26 @@ Bucket-level binding is preferred over project-level. If `GCS_BUCKETS` is empty,
 
 Secret-level binding (preferred over project-level):
 - human must provide secret names if secrets are used.
+
+#### 4.6.4 IAM verification without keys (recommended)
+
+Prefer verifying permissions via **service account impersonation** (no JSON keys).
+
+Examples:
+
+```bash
+# Confirm the SA exists
+gcloud iam service-accounts describe "${RUNTIME_SA_EMAIL}" --project "${PROJECT_ID}"
+
+# GCS: list bucket contents as the runtime SA
+gcloud storage ls "gs://<BUCKET_NAME>/" \
+  --project "${PROJECT_ID}" \
+  --impersonate-service-account="${RUNTIME_SA_EMAIL}"
+```
+
+Notes:
+- Many `gcloud` commands support `--impersonate-service-account`.
+- If impersonation is blocked by org policy, human-in-the-middle is required to run verification from an allowed environment.
 
 ### 4.7 Build identity (Build SA) — do not introduce unless required
 
@@ -406,6 +451,35 @@ gcloud run services add-iam-policy-binding "${FUNCTION_NAME}" \
   --role="roles/run.invoker"
 ```
 
+#### 4.9.1 Eventarc “service agent” invoker (common hidden identity)
+
+In some projects, Eventarc may deliver events using the **Eventarc service agent**:
+
+`service-${PROJECT_NUMBER}@gcp-sa-eventarc.iam.gserviceaccount.com`
+
+If your logs show Eventarc delivery attempts but the Cloud Run request log reports `403`, grant invoker to the delivery identity.
+
+Agent steps:
+1) Get project number:
+```bash
+PROJECT_NUMBER="$(gcloud projects describe "${PROJECT_ID}" --format='value(projectNumber)')"
+```
+2) Compose Eventarc service agent:
+```bash
+EVENTARC_SERVICE_AGENT="service-${PROJECT_NUMBER}@gcp-sa-eventarc.iam.gserviceaccount.com"
+```
+3) Grant invoker (if required):
+```bash
+gcloud run services add-iam-policy-binding "${FUNCTION_NAME}" \
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --member="serviceAccount:${EVENTARC_SERVICE_AGENT}" \
+  --role="roles/run.invoker"
+```
+
+Human-in-the-middle:
+- Only apply this if there is evidence (403 delivery) and you can identify the actual caller identity from logs/trigger config.
+
 ### 4.10 Confirm deploy status
 
 ```bash
@@ -479,6 +553,23 @@ Cloud Run Functions gen2 automatically ships `stdout`/`stderr` to Cloud Logging.
 
 If the application prints **JSON per line**, Cloud Logging typically renders it under `jsonPayload`.
 If the application prints plain text, it appears under `textPayload`.
+
+#### 6.1.1 Gen2 log resource type (common confusion)
+
+For Cloud Run Functions gen2, application logs commonly appear under:
+- `resource.type="cloud_run_revision"`
+- `resource.labels.service_name="<function_name>"`
+
+Quick query template:
+
+```bash
+gcloud logging read \
+  'resource.type="cloud_run_revision"
+   resource.labels.service_name="'"${FUNCTION_NAME}"'"' \
+  --project "${PROJECT_ID}" \
+  --limit 50 \
+  --freshness 30m
+```
 
 ### 6.2 Logs and event names differ by component and step types
 
@@ -655,6 +746,27 @@ gcloud builds list --region "${REGION}" --project "${PROJECT_ID}" --limit 3
 ```
 3) If deploy is not progressing, rerun the deploy command once (do not spam retries).
 
+### 8.8 Existing Cloud Run service name conflicts
+
+In some projects a Cloud Run service with the same name may already exist (created manually or by another system).
+This can create confusing behavior for Cloud Functions gen2, because gen2 is backed by Cloud Run.
+
+Symptoms:
+- deploy fails with errors referencing Cloud Run service/revisions
+- function appears deployed but traffic/logs do not match expected code
+
+Agent-safe options (prefer least destructive):
+1) Rename the function (use a new `FUNCTION_NAME`) for a clean deploy.
+2) If you must reuse the same name, human-in-the-middle is required to decide whether deleting the existing Cloud Run service is safe.
+
+Human-in-the-middle checklist:
+- confirm whether the existing Cloud Run service is managed by Cloud Functions
+- confirm deletion is acceptable
+- provide:
+```bash
+gcloud run services describe "${FUNCTION_NAME}" --project "${PROJECT_ID}" --region "${REGION}" --format="yaml(metadata)"
+```
+
 ---
 
 ## 9) Notes for agents (to avoid “first try” regressions)
@@ -668,3 +780,4 @@ gcloud builds list --region "${REGION}" --project "${PROJECT_ID}" --limit 3
 7) Firestore/Eventarc delivery is at-least-once. Your system must be idempotent.
 8) If the function writes back to the same Firestore document that triggers it, expect multiple trigger invocations for a single logical run (one per write). This is normal; later invocations should typically be safe no-ops.
 9) If `gcloud functions deploy` returns `unable to queue the operation`, wait briefly (e.g., ~20s) and retry once.
+10) Prefer `--env-vars-file` only if the project already uses a reviewed env file workflow; otherwise keep env vars inline and explicit in the deploy request block.

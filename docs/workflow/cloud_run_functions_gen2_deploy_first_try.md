@@ -616,9 +616,44 @@ gcloud run services add-iam-policy-binding "${FUNCTION_NAME}" --project "${PROJE
 Possible causes:
 - your handler intentionally filters out irrelevant events
 - your Firestore document path pattern does not match the subject you think it matches
+- for Firestore CloudEvents, the event payload may omit the document body (`data` may be empty/None); if your handler relies only on `data`, it may incorrectly treat the event as “filtered”. Prefer extracting the document path (or `runId`) from the CloudEvent subject and fetching the document from Firestore.
 
 Human-in-the-middle:
 - provide the event ID and the function logs around that time.
+
+### 8.6 `gcloud functions deploy` crashes (agent environment instability)
+
+Symptom examples:
+- `AttributeError: 'NoneType' object has no attribute 'dockerRepository'`
+- other unexpected Python exceptions inside `gcloud`, especially mid-deploy
+
+Cause:
+- unstable/broken `gcloud` installation in the agent environment
+
+Fix:
+- retry deploy from a known-good environment (recommended: Cloud Shell) or update `gcloud`
+- do not assume the failure is due to config until you have a stable deploy run
+
+Human-in-the-middle:
+- provide the full crash stack trace from the agent environment
+- confirm whether a Cloud Build job was created (and share its build URL if present)
+
+### 8.7 Deploy request appears to “hang” or times out locally
+
+This can happen when the local execution environment imposes time limits on long-running commands.
+The GCP operation may still continue in the background even if the local command times out.
+
+Fix:
+1) Re-check the function state:
+```bash
+gcloud functions describe "${FUNCTION_NAME}" --gen2 --project "${PROJECT_ID}" --region "${REGION}" \
+  --format="value(state,serviceConfig.revision,updateTime)"
+```
+2) If build is still running, check the latest build logs (human-in-the-middle may be needed):
+```bash
+gcloud builds list --region "${REGION}" --project "${PROJECT_ID}" --limit 3
+```
+3) If deploy is not progressing, rerun the deploy command once (do not spam retries).
 
 ---
 
@@ -630,3 +665,6 @@ Human-in-the-middle:
 4) For Firestore triggers, region alignment matters (Firestore DB region must match function/trigger region).
 5) `.gcloudignore` controls upload; ensure runtime-required files are included.
 6) Smoke verification is opt-in and may be expensive; do not run it without explicit approval.
+7) Firestore/Eventarc delivery is at-least-once. Your system must be idempotent.
+8) If the function writes back to the same Firestore document that triggers it, expect multiple trigger invocations for a single logical run (one per write). This is normal; later invocations should typically be safe no-ops.
+9) If `gcloud functions deploy` returns `unable to queue the operation`, wait briefly (e.g., ~20s) and retry once.

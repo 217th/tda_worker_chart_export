@@ -1,15 +1,19 @@
-# Cloud Regression Practice (Codex-run)
+# Cloud Regression Practice (worker-chart-export)
 
 Purpose: a repeatable, Codex-driven checklist for running cloud regression
 scenarios (deploy -> trigger -> verify logs -> verify GCS) without manual console
 work. Use this whenever a task requires verification in real GCP.
+
+This document is **component-specific** (for `worker-chart-export`).
+
+For the **universal** Cloud Run Functions gen2 deployment procedure (first deploy vs update deploy, triggers, IAM, troubleshooting), use:
+- `docs/workflow/cloud_run_functions_gen2_deploy_first_try.md`
 
 ## Preconditions
 
 - `gcloud` installed and authenticated (active account has deploy + runtime perms).
 - Project, Firestore DB, bucket, and Secret Manager are provisioned.
 - Cloud Function triggers Firestore updates on `flow_runs/{runId}`.
-- `.gcloudignore` excludes non-runtime files (docs, codex-swarm, etc.).
 - Access to the Chart-IMG secret in Secret Manager.
 
 ## Safety & hygiene
@@ -28,40 +32,37 @@ export ARTIFACTS_BUCKET="YOUR_ARTIFACTS_BUCKET"
 export REGION="YOUR_REGION"
 export FUNCTION_NAME="worker-chart-export"
 export STEP_ID="charts:1H:ctpl_price_ma1226_vol_v1"
+export RUNTIME_SA_EMAIL="YOUR_RUNTIME_SA_EMAIL"
+export CHART_IMG_ACCOUNTS_SECRET_NAME="YOUR_SECRET_NAME"
 ```
 
-## 1) Deploy from current branch
+## 1) Deploy / update from current branch
 
-Run from repo root (same branch you are verifying):
+Run from repo root (same branch you are verifying).
 
-```
-gcloud functions deploy "${FUNCTION_NAME}" \
-  --gen2 \
-  --region="${REGION}" \
-  --runtime=python313 \
-  --source=. \
-  --entry-point=worker_chart_export \
-  --service-account="tda-worker-chart-export-test@${PROJECT_ID}.iam.gserviceaccount.com" \
-  --set-env-vars="ARTIFACTS_BUCKET=${ARTIFACTS_BUCKET},CHARTS_BUCKET=gs://${ARTIFACTS_BUCKET},CHARTS_DEFAULT_TIMEZONE=Etc/UTC,FIRESTORE_DB=${FIRESTORE_DB},CHARTS_API_MODE=record" \
-  --set-secrets="CHART_IMG_ACCOUNTS_JSON=projects/${PROJECT_ID}/secrets/chart-img-accounts:latest" \
-  --trigger-location="${REGION}" \
-  --trigger-event-filters="type=google.cloud.firestore.document.v1.updated" \
-  --trigger-event-filters="database=${FIRESTORE_DB}" \
-  --trigger-event-filters="namespace=(default)" \
-  --trigger-event-filters-path-pattern="document=flow_runs/{runId}"
-```
+Do **not** copy a hardcoded deploy command from this file. Instead:
+- Follow `docs/workflow/cloud_run_functions_gen2_deploy_first_try.md`.
 
-Notes:
-- If deploy returns `unable to queue the operation`, wait ~20s and retry.
-- Make sure function is redeployed after code changes to avoid stale behavior.
-- In automation, deploy/log commands may time out locally while the GCP operation continues.
-  If you see a timeout without a hard error, re-run with a longer timeout and/or
-  confirm status in Cloud Console or with a fresh `gcloud functions describe`.
-- Expect multiple Firestore update triggers per run:
-  - The worker writes claim/finalize updates to the same `flow_runs/{runId}` document.
-  - Each write emits a new Eventarc event with a new `eventId`.
-  - Only the first event typically performs work; subsequent events should log
-    `cloud_event_noop` with `reason=no_ready_step`. This is normal/idempotent.
+Worker-specific values to plug into that playbook:
+
+- `TRIGGER_KIND=firestore`
+- Firestore trigger:
+  - `FIRESTORE_TRIGGER_EVENT_TYPE=google.cloud.firestore.document.v1.updated`
+  - `FIRESTORE_DB=${FIRESTORE_DB}`
+  - `FIRESTORE_NAMESPACE=(default)`
+  - `FIRESTORE_TRIGGER_DOCUMENT_PATH=flow_runs/{runId}`
+- Runtime SA:
+  - `RUNTIME_SA_EMAIL=${RUNTIME_SA_EMAIL}`
+- Env vars commonly used by this component:
+  - `FIRESTORE_DB=${FIRESTORE_DB}`
+  - `ARTIFACTS_BUCKET=${ARTIFACTS_BUCKET}`
+  - `CHARTS_BUCKET=gs://${ARTIFACTS_BUCKET}`
+  - `CHARTS_DEFAULT_TIMEZONE=Etc/UTC`
+  - `CHARTS_API_MODE=record` (real Chart-IMG calls) or `mock` (no paid API)
+- Secret env var (optional; only if you need real Chart-IMG calls):
+  - `CHART_IMG_ACCOUNTS_JSON=projects/${PROJECT_ID}/secrets/${CHART_IMG_ACCOUNTS_SECRET_NAME}:latest`
+
+Important: this component writes back to `flow_runs/{runId}` (claim/finalize), which can cause multiple Firestore-trigger invocations per logical run. Only the first invocation should do work; later ones should be safe no-ops.
 
 ## 2) Create a flow_run and trigger update
 
@@ -70,7 +71,7 @@ Use a valid runId (regex must match: `YYYYMMDD-HHMMSS_SYMBOL_slug`).
 ```
 export RUN_ID="20251221-142000_BTCUSDT_demo25"
 
-python - <<'PY'
+python3 - <<'PY'
 import os, uuid
 from datetime import datetime, timezone
 from google.cloud import firestore
@@ -148,7 +149,7 @@ Expected:
 ## 5) Idempotent retry
 
 ```
-python - <<'PY'
+python3 - <<'PY'
 import os, uuid
 from google.cloud import firestore
 
@@ -173,7 +174,7 @@ gcloud logging read \
 
 ```
 export RUN_ID="20251221-143000_BTCUSDT_demo25m"
-python - <<'PY'
+python3 - <<'PY'
 import os, uuid
 from datetime import datetime, timezone
 from google.cloud import firestore
@@ -224,7 +225,7 @@ Purpose: ensure non-target steps do not trigger processing.
 
 ```
 export RUN_ID="20251221-144000_BTCUSDT_demo25no"
-python - <<'PY'
+python3 - <<'PY'
 import os, uuid
 from datetime import datetime, timezone
 from google.cloud import firestore
@@ -273,7 +274,7 @@ Purpose: ensure updates outside `flow_runs/` do not invoke the function.
 
 1) Update any `chart_templates/{id}` document:
 ```
-python - <<'PY'
+python3 - <<'PY'
 import os, uuid
 from google.cloud import firestore
 
@@ -291,23 +292,9 @@ PY
 Purpose: validate `MANIFEST_WRITE_FAILED` when bucket is invalid.
 
 Steps:
-1) Redeploy with a bad bucket name:
-```
-gcloud functions deploy "${FUNCTION_NAME}" \
-  --gen2 \
-  --region="${REGION}" \
-  --runtime=python313 \
-  --source=. \
-  --entry-point=worker_chart_export \
-  --service-account="tda-worker-chart-export-test@${PROJECT_ID}.iam.gserviceaccount.com" \
-  --set-env-vars="ARTIFACTS_BUCKET=bad-bucket-name,CHARTS_BUCKET=gs://bad-bucket-name,CHARTS_DEFAULT_TIMEZONE=Etc/UTC,FIRESTORE_DB=${FIRESTORE_DB},CHARTS_API_MODE=record" \
-  --set-secrets="CHART_IMG_ACCOUNTS_JSON=projects/${PROJECT_ID}/secrets/chart-img-accounts:latest" \
-  --trigger-location="${REGION}" \
-  --trigger-event-filters="type=google.cloud.firestore.document.v1.updated" \
-  --trigger-event-filters="database=${FIRESTORE_DB}" \
-  --trigger-event-filters="namespace=(default)" \
-  --trigger-event-filters-path-pattern="document=flow_runs/{runId}"
-```
+1) Redeploy using `docs/workflow/cloud_run_functions_gen2_deploy_first_try.md`, but temporarily set:
+   - `ARTIFACTS_BUCKET=bad-bucket-name`
+   - `CHARTS_BUCKET=gs://bad-bucket-name`
 
 2) Run the happy path (section 2).
 3) Expect `cloud_event_finished` with `errorCode=MANIFEST_WRITE_FAILED` or `GCS_WRITE_FAILED`.
@@ -320,7 +307,7 @@ Purpose: ensure bad secret format fails fast with `config_error`.
 Steps:
 1) Add a temporary bad version:
 ```
-echo "not-json" | gcloud secrets versions add chart-img-accounts \
+echo "not-json" | gcloud secrets versions add "${CHART_IMG_ACCOUNTS_SECRET_NAME}" \
   --project "${PROJECT_ID}" --data-file=-
 ```
 2) Trigger any flow_run update.
@@ -333,7 +320,7 @@ Purpose: if all accounts are exhausted, expect `CHART_API_LIMIT_EXCEEDED`.
 
 Steps:
 ```
-python - <<'PY'
+python3 - <<'PY'
 import os
 from datetime import datetime, timezone
 from google.cloud import firestore

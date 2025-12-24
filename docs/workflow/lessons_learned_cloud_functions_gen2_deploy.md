@@ -1,189 +1,69 @@
-# Lessons Learned: Cloud Functions Gen2 Deploy (worker-chart-export)
+# Lessons Learned (worker-chart-export specific)
 
-## Context
+This document intentionally keeps **worker-chart-export-specific** lessons that are *not* universal deployment guidance.
 
-This document captures the issues we hit and the fixes that led to a successful
-deploy of `worker-chart-export` to Cloud Functions (gen2) in `YOUR_REGION`.
+For the universal Cloud Run Functions gen2 deployment playbook (first deploy vs update deploy, triggers, IAM, troubleshooting), use:
+- `docs/workflow/cloud_run_functions_gen2_deploy_first_try.md`
 
-## Key outcomes
+---
 
-- Deploy succeeded after aligning Eventarc filters with Firestore provider
-  requirements, granting correct IAM roles, and sanitizing the source bundle
-  with `.gcloudignore`.
-- Firestore trigger works for a **non-default** database in `YOUR_REGION`.
-- CloudEvent payload for Firestore updates may arrive without `data`; handler
-  should fallback to fetching `flow_run` from Firestore by `subject` runId.
-- Manifest schema must be bundled with runtime; docs-only paths are excluded
-  by `.gcloudignore`.
+## A) runId format matters (manifest schema validation)
 
-## Issues and fixes
+This component validates outputs against a JSON schema that includes a strict `runId` pattern.
 
-### 1) Source bundle contained extra directories
+If the `runId` does not match the expected regex, the step can fail with `VALIDATION_FAILED` even if some upstream work succeeded.
 
-**Symptom:** Deploy ZIP included docs, codex-swarm, etc.  
-**Fix:** Maintain `.gcloudignore` and exclude non-runtime directories:
-- `.codex-swarm/`, `.codex-resume`
-- `docs/`, `docs-*`, `tests/`, `scripts/`
-- `tasks.json`, `AGENTS.md`, `README.md`
+Practical guidance:
+- Generate `runId` values that follow the agreed contract for this system.
+- When creating test runs manually, avoid ad-hoc IDs; use the canonical format.
 
-**Lesson:** `gcloud` uses `.gcloudignore` (not `.gitignore`), so add explicit
-exclusions there to keep Cloud Function bundles minimal.
+---
 
-### 2) Missing `main.py` for python313 runtime
+## B) Missing chart template should surface the real root cause
 
-**Symptom:** `--source` missing required `main.py`.  
-**Fix:** Provide `main.py` that exports the entry point:
-`worker_chart_export`.
+If `inputs.requests[]` references a `chartTemplateId` that does not exist in `chart_templates/{chartTemplateId}`:
+- The component should record a per-request failure for that request with a specific error message like “Chart template not found”.
+- Avoid collapsing the entire situation into a generic message like “minImages not satisfied” if all requests failed for a concrete reason.
 
-**Lesson:** Gen2 Python runtime still expects `main.py` unless you use a custom
-container. Keep `main.py` small and delegate to application entrypoint.
+Why this matters:
+- Operators can fix the underlying misconfiguration faster if the error message is specific.
 
-### 3) Eventarc filter validation errors
+---
 
-**Symptom:** `missing required attribute "database"` or database not found.  
-**Fix:** Use Eventarc Firestore provider filter format:
+## C) GCS bucket misconfiguration should be clearly distinguishable
 
-```
---trigger-event-filters="type=google.cloud.firestore.document.v1.updated"
---trigger-event-filters="database=YOUR_FIRESTORE_DB"
---trigger-event-filters="namespace=(default)"
---trigger-event-filters-path-pattern="document=flow_runs/{runId}"
-```
+If the bucket configured via env vars is invalid (typo, missing bucket, wrong project) or runtime SA lacks required permissions:
+- PNG and/or manifest writes can fail.
+- For this component, ensure failures map to clear worker-level error codes:
+  - `GCS_WRITE_FAILED` (PNG write)
+  - `MANIFEST_WRITE_FAILED` (manifest write)
 
-**Lesson:** For Firestore triggers:
-- `database` is the **DB ID only**, not full resource name.
-- `namespace` must be included (`(default)`).
-- Use **path-pattern** for the document.
+This scenario is useful as a negative test to validate that:
+- GCS wiring is correct.
+- error reporting is actionable.
 
-### 4) Eventarc permissions missing
+---
 
-**Symptom:** `Permission "eventarc.events.receiveEvent" denied`.  
-**Fix:** Grant `roles/eventarc.eventReceiver` to the runtime SA:
+## D) Secret Manager misconfiguration fails fast
 
-```
-gcloud projects add-iam-policy-binding <PROJECT_ID> \
-  --member="serviceAccount:<RUNTIME_SA>" \
-  --role="roles/eventarc.eventReceiver"
-```
+If `CHART_IMG_ACCOUNTS_JSON` (from Secret Manager) is present but not a valid JSON array:
+- The service fails fast at config load time (before step execution).
 
-**Lesson:** Eventarc trigger delivery is blocked without `eventReceiver`.
+Expected behavior:
+- No chart requests should be executed.
+- No artifacts should be written.
+- Logs should include a clear `config_error` signal (and a stack trace in stderr).
 
-### 5) Cloud Run invocation permissions missing
+---
 
-**Symptom:** HTTP 403 from Cloud Run on Eventarc delivery.  
-**Fix:** Grant `roles/run.invoker` to the Eventarc trigger service account:
+## E) Cloud Run / Firestore-triggered execution does not accept CLI-like step overrides
 
-```
-gcloud run services add-iam-policy-binding worker-chart-export \
-  --region=YOUR_REGION \
-  --project <PROJECT_ID> \
-  --member="serviceAccount:<RUNTIME_SA>" \
-  --role="roles/run.invoker"
-```
+This component supports explicit `--step-id` in the **CLI**.
 
-**Lesson:** Eventarc triggers require Cloud Run invoker permissions.
+In Cloud Run Functions gen2, execution is driven by Firestore events:
+- The handler selects READY steps deterministically.
+- A “CLI-style invalid stepId” scenario is therefore not directly reproducible in Cloud Run.
 
-### 5) Region and DB alignment
-
-**Symptom:** Trigger validation errors when Firestore DB region mismatched.  
-**Fix:** Use Firestore DB in the same region as Eventarc trigger:
-`YOUR_REGION` in our case.
-
-**Lesson:** Firestore DB, Eventarc trigger region, and Cloud Function region
-must be aligned.
-
-### 6) gcloud deploy crash in this environment
-
-**Symptom:** `AttributeError: 'NoneType' object has no attribute 'dockerRepository'`.  
-**Fix:** Re-run deploy from a stable `gcloud` installation (or Cloud Shell).
-
-**Lesson:** If `gcloud` crashes mid-deploy, retry from a known-good environment
-before debugging the config.
-
-### 7) Firestore event data missing in CloudEvent
-
-**Symptom:** CloudEvent `data` is `None`, causing `event_filtered`.  
-**Fix:** Extract `runId` from `subject` and fetch `flow_run` from Firestore.
-
-**Lesson:** CloudEvent payloads may not include document data; avoid relying
-solely on `data` for Firestore-triggered flows.
-
-### 8) Manifest schema missing in runtime bundle
-
-**Symptom:** `FileNotFoundError` on manifest schema path in Cloud Run.  
-**Fix:** Package schema inside the application (resources) and load from there.
-
-**Lesson:** Anything required at runtime must be bundled; `docs-*` are excluded.
-
-### 9) Manifest validation failure due to runId format
-
-**Symptom:** `VALIDATION_FAILED` with runId regex mismatch.  
-**Fix:** Use runId suffix without `_` (only `[a-z0-9]{3,6}`).
-
-**Lesson:** runId format is part of manifest schema validation; invalid runId
-will fail the step even if PNG generation succeeds.
-
-### 10) Missing chart template should surface original error
-
-**Symptom:** Missing template produced `VALIDATION_FAILED` with generic
-`minImages not satisfied`.
-**Fix:** Preserve original failure message (e.g., `Chart template not found`)
-when `minImages` fails because all items failed.
-
-**Lesson:** Validation failures should be specific to the root cause to avoid
-misleading operators.
-
-### 11) GCS bucket typo causes manifest write failure
-
-**Symptom:** Step fails with `MANIFEST_WRITE_FAILED` and `NotFound` on
-`charts/<runId>/<stepId>/manifest.json`.
-**Fix:** Ensure `CHARTS_BUCKET` points to an existing bucket and runtime SA
-has `storage.objectAdmin`.
-
-**Lesson:** Manifest write failures surface clearly via `MANIFEST_WRITE_FAILED`;
-use this scenario to validate GCS wiring.
-
-### 12) Secret Manager bad JSON fails fast at config
-
-**Symptom:** `config_error` with `CHART_IMG_ACCOUNTS_JSON must be a valid JSON array`
-and stack trace in logs.
-**Fix:** Validate secret contents (JSON array of `{id, apiKey}`) and redeploy
-with correct secret version.
-
-**Lesson:** Misconfigured secrets are caught early; expect no step execution
-and no artifacts when config fails.
-
-### 13) Cloud Run does not accept stepId overrides
-
-**Symptom:** Cannot reproduce "invalid stepId" behavior from CLI in Cloud Run.
-**Fix:** Treat Scenario 3 as "no READY CHART_EXPORT" which yields
-`cloud_event_noop` with `reason=no_ready_step`.
-
-**Lesson:** Cloud Run handler auto-selects READY steps; stepId is only a CLI concern.
-
-## Canonical deploy command (post-fixes)
-
-```
-gcloud functions deploy worker-chart-export \
-  --gen2 \
-  --region=YOUR_REGION \
-  --runtime=python313 \
-  --source=. \
-  --entry-point=worker_chart_export \
-  --service-account=YOUR_RUNTIME_SA@YOUR_PROJECT_ID.iam.gserviceaccount.com \
-  --set-env-vars="ARTIFACTS_BUCKET=YOUR_ARTIFACTS_BUCKET,FIRESTORE_DB=YOUR_FIRESTORE_DB,CHARTS_API_MODE=record" \
-  --set-secrets="CHART_IMG_ACCOUNTS_JSON=projects/YOUR_PROJECT_ID/secrets/chart-img-accounts:latest" \
-  --trigger-location=YOUR_REGION \
-  --trigger-event-filters="type=google.cloud.firestore.document.v1.updated" \
-  --trigger-event-filters="database=YOUR_FIRESTORE_DB" \
-  --trigger-event-filters="namespace=(default)" \
-  --trigger-event-filters-path-pattern="document=flow_runs/{runId}"
-```
-
-## Verification checklist
-
-- Cloud Function `worker-chart-export` is ACTIVE.
-- Eventarc trigger exists and references the function.
-- Firestore update on `flow_runs/{runId}` triggers the function.
-- Logs appear in Cloud Logging.
-- Artifacts land in `gs://YOUR_ARTIFACTS_BUCKET/...`.
+Operator implication:
+- If you want to test “invalid stepId” behavior, do it via CLI.
+- For Cloud Run, the equivalent negative case is typically “no READY steps” → no-op.

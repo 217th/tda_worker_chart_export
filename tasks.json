@@ -744,12 +744,27 @@
         "hash": "17082b24bc182e4d2152f3925909f8ea91f68620",
         "message": "🧭 T-030 add deploy playbook"
       }
+    },
+    {
+      "id": "T-031",
+      "title": "Refine gen2 deploy playbook",
+      "description": "Expand cloud_run_functions_gen2_deploy_first_try.md: split first deploy vs update deploy, clarify trigger filter meanings, make ENTRY_POINT and BUILD SA derivation agent-driven, make secrets/IAM conditional on used services, add human-in-the-middle debug steps, and mark smoke verification as opt-in. Keep single-file, English, unambiguous.",
+      "status": "TODO",
+      "priority": "med",
+      "owner": "codex",
+      "tags": [
+        "docs",
+        "gcp"
+      ],
+      "depends_on": [
+        "T-030"
+      ]
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "9e004462d129392df7f4cc13ebd8c80e5d262c772b5dd1ba19a3988ab83c6fbf"
+    "checksum": "407f77e71e21f1916152d7afd8e5371692f293115f30fd51423bd74978d5dcd2"
   }
 }

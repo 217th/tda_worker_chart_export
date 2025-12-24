@@ -1,364 +1,632 @@
-# Google Cloud Run Functions (gen2) — First‑Try Deploy & Smoke Verify (Playbook)
+# Google Cloud Run Functions (gen2) — Deploy “First Try” Playbook (Universal)
 
-This file is a **single, unambiguous instruction** you can paste to the Codex agent whenever you want it to deploy a service to **Google Cloud Run Functions (gen2)** and verify it.
+This is a **single-file**, **English**, **high-detail**, **unambiguous** instruction intended to be followed by an agent (or a human acting as the agent) to deploy a Python service to **Google Cloud Run Functions (gen2)** with minimal retries.
 
-It is written to avoid the common failure modes we hit in this repo (Eventarc filters, Firestore DB/region mismatch, missing invoker permissions, Artifact Registry cache permissions, oversized source bundles, etc.).
+It explicitly supports two situations:
+
+1) **First-time deploy**: the function does not exist yet → bootstrap + validate everything.
+2) **Update deploy**: the function already exists and previously worked → minimal changes; only re-validate when errors occur.
+
+This playbook also defines when **human-in-the-middle** is required (when the agent cannot uniquely diagnose or should not take potentially destructive actions without explicit approval).
+
+Security note (public repos):
+- Do **not** commit real `PROJECT_ID`, database IDs, bucket names, service account emails, secret names, or URLs into tracked docs.
+- Always use placeholders in this file. Only pass real values in the deploy request block at runtime.
 
 ---
 
-## 0) What you (the human) must provide in the prompt
+## 0) Preconditions for the agent environment
 
-When you ask the agent to deploy, include the following values explicitly (copy/paste the block and fill it):
+The agent must have:
+- `gcloud` installed and authenticated.
+- Permissions in the target project to deploy Cloud Run Functions gen2 and to read/write IAM policies for the resources involved.
+
+The agent must work from a clean working tree (or at least be able to clearly attribute any changes).
+
+---
+
+## 1) The deploy request block (human input)
+
+When you request a deploy, provide this exact block. **Fill required fields** and omit optional blocks if not used.
 
 ```text
+# Required
 PROJECT_ID=
 REGION=
 FUNCTION_NAME=
 RUNTIME=python313
 SOURCE_DIR=.
-ENTRY_POINT=
 
-# Firestore trigger
+# Trigger kind (required): firestore | http | pubsub
+TRIGGER_KIND=firestore
+
+# Firestore trigger (required if TRIGGER_KIND=firestore)
+# FIRESTORE_DB is a database ID, e.g. "(default)" or "my-db" (not a full resource path).
 FIRESTORE_DB=
-FIRESTORE_TRIGGER_DOCUMENT_PATH=flow_runs/{runId}
-FIRESTORE_TRIGGER_EVENT_TYPE=google.cloud.firestore.document.v1.updated
 FIRESTORE_NAMESPACE=(default)
+FIRESTORE_TRIGGER_EVENT_TYPE=google.cloud.firestore.document.v1.updated
+FIRESTORE_TRIGGER_DOCUMENT_PATH=flow_runs/{runId}
 
-# Runtime configuration
-CHARTS_BUCKET_GS=gs://
-CHARTS_DEFAULT_TIMEZONE=Etc/UTC
+# HTTP trigger (optional, only if TRIGGER_KIND=http)
+# If omitted: default is authenticated-only.
+HTTP_ALLOW_UNAUTHENTICATED=false
 
-# Secrets
-CHART_IMG_ACCOUNTS_SECRET_NAME=
+# Pub/Sub trigger (required if TRIGGER_KIND=pubsub)
+PUBSUB_TOPIC=
+PUBSUB_TOPIC_CREATE_IF_MISSING=false
 
-# Service accounts
+# Runtime Service Account (required)
 RUNTIME_SA_EMAIL=
-BUILD_SA_EMAIL=
 
-# Optional: smoke test control
-SMOKE_TEST_MODE=safe_no_quota   # allowed: safe_no_quota | real_one_image
+# Environment variables (optional; comma-separated KEY=VALUE)
+ENV_VARS=
+
+# Secrets (optional; comma-separated KEY=projects/<PROJECT_ID>/secrets/<NAME>:<VERSION>)
+# Many services do not need secrets. If empty, do not set any secrets.
+SECRET_ENV_VARS=
+
+# Cloud Storage buckets used by the function (optional; comma-separated bucket names without gs://)
+# Example: my-artifacts-bucket,my-logs-bucket
+GCS_BUCKETS=
+
+# Used GCP services (recommended; comma-separated)
+# Example: firestore,storage,secretmanager,logging,eventarc
+USED_GCP_SERVICES=
+
+# Optional (opt-in) smoke verification
+# If omitted or false, the agent must NOT run smoke verification that writes to GCP or consumes paid API quota.
+APPROVE_SMOKE_VERIFY=false
+SMOKE_VERIFY_MODE=safe_no_quota  # safe_no_quota | real_one_image
 ```
 
-Notes:
-- `ENTRY_POINT` is the exported Functions Framework handler. In this repo it is `worker_chart_export` (see `main.py`).
-- `FIRESTORE_DB` is the **database ID** (e.g. `(default)` or `my-db-name`), not a full resource path.
+Important rules:
+- `ENTRY_POINT` is **not provided** by the human. The agent must derive it from the codebase (Section 4.2).
+- `SECRET_ENV_VARS` is optional. Do not force secrets for services that do not need them.
+- IAM roles must be conditional on actual usage (`USED_GCP_SERVICES`) (Section 4.4).
+- Smoke verification is opt-in only (Section 6). If not approved, the agent must stop after a successful deploy confirmation.
 
 ---
 
-## 1) Preconditions the agent will verify (and fix if possible)
+## 2) Decide deploy mode: first-time vs update deploy (agent step)
 
-### 1.1 gcloud context
+The agent must determine whether this is a first deploy or update deploy:
+
+```bash
+gcloud functions describe "${FUNCTION_NAME}" \
+  --gen2 \
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --format="value(name)" \
+  >/dev/null
+```
+
+- If the command succeeds → **Update deploy** (Section 5).
+- If it returns NOT_FOUND → **First-time deploy** (Section 4).
+
+---
+
+## 3) What “success” means (definition of done)
+
+### 3.1 Deploy success (first deploy and update deploy)
+
+Deploy is considered successful when:
+- `gcloud functions describe ... --format="value(state)"` returns `ACTIVE`.
+- The function has the intended trigger and runtime configuration.
+
+### 3.2 Optional smoke verification success
+
+Smoke verification is considered successful only if it is explicitly approved and the defined smoke scenarios pass (Section 6).
+
+---
+
+## 4) First-time deploy (bootstrap + validations)
+
+### 4.1 Set gcloud context (always)
 
 ```bash
 gcloud config set project "${PROJECT_ID}"
-gcloud config set run/region "${REGION}" >/dev/null 2>&1 || true
 ```
 
-### 1.2 Required APIs
+### 4.2 Verify source packaging for Cloud Run Functions gen2 (Python)
 
-Enable once per project:
+Rules:
+- `gcloud functions deploy` uses **`.gcloudignore`** (not `.gitignore`) to decide what is uploaded.
+- For Python runtimes (`python313`), the source must include a top-level **`main.py`** under `SOURCE_DIR`.
+
+Agent checks (hard requirements):
+
+```bash
+test -f "${SOURCE_DIR}/main.py"
+test -f "${SOURCE_DIR}/.gcloudignore"
+```
+
+Critical runtime-assets rule:
+- If your code reads files at runtime (schemas, JSON templates, etc.), those files must be included in the deploy source.
+- Therefore: do not place required runtime assets only under excluded folders like `docs-*` if `.gcloudignore` excludes them.
+
+If the agent cannot confirm which files are runtime-required:
+- human-in-the-middle required (Section 7.1). The human must confirm which files are needed at runtime.
+
+### 4.3 Derive `ENTRY_POINT` (agent-only, deterministic)
+
+The agent must determine the Cloud Run Functions entry point from the codebase.
+
+Definition:
+- `ENTRY_POINT` is the python function symbol name passed to `gcloud functions deploy --entry-point`.
+
+Procedure (agent must follow in this order):
+
+1) Read `${SOURCE_DIR}/main.py`.
+2) If `main.py` contains a line importing the handler symbol (common pattern), use the imported symbol name:
+   - Example: `from mypkg.entrypoints.cloud_event import worker_chart_export`
+   - Then: `ENTRY_POINT=worker_chart_export`
+3) If `main.py` does not clearly identify the entry function:
+   - Search for Functions Framework decorators:
+     - `@functions_framework.cloud_event`
+     - `@functions_framework.http`
+4) If still ambiguous:
+   - STOP. Ask the human to specify the entry-point symbol.
+
+Human-in-the-middle request format:
+```text
+Provide ENTRY_POINT (python function symbol) and trigger kind (cloud_event/http/pubsub).
+Paste the exact python file path and the function name to use.
+```
+
+### 4.4 Enable required APIs (one-time bootstrap)
+
+Always enable these platform APIs (Cloud Run Functions gen2 stack):
 
 ```bash
 gcloud services enable \
+  cloudfunctions.googleapis.com \
   run.googleapis.com \
   eventarc.googleapis.com \
-  firestore.googleapis.com \
-  secretmanager.googleapis.com \
-  storage.googleapis.com \
-  logging.googleapis.com \
   cloudbuild.googleapis.com \
   artifactregistry.googleapis.com \
+  logging.googleapis.com \
   --project "${PROJECT_ID}"
 ```
 
-### 1.3 Firestore DB exists in the same region
+Enable additional APIs only if your function actually uses those services:
 
-Cloud Run Functions gen2 + Eventarc **require region alignment**.
+- Firestore data access or Firestore trigger: `firestore.googleapis.com`
+- Cloud Storage: `storage.googleapis.com`
+- Secret Manager: `secretmanager.googleapis.com`
 
-Check:
+Example:
 
 ```bash
-gcloud firestore databases list --project "${PROJECT_ID}" \
+gcloud services enable \
+  firestore.googleapis.com \
+  storage.googleapis.com \
+  secretmanager.googleapis.com \
+  --project "${PROJECT_ID}"
+```
+
+If the agent is unsure which APIs are needed:
+- it must use `USED_GCP_SERVICES` (Section 1) or ask the human.
+
+### 4.5 Firestore database region alignment (required for TRIGGER_KIND=firestore)
+
+For Firestore → Eventarc → Cloud Run Functions gen2, these must be aligned:
+- Firestore database location == `${REGION}`
+- Eventarc trigger location == `${REGION}`
+- Function region == `${REGION}`
+
+Check Firestore databases:
+
+```bash
+gcloud firestore databases list \
+  --project "${PROJECT_ID}" \
   --format="table(name,locationId,type)"
 ```
 
 Requirement:
-- The database named `projects/${PROJECT_ID}/databases/${FIRESTORE_DB}` must exist.
-- Its `locationId` must be exactly `${REGION}`.
+- `projects/${PROJECT_ID}/databases/${FIRESTORE_DB}` must exist
+- its `locationId` must equal `${REGION}`
 
-If not aligned, **stop** and create/move the database (this is a one‑time infra decision).
+If the required DB does not exist in that region:
+- human-in-the-middle required (Section 7.2).
 
-### 1.4 Source bundle correctness (.gcloudignore + main.py)
+### 4.6 IAM (runtime SA) — conditional roles only
 
-Rules:
-- `gcloud` deploy uses **`.gcloudignore`**, not `.gitignore`.
-- For `python313`, the source must include `main.py`.
+IAM depends on which services the function uses.
 
-Verify:
+The agent must build an IAM plan using (in priority order):
+1) `USED_GCP_SERVICES` from the request block (best).
+2) Infer from code (imports and dependencies) (acceptable).
+3) If uncertain: ask the human to confirm (required).
+
+#### 4.6.1 Minimal role mapping (use only what applies)
+
+Use the smallest roles that satisfy required actions:
+
+- Firestore **read/write**: `roles/datastore.user` (project-level)
+- Firestore **read-only**: `roles/datastore.viewer` (project-level)
+- Cloud Storage (GCS) **write objects**:
+  - simplest: bucket-level `roles/storage.objectAdmin`
+  - stricter: bucket-level `roles/storage.objectCreator` + `roles/storage.objectViewer` (only if compatible with your code)
+- Secret Manager **read secret values**:
+  - secret-level `roles/secretmanager.secretAccessor`
+- Cloud Logging:
+  - Cloud Run Functions automatically ships stdout/stderr to Cloud Logging; no IAM role is usually needed for that.
+  - Only grant `roles/logging.logWriter` if your code calls Cloud Logging API directly.
+
+#### 4.6.2 Eventarc roles (only for TRIGGER_KIND=firestore)
+
+If using Firestore/Eventarc:
+- runtime SA needs: `roles/eventarc.eventReceiver` (project-level)
+- the Eventarc trigger SA must be allowed to invoke the Cloud Run service (roles/run.invoker) (Section 4.9)
+
+Grant Eventarc receiver to runtime SA:
 
 ```bash
-test -f .gcloudignore
-test -f main.py
-```
-
----
-
-## 2) IAM: make deploy work on the first attempt
-
-### 2.1 Resolve project number
-
-```bash
-PROJECT_NUMBER="$(gcloud projects describe "${PROJECT_ID}" --format='value(projectNumber)')"
-```
-
-### 2.2 Runtime SA permissions
-
-Grant the minimal permissions the function needs at runtime:
-
-```bash
-# Firestore (read/write the required collections)
-gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
-  --member="serviceAccount:${RUNTIME_SA_EMAIL}" \
-  --role="roles/datastore.user"
-
-# Secret Manager: read the accounts secret
-#gcloud secrets add-iam-policy-binding is per-secret (preferred)
-gcloud secrets add-iam-policy-binding "${CHART_IMG_ACCOUNTS_SECRET_NAME}" \
-  --project "${PROJECT_ID}" \
-  --member="serviceAccount:${RUNTIME_SA_EMAIL}" \
-  --role="roles/secretmanager.secretAccessor"
-
-# Cloud Storage write (bucket‑level binding; adjust role if you want stricter)
-BUCKET_NAME="${CHARTS_BUCKET_GS#gs://}"
-gcloud storage buckets add-iam-policy-binding "gs://${BUCKET_NAME}" \
-  --project "${PROJECT_ID}" \
-  --member="serviceAccount:${RUNTIME_SA_EMAIL}" \
-  --role="roles/storage.objectAdmin"
-
-# Eventarc delivery (required for Firestore → Eventarc → Cloud Run)
 gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
   --member="serviceAccount:${RUNTIME_SA_EMAIL}" \
   --role="roles/eventarc.eventReceiver"
 ```
 
-### 2.3 Build SA permissions (Artifact Registry cache)
+#### 4.6.3 Bucket + secret bindings (recommended scope)
 
-Cloud Functions gen2 builds use Artifact Registry (`gcf-artifacts` repository in the function region).
-Missing these permissions commonly breaks deploy with:
-`artifactregistry.repositories.downloadArtifacts denied`.
+Bucket-level binding is preferred over project-level. If `GCS_BUCKETS` is empty, the agent must either:
+- ask the human for bucket names, or
+- fall back to project-level roles (less strict; only if explicitly approved by the human).
 
-Ensure `gcf-artifacts` exists, then grant build SA `reader` + `writer`:
+Secret-level binding (preferred over project-level):
+- human must provide secret names if secrets are used.
 
-```bash
-# Ensure repository exists (if this fails, list repos and adjust the name)
-gcloud artifacts repositories describe gcf-artifacts \
-  --location "${REGION}" \
-  --project "${PROJECT_ID}" \
-  >/dev/null
+### 4.7 Build identity (Build SA) — do not introduce unless required
 
-gcloud artifacts repositories add-iam-policy-binding gcf-artifacts \
-  --location "${REGION}" \
-  --project "${PROJECT_ID}" \
-  --member="serviceAccount:${BUILD_SA_EMAIL}" \
-  --role="roles/artifactregistry.reader"
+Recommendation:
+- Do **not** set a custom build service account (do not use `--build-service-account`) unless required by policy.
 
-gcloud artifacts repositories add-iam-policy-binding gcf-artifacts \
-  --location "${REGION}" \
-  --project "${PROJECT_ID}" \
-  --member="serviceAccount:${BUILD_SA_EMAIL}" \
-  --role="roles/artifactregistry.writer"
-```
+Build identity is relevant only when:
+- Cloud Build fails (often due to Artifact Registry permissions) (Section 8.1).
 
-Also ensure Cloud Build can act as the build SA:
+### 4.8 Deploy command (first deploy)
 
-```bash
-gcloud iam service-accounts add-iam-policy-binding "${BUILD_SA_EMAIL}" \
-  --project "${PROJECT_ID}" \
-  --member="serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" \
-  --role="roles/iam.serviceAccountUser"
-```
+Agent composes the deploy command based on `TRIGGER_KIND`.
 
----
+Important:
+- If `ENV_VARS` is empty, omit `--set-env-vars` entirely.
+- If `SECRET_ENV_VARS` is empty, omit `--set-secrets` entirely.
 
-## 3) Deploy (canonical command)
+#### 4.8.1 Firestore trigger (Eventarc) — recommended filters and meaning
 
-Run from repo root (or `${SOURCE_DIR}`):
+Filters:
+- `type`: which Firestore CloudEvent to receive
+- `database`: database ID (required)
+- `namespace`: namespace (required; typically `(default)`)
+- `document` (path pattern): which document path to match and which variables to extract
+
+Recommended event type:
+- `google.cloud.firestore.document.v1.updated` (update-only).
+
+Alternatives:
+- `.written` (created/updated/deleted) — use only if you intentionally want those events.
+
+Deploy:
 
 ```bash
 gcloud functions deploy "${FUNCTION_NAME}" \
   --gen2 \
-  --project="${PROJECT_ID}" \
-  --region="${REGION}" \
-  --runtime="${RUNTIME}" \
-  --source="${SOURCE_DIR}" \
-  --entry-point="${ENTRY_POINT}" \
-  --service-account="${RUNTIME_SA_EMAIL}" \
-  --build-service-account="projects/${PROJECT_ID}/serviceAccounts/${BUILD_SA_EMAIL}" \
-  --set-env-vars="CHARTS_BUCKET=${CHARTS_BUCKET_GS},CHARTS_DEFAULT_TIMEZONE=${CHARTS_DEFAULT_TIMEZONE},FIRESTORE_DB=${FIRESTORE_DB}" \
-  --set-secrets="CHART_IMG_ACCOUNTS_JSON=projects/${PROJECT_ID}/secrets/${CHART_IMG_ACCOUNTS_SECRET_NAME}:latest" \
-  --trigger-location="${REGION}" \
-  --trigger-event-filters="type=${FIRESTORE_TRIGGER_EVENT_TYPE}" \
-  --trigger-event-filters="database=${FIRESTORE_DB}" \
-  --trigger-event-filters="namespace=${FIRESTORE_NAMESPACE}" \
-  --trigger-event-filters-path-pattern="document=${FIRESTORE_TRIGGER_DOCUMENT_PATH}"
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --runtime "${RUNTIME}" \
+  --source "${SOURCE_DIR}" \
+  --entry-point "${ENTRY_POINT}" \
+  --service-account "${RUNTIME_SA_EMAIL}" \
+  --trigger-location "${REGION}" \
+  --trigger-event-filters "type=${FIRESTORE_TRIGGER_EVENT_TYPE}" \
+  --trigger-event-filters "database=${FIRESTORE_DB}" \
+  --trigger-event-filters "namespace=${FIRESTORE_NAMESPACE}" \
+  --trigger-event-filters-path-pattern "document=${FIRESTORE_TRIGGER_DOCUMENT_PATH}"
 ```
 
-After a successful deploy, always grant Cloud Run invoker to the runtime SA (this prevents Eventarc 403s):
+If you have env vars:
+```bash
+  --set-env-vars "${ENV_VARS}"
+```
+
+If you have secrets:
+```bash
+  --set-secrets "${SECRET_ENV_VARS}"
+```
+
+#### 4.8.2 HTTP trigger
+
+Deploy:
+
+```bash
+gcloud functions deploy "${FUNCTION_NAME}" \
+  --gen2 \
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --runtime "${RUNTIME}" \
+  --source "${SOURCE_DIR}" \
+  --entry-point "${ENTRY_POINT}" \
+  --service-account "${RUNTIME_SA_EMAIL}" \
+  --trigger-http
+```
+
+If `HTTP_ALLOW_UNAUTHENTICATED=true`, also add:
+```bash
+  --allow-unauthenticated
+```
+
+#### 4.8.3 Pub/Sub trigger
+
+Human must supply `PUBSUB_TOPIC`.
+
+If `PUBSUB_TOPIC_CREATE_IF_MISSING=true`:
+```bash
+gcloud pubsub topics create "${PUBSUB_TOPIC}" --project "${PROJECT_ID}" || true
+```
+
+Deploy:
+```bash
+gcloud functions deploy "${FUNCTION_NAME}" \
+  --gen2 \
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --runtime "${RUNTIME}" \
+  --source "${SOURCE_DIR}" \
+  --entry-point "${ENTRY_POINT}" \
+  --service-account "${RUNTIME_SA_EMAIL}" \
+  --trigger-topic "${PUBSUB_TOPIC}"
+```
+
+### 4.9 Post-deploy: allow Eventarc delivery to invoke Cloud Run service (firestore only)
+
+If `TRIGGER_KIND=firestore`, ensure the Eventarc trigger identity can invoke the Cloud Run service.
+
+1) Determine which service account the trigger uses:
+
+```bash
+gcloud functions describe "${FUNCTION_NAME}" \
+  --gen2 \
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --format="value(eventTrigger.serviceAccountEmail)"
+```
+
+2) Grant Cloud Run invoker to that identity:
+
+Note:
+- In Cloud Run Functions gen2, the Cloud Run **service name** is usually the same as `FUNCTION_NAME`.
+- If it is not, get the service resource from:
+  `gcloud functions describe ... --format="value(serviceConfig.service)"` and use that service’s name for `gcloud run services ...`.
 
 ```bash
 gcloud run services add-iam-policy-binding "${FUNCTION_NAME}" \
   --project "${PROJECT_ID}" \
   --region "${REGION}" \
-  --member="serviceAccount:${RUNTIME_SA_EMAIL}" \
+  --member="serviceAccount:<EVENTARC_TRIGGER_SA_EMAIL>" \
   --role="roles/run.invoker"
 ```
 
----
-
-## 4) Smoke verification (Cloud Logging + Firestore)
-
-### 4.1 Create a test flow_run document
-
-You must create a document in:
-- collection: `flow_runs`
-- document id: a valid `runId` (must match your schema regex).
-
-**Important:** Firestore triggers fire on *updates*. To guarantee an update event:
-- `set(...)` the document
-- then `update(...)` any field
-
-Use this script (safe by default):
+### 4.10 Confirm deploy status
 
 ```bash
-RUN_ID="$(date -u +%Y%m%d-%H%M%S)_BTCUSDT_demo"
-STEP_ID="charts:1H:ctpl_price_ma1226_vol_v1"
-
-python3 - <<'PY'
-import os, uuid
-from datetime import datetime, timezone
-from google.cloud import firestore
-
-project = os.environ["PROJECT_ID"]
-database = os.environ["FIRESTORE_DB"]
-run_id = os.environ["RUN_ID"]
-step_id = os.environ["STEP_ID"]
-
-client = firestore.Client(project=project, database=database)
-doc = client.collection("flow_runs").document(run_id)
-
-now = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-
-# By default this is a safe/no-quota test (missing template => VALIDATION_FAILED before Chart-IMG).
-smoke_mode = os.environ.get("SMOKE_TEST_MODE", "safe_no_quota")
-if smoke_mode == "real_one_image":
-    requests = [{"chartTemplateId": "ctpl_price_ma1226_vol_v1"}]
-else:
-    requests = [{"chartTemplateId": "ctpl_missing_v1"}]
-
-flow_run = {
-    "schemaVersion": 1,
-    "runId": run_id,
-    "flowKey": "smoke_test",
-    "status": "RUNNING",
-    "createdAt": now,
-    "trigger": {"type": "MANUAL", "source": "deploy-smoke"},
-    "scope": {"symbol": "BTCUSDT"},
-    "steps": {
-        step_id: {
-            "stepType": "CHART_EXPORT",
-            "status": "READY",
-            "timeframe": "1h",
-            "createdAt": now,
-            "dependsOn": [],
-            "inputs": {"minImages": 1, "requests": requests},
-            "outputs": {},
-        }
-    },
-}
-
-doc.set(flow_run)
-# Force an update event
-
-doc.update({"trigger.source": f"deploy-smoke-{uuid.uuid4().hex[:6]}"})
-print("runId=", run_id)
-print("stepId=", step_id)
-PY
-```
-
-### 4.2 Observe logs
-
-Filter by `runId` and expected events:
-
-```bash
-gcloud logging read \
-  'resource.type="cloud_run_revision"\
-   resource.labels.service_name="'"${FUNCTION_NAME}"'"\
-   jsonPayload.runId="'"${RUN_ID}"'"\
-   jsonPayload.event:("cloud_event_received" OR "cloud_event_parsed" OR "ready_step_selected" OR "depends_on_blocked" OR "cloud_event_finished" OR "step_completed")' \
+gcloud functions describe "${FUNCTION_NAME}" \
+  --gen2 \
   --project "${PROJECT_ID}" \
-  --limit 50 \
-  --freshness 15m
+  --region "${REGION}" \
+  --format="value(state,serviceConfig.revision,updateTime)"
 ```
 
-Expected outcomes:
+---
 
-- If `SMOKE_TEST_MODE=safe_no_quota`:
-  - You should see `cloud_event_received` → `cloud_event_parsed` → `ready_step_selected` → `cloud_event_finished` with `errorCode=VALIDATION_FAILED`.
-  - **No Chart‑IMG usage** is consumed.
+## 5) Update deploy (function already exists)
 
-- If `SMOKE_TEST_MODE=real_one_image`:
-  - You should see `step_completed` and `cloud_event_finished` with `status=SUCCEEDED`.
-  - This consumes **exactly one** Chart‑IMG image (assuming templates exist).
+Update deploy is intentionally minimal: redeploy the source while preserving trigger and configuration.
 
-### 4.3 Idempotency note (multiple triggers)
+### 5.1 Read current deployed configuration (agent step)
 
-It is normal to see multiple `cloud_event_received` events for the same `runId`:
-- the worker itself updates `flow_runs/{runId}` (claim/finalize), producing additional Firestore update events.
-- subsequent events should log `cloud_event_noop` with `reason=no_ready_step`.
+```bash
+gcloud functions describe "${FUNCTION_NAME}" \
+  --gen2 \
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --format="yaml(serviceConfig.environmentVariables,serviceConfig.secretEnvironmentVariables,eventTrigger,buildConfig,serviceConfig.serviceAccountEmail,url)"
+```
+
+Agent must reuse (unless human explicitly requests changes):
+- runtime SA: `serviceConfig.serviceAccountEmail`
+- env vars: `serviceConfig.environmentVariables`
+- secrets mapping: `serviceConfig.secretEnvironmentVariables`
+- trigger config: `eventTrigger` (if present)
+
+### 5.2 Derive `ENTRY_POINT` again (agent step)
+
+Always re-derive entry point from code (Section 4.3). Do not assume it stayed the same.
+
+### 5.3 Deploy update (explicit, deterministic)
+
+Rules:
+- Use the same trigger kind as currently deployed unless the human requests a trigger change.
+- Keep existing env vars and secrets unless the human requests changes.
+- Do not redo API enablement and IAM unless errors occur.
+
+Perform the same deploy command as in first deploy (Section 4.8) using:
+- existing trigger values from `eventTrigger` (preferred), and/or
+- the human-provided input block.
+
+### 5.4 Confirm deploy status
+
+```bash
+gcloud functions describe "${FUNCTION_NAME}" \
+  --gen2 \
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --format="value(state,serviceConfig.revision,updateTime)"
+```
+
+If the function does not become ACTIVE, go to troubleshooting (Section 8).
 
 ---
 
-## 5) Troubleshooting decision tree (fast)
+## 6) Optional smoke verification (opt‑in only)
 
-### A) Build failed: Artifact Registry permissions
+Smoke verification must only be executed if `APPROVE_SMOKE_VERIFY=true`.
 
-Symptoms:
-- `artifactregistry.repositories.downloadArtifacts denied`
+If not approved, stop after deploy confirmation.
 
-Fix:
-- Ensure build SA has `roles/artifactregistry.reader` and `roles/artifactregistry.writer` on `gcf-artifacts` in `${REGION}`.
+### 6.1 Cloud Logging transport (what exists by default)
 
-### B) Eventarc delivery returns HTTP 403
+Cloud Run Functions gen2 automatically ships `stdout`/`stderr` to Cloud Logging.
 
-Symptoms:
-- Cloud Run request logs show 403 unauthenticated
+If the application prints **JSON per line**, Cloud Logging typically renders it under `jsonPayload`.
+If the application prints plain text, it appears under `textPayload`.
 
-Fix:
-- Ensure `roles/run.invoker` binding exists for the runtime SA on the Cloud Run service.
+### 6.2 Logs and event names differ by component and step types
 
-### C) Trigger validation errors
+Different components (and even different step types in the same component) can emit different log events.
 
-Symptoms:
-- deploy fails: missing required event filter attributes
+Therefore:
+- The agent must not assume the presence of specific event names.
+- The agent must first scan code for event naming conventions (e.g., look for a stable `event` key).
 
-Fix:
-- Ensure the trigger filters include:
-  - `type=google.cloud.firestore.document.v1.updated`
-  - `database=${FIRESTORE_DB}`
-  - `namespace=(default)`
-  - document path pattern
+### 6.3 Firestore-triggered smoke is human-driven by default
 
-### D) No worker logs after Firestore update
+The agent cannot safely create a valid Firestore document for an unknown schema.
 
-Fix:
-- Ensure you performed an `update(...)` after `set(...)`.
-- Ensure Firestore DB location == `${REGION}`.
-- Ensure trigger exists and targets the correct database and document pattern.
+Human must provide:
+- the exact Firestore path to write (collection + document ID)
+- a minimal JSON document that should trigger processing
+- which field to update to “poke” it (update) and trigger the event
+- expected outcomes (which fields should change; which artifacts should appear)
+
+### 6.4 Paid API quota safety
+
+If the service uses a paid external API:
+- Default `SMOKE_VERIFY_MODE=safe_no_quota` must not consume paid requests.
+- `SMOKE_VERIFY_MODE=real_one_image` must be explicitly approved and must be designed to consume at most one paid request.
 
 ---
 
-## 6) Cleanup (optional)
+## 7) Human-in-the-middle checkpoints (explicit)
 
-- Delete the test `flow_runs/{runId}` document.
-- Delete test objects under `gs://<bucket>/charts/<runId>/...` if you ran real mode.
+### 7.1 Runtime assets are unclear
 
+If the agent cannot determine whether the function reads non-code files at runtime:
+Human must confirm:
+- which exact files are required at runtime
+- where they live in the repo
+- whether `.gcloudignore` includes them
+
+### 7.2 Firestore DB creation / region mismatch
+
+If Firestore DB does not exist in `${REGION}`:
+Human must:
+1) Create a Firestore database in that region (or select an existing one).
+2) Provide its database ID for `FIRESTORE_DB`.
+3) Paste the output of:
+
+```bash
+gcloud firestore databases list --project "${PROJECT_ID}" --format="table(name,locationId,type)"
+```
+
+### 7.3 Optional smoke verification
+
+If smoke verification is requested:
+- Human must set `APPROVE_SMOKE_VERIFY=true`.
+- Human must approve any action that writes to Firestore / GCS or consumes paid API quota.
+
+---
+
+## 8) Troubleshooting (when something fails)
+
+### 8.1 Cloud Build fails: Artifact Registry permission denied
+
+Symptoms:
+- `artifactregistry.repositories.downloadArtifacts` denied
+- build fails when trying to access `gcf-artifacts`
+
+Cause:
+- the **build identity** (not the runtime SA) lacks permissions on Artifact Registry.
+
+Step 1: find build identity for this function:
+
+```bash
+gcloud functions describe "${FUNCTION_NAME}" \
+  --gen2 \
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --format="value(buildConfig.serviceAccount)"
+```
+
+Step 2: grant it reader+writer on `gcf-artifacts`:
+
+```bash
+gcloud artifacts repositories add-iam-policy-binding gcf-artifacts \
+  --location "${REGION}" \
+  --project "${PROJECT_ID}" \
+  --member="serviceAccount:<BUILD_IDENTITY_EMAIL>" \
+  --role="roles/artifactregistry.reader"
+
+gcloud artifacts repositories add-iam-policy-binding gcf-artifacts \
+  --location "${REGION}" \
+  --project "${PROJECT_ID}" \
+  --member="serviceAccount:<BUILD_IDENTITY_EMAIL>" \
+  --role="roles/artifactregistry.writer"
+```
+
+If the agent cannot access build logs or cannot identify build identity:
+- human-in-the-middle required: paste the Cloud Build error lines and the build URL.
+
+### 8.2 Deploy fails: “Provided source directory does not have file [main.py]”
+
+Cause:
+- Python runtime for Cloud Run Functions gen2 expects `main.py` in the uploaded source root.
+
+Fix:
+- Add `main.py` under `SOURCE_DIR` and ensure it exposes/imports the entry function.
+
+### 8.3 Runtime errors: missing required env var / config errors
+
+Cause:
+- required env vars were not set.
+
+Fix:
+- provide `ENV_VARS` (and/or `SECRET_ENV_VARS`) explicitly
+- ensure update deploy preserves required values (Section 5.1)
+
+### 8.4 Eventarc delivery returns 403 (Firestore trigger)
+
+Cause:
+- the Eventarc trigger identity cannot invoke the Cloud Run service.
+
+Fix:
+1) Determine trigger SA:
+```bash
+gcloud functions describe "${FUNCTION_NAME}" --gen2 --project "${PROJECT_ID}" --region "${REGION}" \
+  --format="value(eventTrigger.serviceAccountEmail)"
+```
+2) Grant invoker:
+```bash
+gcloud run services add-iam-policy-binding "${FUNCTION_NAME}" --project "${PROJECT_ID}" --region "${REGION}" \
+  --member="serviceAccount:<EVENTARC_TRIGGER_SA_EMAIL>" \
+  --role="roles/run.invoker"
+```
+
+### 8.5 Trigger fires but function ignores the event
+
+Possible causes:
+- your handler intentionally filters out irrelevant events
+- your Firestore document path pattern does not match the subject you think it matches
+
+Human-in-the-middle:
+- provide the event ID and the function logs around that time.
+
+---
+
+## 9) Notes for agents (to avoid “first try” regressions)
+
+1) Prefer explicit deploy flags over relying on defaults.
+2) Do not add secrets unless needed.
+3) IAM must be conditional; do not request roles for services not used by the function.
+4) For Firestore triggers, region alignment matters (Firestore DB region must match function/trigger region).
+5) `.gcloudignore` controls upload; ensure runtime-required files are included.
+6) Smoke verification is opt-in and may be expensive; do not run it without explicit approval.

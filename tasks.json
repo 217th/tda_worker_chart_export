@@ -730,7 +730,7 @@
       "id": "T-030",
       "title": "Universal Cloud Run Functions gen2 deploy instruction",
       "description": "Single-file, unambiguous playbook for repeatable Cloud Run Functions gen2 deploy and smoke verification (first try).",
-      "status": "TODO",
+      "status": "DONE",
       "priority": "med",
       "owner": "codex",
       "tags": [
@@ -739,13 +739,17 @@
       ],
       "depends_on": [
         "T-024"
-      ]
+      ],
+      "commit": {
+        "hash": "17082b24bc182e4d2152f3925909f8ea91f68620",
+        "message": "🧭 T-030 add deploy playbook"
+      }
     }
   ],
   "meta": {
     "schema_version": 1,
     "managed_by": "agentctl",
     "checksum_algo": "sha256",
-    "checksum": "7d94e3316e827fba32cde93b24bc3417e9865b066cdf8a271d12c91e90c189a1"
+    "checksum": "9e004462d129392df7f4cc13ebd8c80e5d262c772b5dd1ba19a3988ab83c6fbf"
   }
 }
